@@ -1,10 +1,14 @@
 # Changelog
 
-Toutes les modifications notables du support de cours. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Dès la version 1.0 (premier jour de cours), la syntaxe des pages reste rétrocompatible.
+Toutes les modifications notables du support de cours. Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), numérotation [SemVer](https://semver.org/lang/fr/) (règles dans le README). Chaque version porte un tag git `vX.Y.Z`. Dès la version 1.0.0 (premier jour de cours), la syntaxe des pages reste rétrocompatible.
 
-## [0.2] – 2026-11-10
+## [Non publié]
 
-Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en général). Le contenu du premier jet INTERLIS (`C:\00_COURS_INTERLIS`, version 0.1 du 30.09.2026) est migré dans le format de ce dépôt : en-têtes dans `config.js`, texte en Markdown dans les pages.
+## [0.1.0] – 2026-11-10
+
+Première version numérotée.
+
+Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en général). Le contenu du premier jet INTERLIS (`C:\00_COURS_INTERLIS`, premier jet du 30.09.2026) est migré dans le format de ce dépôt : en-têtes dans `config.js`, texte en Markdown dans les pages.
 
 ### Ajouté
 - Chapitres INTERLIS : 1 Pourquoi INTERLIS ?, 2 Modéliser le territoire, 3 INTERLIS 1, 4 INTERLIS 2, 5 Atelier .ili, 6 Contrôler les données, 7 Outils et pratique, 8 Quiz final ; annexe A Aide-mémoire. Composants interactifs repris à l'identique (jeu du téléphone, frise, croquis, éditeur SURFACE/AREA, ITF annoté, banc des cardinalités, atelier avec diagramme UML, chasse aux erreurs, chaîne d'outils).
@@ -24,6 +28,9 @@ Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en géné
 ### Supprimé
 - Chapitres de démonstration en géomatique : systèmes de référence, GNSS, nivellement, LiDAR, analyse spatiale.
 
-## [0.0] – 2026-11-10
+## Avant 0.1.0
 
-- Gabarit de démonstration (géomatique) : moteur Markdown, menu généré, annotations exportables, application hors ligne.
+- Gabarit de démonstration (géomatique), non numéroté : moteur Markdown, menu généré, annotations exportables, application hors ligne.
+
+[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/MatteoCasto/cf-geo-b4a/releases/tag/v0.1.0
