@@ -134,7 +134,7 @@ Tout le reste se **déduit automatiquement** du modèle. Cliquez sur les boîtes
 Le modèle est indépendant de tout logiciel. Un SIG, une DAO ou une base de données peuvent tous lire et écrire selon le même modèle.
 :::
 
-Voici à quoi ressemble le début du modèle de Montavaux. Pas besoin de tout comprendre maintenant : on le construira pas à pas aux chapitres 3 et 4.
+Voici à quoi ressemble le début du modèle de Montavaux. Pas besoin de tout comprendre maintenant : on le construira pas à pas dans les chapitres INTERLIS 1 et INTERLIS 2.
 
 ```ili Arbres_Communaux_V1.ili (extrait)
 CLASS Arbre =
@@ -275,7 +275,7 @@ Dates vérifiées en novembre 2026 : eCH-0031 (INTERLIS 2.4) v2.0 en 2017, v2.1.
   const NOTES = [
     "<strong>Format de transfert.</strong> Les règles d'encodage d'INTERLIS disent comment écrire chaque classe et chaque attribut dans un fichier XTF (ou ITF en INTERLIS 1). Personne n'a à inventer un format.",
     "<strong>Base de données.</strong> L'outil ili2db lit le modèle et crée les tables, les colonnes, les types et les clés étrangères, par exemple dans PostGIS ou un GeoPackage.",
-    "<strong>Contrôles.</strong> Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (chapitre 8).",
+    "<strong>Contrôles.</strong> Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (chapitre Contrôler les données).",
     "<strong>Documentation.</strong> Le modèle se traduit en diagramme de classes UML et en catalogue d'objets. C'est la même source que pour le reste : la documentation ne peut pas être « en retard » sur les données.",
   ];
   const outs = document.querySelectorAll('#mbd .bx.out');

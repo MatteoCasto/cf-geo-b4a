@@ -154,7 +154,7 @@ Pour chaque attribut, choisissez le type le plus adapté. La correction s'affich
 
 Pour chaque attribut, il faut aussi décider s'il doit **toujours** avoir une valeur. Un arbre sans position n'a aucun sens dans l'inventaire : la position est **obligatoire**. En revanche, on ne connaît pas toujours l'année de plantation d'un vieux chêne : elle reste **facultative**.
 
-Ce choix a une conséquence directe. Un attribut obligatoire vide rendra le fichier invalide lors du contrôle (chapitre 8). Si on rend tout obligatoire, les livraisons seront bloquées pour des détails. Si rien ne l'est, les données seront incomplètes.
+Ce choix a une conséquence directe. Un attribut obligatoire vide rendra le fichier invalide lors du contrôle (voir [Contrôler les données](controler.html)). Si on rend tout obligatoire, les livraisons seront bloquées pour des détails. Si rien ne l'est, les données seront incomplètes.
 
 :::terrain
 Avant de créer un modèle, cherchez s'il en existe déjà un. La Confédération publie les modèles de géodonnées minimaux, et de nombreux cantons publient leurs propres modèles. Réutiliser un modèle existant, c'est gagner du temps et pouvoir échanger avec d'autres dès le premier jour.
@@ -188,14 +188,14 @@ Le point suffit : un banc mesure 2 m, c'est négligeable à l'échelle d'un plan
 Dans la classe `Arbre`, on a mis `Espece : texte`. Que se passe-t-il si une personne saisit « Tilia cordata », une autre « tilia cordata » et une troisième « Tilleul » ? Proposez une meilleure solution.
 
 ??? Réponse
-On obtient trois espèces différentes pour un seul arbre réel, et les statistiques par espèce sont fausses. Mieux : créer une **classe `Espece`** séparée (nom latin, nom français) et **relier** chaque arbre à une espèce. On saisit l'espèce une seule fois, puis on la choisit dans une liste. C'est une *relation* (INTERLIS 1) ou une *association* (INTERLIS 2). On la verra aux chapitres 3 et 4.
+On obtient trois espèces différentes pour un seul arbre réel, et les statistiques par espèce sont fausses. Mieux : créer une **classe `Espece`** séparée (nom latin, nom français) et **relier** chaque arbre à une espèce. On saisit l'espèce une seule fois, puis on la choisit dans une liste. C'est une *relation* (INTERLIS 1) ou une *association* (INTERLIS 2). On la verra dans les chapitres INTERLIS 1 et INTERLIS 2.
 ???
 :::
 
 :::prof
 Faire l'exercice des bancs sur papier A3, sans ordinateur. Chaque groupe présente sa classe en 1 minute. Relever les divergences (point ou surface ? matériau en texte libre ?) : elles montrent qu'il n'y a pas *une* solution, mais des choix à justifier.
 
-Garder les feuilles : au chapitre 7, les groupes pourront retranscrire leur banc en INTERLIS 2 dans l'atelier.
+Garder les feuilles : dans l'atelier .ili, les groupes pourront retranscrire leur banc en INTERLIS 2 dans l'atelier.
 :::
 </script>
 

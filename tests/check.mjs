@@ -25,6 +25,7 @@ for (const ch of C.chapters) {
   if (!files.has(ch.file)) fail('config.js', `page manquante ${ch.file}`);
   if (ch.num) { if (nums.has(ch.num)) fail('config.js', `numéro en double ${ch.num}`); nums.add(ch.num); }
   for (const k of ['title']) if (!ch[k]) fail('config.js', `${ch.file} : champ ${k} manquant`);
+  if (/chapitres? \d/.test(ch.prereq || '')) fail('config.js', `${ch.file} : prérequis numéroté, citer le titre`);
 }
 // numérotation continue des chapitres numérotés
 const numbered = C.chapters.filter(c => /^\d+$/.test(c.num || '')).map(c => +c.num);
@@ -42,7 +43,8 @@ for (const f of [...files].sort()) {
   let m;
   while ((m = re.exec(html))) {
     const attrs = m[1] || '';
-    if (/src=/.test(attrs) || /type="text\/(markdown|x-code)"/.test(attrs)) continue;
+    const type = (attrs.match(/type="([^"]+)"/) || [])[1];
+    if (/src=/.test(attrs) || (type && !/^(module|text\/javascript)$/.test(type))) continue;
     try { new vm.Script(m[2], { filename: f }); }
     catch (e) { fail(f, `JavaScript invalide : ${e.message}`); }
   }
@@ -70,6 +72,15 @@ for (const f of [...files].sort()) {
   // liens internes vers des pages
   const linkRe = /(?:href="|\]\()([a-z0-9-]+\.html)(?:#[^")]*)?[")]/g;
   while ((m = linkRe.exec(html))) if (!files.has(m[1])) fail(f, `lien vers une page inexistante : ${m[1]}`);
+
+  // numéros de figures : « Fig. N.x » avec N = numéro du chapitre (outil : node tests/renumber-figures.mjs)
+  const chNum = (C.chapters.find(c => c.file === f) || {}).num;
+  if (/^\d+$/.test(chNum || '')) for (const mm of html.matchAll(/Fig\. (\d+)\.\d+/g)) if (mm[1] !== chNum) fail(f, `${mm[0]} dans le chapitre ${chNum} (lancer node tests/renumber-figures.mjs)`);
+
+  // renvois numérotés « chapitre 4 » : ils cassent à chaque renumérotation, on cite le titre
+  if (!['guide.html', 'index.html'].includes(f)) {
+    for (const mm of html.matchAll(/chapitres? \d+/g)) fail(f, `renvoi numéroté « ${mm[0]} » : citer le titre du chapitre`);
+  }
 
   // données internes à ne pas publier
   if (f !== 'guide.html' && META.test(html)) fail(f, 'mention d\'un nombre de périodes (donnée interne)');

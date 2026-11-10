@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>La MO en INTERLIS 1</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.rd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+@media (max-width:900px){.rd{grid-template-columns:minmax(0,1fr)}}
+.itfl{list-style:none;margin:0;padding:8px 0;background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;font:400 .76rem/1.55 var(--f-mono);counter-reset:l;overflow:auto;max-height:600px}
+.itfl li{margin:0}
+.itfl button{all:unset;display:block;box-sizing:border-box;width:100%;padding:0 10px 0 0;white-space:pre;cursor:pointer;color:var(--code-fg);border-left:4px solid transparent}
+.itfl button::before{counter-increment:l;content:counter(l);display:inline-block;width:2.6em;padding-right:.8em;text-align:right;color:var(--code-com)}
+.itfl button:hover{background:var(--grid)}
+.itfl button.sel{background:var(--hl);border-left-color:var(--accent)}
+.itfl button.rel{background:var(--accent-soft);border-left-color:var(--accent-soft)}
+.itfl button.cur{outline:2px solid var(--accent);outline-offset:-2px}
+.itfl button.unread{opacity:.35}
+.itfl button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#plan .bl{stroke:var(--ink);stroke-width:2;fill:none;cursor:pointer;transition:stroke .15s,stroke-width .15s}
+#plan .bl.hit{stroke:transparent;stroke-width:12}
+#plan .pt{fill:var(--sheet);stroke:var(--ink);stroke-width:1.6;cursor:pointer}
+#plan .ref{stroke:var(--muted);stroke-width:1.4;cursor:pointer}
+#plan .lab{font:700 15px var(--f-display);fill:var(--ink);cursor:pointer}
+#plan .sub{font:500 10px var(--f-mono);fill:var(--muted)}
+#plan .pid{font:500 10px var(--f-mono);fill:var(--muted)}
+#plan .on{stroke:var(--accent)!important;fill:var(--accent);}
+#plan .bl.on{fill:none;stroke-width:4}
+#plan .pt.on{fill:var(--accent)}
+#plan text.on{fill:var(--accent);stroke:none!important}
+#plan .ref.on{stroke:var(--accent);stroke-width:2.4}
+#plan .hide{opacity:0}
+#plan .fade{transition:opacity .25s}
+.dec{border:1.5px solid var(--ink);border-radius:6px;padding:10px 14px;background:var(--sheet);font-size:.88rem;margin-top:12px;min-height:7em}
+.dec h4{font:700 .95rem var(--f-display);margin:0 0 .3rem}
+.dec table{font-size:.8rem;width:100%;border-collapse:collapse}
+.dec td{padding:2px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+.dec td:first-child{font-family:var(--f-mono);color:var(--muted);white-space:nowrap;width:1%}
+.dec td code{font-size:.78rem}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## La mensuration officielle en INTERLIS 1
+
+Le modèle fédéral de la mensuration officielle, **DM.01-AV-CH** (en français MD.01-MO-CH), est écrit en INTERLIS 1. Il décrit tout le contenu de la MO en une douzaine de thèmes. Chaque canton le complète par sa propre version, avec des attributs supplémentaires.
+
+| Thème (`TOPIC`) | Contenu |
+|---|---|
+| Points_fixesCategorie1 à 3 | points fixes planimétriques et altimétriques |
+| Couverture_du_sol | bâtiments, surfaces dures, vertes, boisées, eaux… (une `AREA`) |
+| Objets_divers | murs, escaliers, fontaines, lignes électriques… |
+| Altimetrie | modèle de terrain |
+| Nomenclature | noms locaux, lieux-dits |
+| **Biens_fonds** | points limites, immeubles, biens-fonds (une `AREA`) |
+| Conduites | conduites |
+| Limites_commune, Limites_district, Limites_canton | limites territoriales |
+| Adresses_des_batiments | adresses (EGID, entrées, rues) |
+
+Le DMAV, son successeur en INTERLIS 2.4, est en vigueur depuis 2024. Les cantons y migrent leurs données d'ici à fin 2027. D'ici là, et pour lire les archives ensuite, les fichiers ITF de la MO restent votre quotidien.
+
+## Le thème Biens-fonds
+
+Voici un extrait du vrai modèle (version française, MN95), réduit aux tables utiles pour ce chapitre. Les commentaires d'origine sont raccourcis.
+
+```ili1 DM.01-AV-CH · extrait du TOPIC Biens_fonds
+DOMAIN
+  CoordP = COORD2 2480000.000 1070000.000
+                  2850000.000 1310000.000;
+  Precision = [0.0 .. 700.0];        !! en cm
+  Fiabilite = (oui, non);
+  Statut = (projete, valable);
+  Materiel = (borne, borne_artificielle, cheville, tuyau,
+              pieu, croix, non_materialise, autre);
+
+TOPIC Biens_fonds =
+
+  TABLE Mise_a_jourBF =               !! une mutation
+    IdentDN: TEXT*12;
+    Identification: TEXT*12;          !! ex. numéro du dossier technique
+    Description: TEXT*30;
+    Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+      WITHOUT OVERLAPS > 0.050;
+    Validite: Statut;
+    En_vigueur: OPTIONAL DATE;
+    Enregistrement_RF: OPTIONAL DATE;
+    Date1: OPTIONAL DATE;
+    Date2: OPTIONAL DATE;
+  IDENT IdentDN, Identification;
+  END Mise_a_jourBF;
+
+  TABLE Point_limite =
+    Origine: -> Mise_a_jourBF;        !! relation 1-mc
+    Identification: OPTIONAL TEXT*12;
+    Geometrie: CoordP;
+    PrecPlan: Precision;
+    FiabPlan: Fiabilite;
+    Signe: Materiel;
+    Defini_exactement: (oui, non);
+    Anc_borne_speciale: (oui, non);
+  IDENT Geometrie;
+  END Point_limite;
+
+  TABLE Immeuble =                    !! l'unité du registre foncier
+    Origine: -> Mise_a_jourBF;
+    IdentDN: TEXT*12;
+    Numero: TEXT*12;
+    EGRIS_EGRID: OPTIONAL TEXT*14;
+    Validite: (en_vigueur, litigieux);
+    Integralite: (complet, incomplet);
+    Genre: Genre_Immeuble;            !! bien_fonds, DDP (…), mine
+    Superficie_totale: OPTIONAL DIM2 1 999999999;
+  IDENT IdentDN, Numero;
+  END Immeuble;
+
+  TABLE PosImmeuble =                 !! position du numéro sur le plan
+    PosImmeuble_de: -> Immeuble;
+    Pos: CoordP;
+    Ori: OPTIONAL Rotation;
+    HAli: OPTIONAL HALIGNMENT;
+    VAli: OPTIONAL VALIGNMENT;
+    Grandeur: OPTIONAL GrandeurEcriture;
+    Ligne_auxiliaire: OPTIONAL POLYLINE WITH (STRAIGHTS) VERTEX CoordP;
+  NO IDENT
+  END PosImmeuble;
+
+  TABLE Bien_fonds =                  !! la géométrie de l'immeuble
+    Bien_fonds_de: -> Immeuble;
+    PartieNumeroImmeuble: OPTIONAL TEXT*12;
+    Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+      WITHOUT OVERLAPS > 0.050
+      LINEATTR = Genre_ligne: OPTIONAL (litigieux, incomplet); END;
+    Superficie: DIM2 1 999999999;
+  NO IDENT
+  END Bien_fonds;
+
+END Biens_fonds.
+```
+</script>
+
+<!-- figure : relations du thème Biens_fonds -->
+<figure class="fig gridbg">
+  <svg viewBox="0 0 800 250" role="img" aria-label="Relations : Mise_a_jourBF est l'origine des points limites et des immeubles ; un immeuble a une ou plusieurs positions de numéro et un ou plusieurs biens-fonds">
+    <g class="uml-box"><rect x="300" y="14" width="200" height="40"/><text class="nm" x="400" y="39" text-anchor="middle">Mise_a_jourBF</text></g>
+    <g class="uml-box"><rect x="40" y="110" width="180" height="40"/><text class="nm" x="130" y="135" text-anchor="middle">Point_limite</text></g>
+    <g class="uml-box"><rect x="310" y="110" width="180" height="40"/><text class="nm" x="400" y="135" text-anchor="middle">Immeuble</text></g>
+    <g class="uml-box"><rect x="190" y="196" width="180" height="40"/><text class="nm" x="280" y="221" text-anchor="middle">PosImmeuble</text></g>
+    <g class="uml-box"><rect x="430" y="196" width="180" height="40"/><text class="nm" x="520" y="221" text-anchor="middle">Bien_fonds</text></g>
+    <g class="uml-box"><rect x="630" y="196" width="160" height="40" stroke-dasharray="4 3"/><text x="710" y="215" text-anchor="middle">Bien_fonds_</text><text x="710" y="229" text-anchor="middle">Geometrie</text></g>
+    <path class="uml-edge" d="M340 54L150 110"/><text class="uml-card" x="318" y="70">1</text><text class="uml-card" x="160" y="104">mc</text><text class="uml-role" x="190" y="78">Origine</text>
+    <path class="uml-edge" d="M400 54V110"/><text class="uml-card" x="406" y="70">1</text><text class="uml-card" x="406" y="104">mc</text><text class="uml-role" x="412" y="88">Origine</text>
+    <path class="uml-edge" d="M370 150L300 196"/><text class="uml-card" x="356" y="166">1</text><text class="uml-card" x="300" y="190">m</text>
+    <path class="uml-edge" d="M430 150L500 196"/><text class="uml-card" x="440" y="166">1</text><text class="uml-card" x="508" y="190">mc</text>
+    <path class="uml-edge" d="M610 216H630" stroke-dasharray="4 3"/>
+    <text class="uml-role" x="620" y="186" text-anchor="middle">table de lignes de l'AREA</text>
+  </svg>
+  <figcaption>Fig. 4.1 · Notation de la MO : 1 = exactement un, m = un ou plusieurs, mc = zéro, un ou plusieurs. Une mutation est l'origine de points et d'immeubles. Un immeuble (registre foncier) a sa géométrie dans Bien_fonds.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+- **Immeuble** = l'unité juridique du registre foncier (numéro, EGRID). **Bien_fonds** = sa géométrie. On les sépare parce qu'un immeuble peut avoir plusieurs parties, et qu'un DDP ou une mine est un immeuble sans être un bien-fonds.
+- Chaque point limite et chaque immeuble garde son **origine** : la mutation (`Mise_a_jourBF`) qui l'a créé.
+- La notation **1 / c / m / mc** des commentaires est celle de la MO : on la retrouve partout dans les modèles INTERLIS 1. En INTERLIS 2, elle devient `{1}`, `{0..1}`, `{1..*}`, `{0..*}`.
+:::
+
+## Un extrait de Montavaux
+
+Voici les biens-fonds de la place de Montavaux, en ITF : une mutation de 2026 a divisé l'ancien bien-fonds 1287 en deux, créant le 1288. **Cliquez sur une ligne du fichier** pour la décoder avec le modèle et la situer sur le plan, ou **cliquez sur un élément du plan** pour retrouver sa ligne. Le bouton *Lire pas à pas* refait la lecture comme un logiciel : le plan se construit au fil du fichier.
+</script>
+
+<!-- composant interactif : lecteur ITF ↔ plan -->
+<div class="rd">
+  <ol class="itfl" id="itfl" aria-label="Fichier ITF, une ligne par bouton"></ol>
+  <div>
+    <figure class="fig gridbg" style="margin:0">
+      <svg id="plan" viewBox="0 0 560 400" role="img" aria-label="Plan des biens-fonds 1287, 1288 et DP12, construit à partir du fichier ITF"></svg>
+      <figcaption>Fig. 4.2 · Plan dessiné par cette page à partir du fichier ITF ci-contre. Données fictives.</figcaption>
+    </figure>
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" type="button" id="btPlay">Lire pas à pas</button>
+      <button class="btn" type="button" id="btAll">Tout afficher</button>
+      <button class="btn" type="button" id="btDl">Télécharger l'ITF</button>
+    </div>
+    <div class="dec" id="dec" aria-live="polite"></div>
+  </div>
+</div>
+
+<script type="text/plain" id="itfSrc">
+SCNT
+Montavaux (commune fictive) - theme Biens_fonds - donnees fictives pour le cours INTERLIS
+////
+MTID INTERLIS1
+MODL MD01MOCH24MN95F
+TOPI Biens_fonds
+TABL Mise_a_jourBF
+OBJE 1 VD9999000000 REPRISE-2001 Reprise_mensuration_1993 1 20011120 @ @ @
+OBJE 2 VD9999000000 MUT2026-017 Division_bien-fonds_1287 1 20260315 20260402 @ @
+ETAB
+TABL Mise_a_jourBF_Perimetre
+ETAB
+TABL Point_limite
+OBJE 101 1 1001 2538180.000 1152360.000 3.0 0 0 0 1
+OBJE 102 2 1002 2538230.000 1152360.000 1.5 0 2 0 1
+OBJE 103 1 1003 2538280.000 1152360.000 3.0 0 0 0 1
+OBJE 104 1 1004 2538180.000 1152410.000 3.0 0 0 0 1
+OBJE 105 2 1005 2538230.000 1152412.000 1.5 0 5 0 1
+OBJE 106 1 1006 2538280.000 1152414.000 3.0 0 0 0 1
+OBJE 107 1 1007 2538180.000 1152340.000 3.0 0 0 0 1
+OBJE 108 1 1008 2538280.000 1152340.000 5.0 0 3 0 1
+ETAB
+TABL Immeuble
+OBJE 201 1 VD9999000000 1287 CH999900001287 0 0 0 @
+OBJE 202 2 VD9999000000 1288 CH999900001288 0 0 0 @
+OBJE 203 1 VD9999000000 DP12 CH999900000012 0 0 0 @
+ETAB
+TABL PosImmeuble
+OBJE 301 201 2538205.000 1152387.000 100.0 1 2 1
+ELIN
+OBJE 302 202 2538255.000 1152389.000 100.0 1 2 1
+ELIN
+OBJE 303 203 2538230.000 1152353.000 100.0 1 2 1
+ELIN
+ETAB
+TABL Bien_fonds_Geometrie
+OBJE 401 @
+STPT 2538180.000 1152360.000
+LIPT 2538230.000 1152360.000
+ELIN
+OBJE 402 @
+STPT 2538230.000 1152360.000
+LIPT 2538280.000 1152360.000
+ELIN
+OBJE 403 @
+STPT 2538280.000 1152360.000
+LIPT 2538280.000 1152414.000
+ELIN
+OBJE 404 @
+STPT 2538280.000 1152414.000
+LIPT 2538230.000 1152412.000
+ELIN
+OBJE 405 @
+STPT 2538230.000 1152412.000
+LIPT 2538180.000 1152410.000
+ELIN
+OBJE 406 @
+STPT 2538180.000 1152410.000
+LIPT 2538180.000 1152360.000
+ELIN
+OBJE 407 @
+STPT 2538230.000 1152360.000
+LIPT 2538230.000 1152412.000
+ELIN
+OBJE 408 @
+STPT 2538180.000 1152360.000
+LIPT 2538180.000 1152340.000
+ELIN
+OBJE 409 @
+STPT 2538180.000 1152340.000
+LIPT 2538280.000 1152340.000
+ELIN
+OBJE 410 @
+STPT 2538280.000 1152340.000
+LIPT 2538280.000 1152360.000
+ELIN
+ETAB
+TABL Bien_fonds
+OBJE 501 201 @ 2538205.000 1152383.000 2550
+OBJE 502 202 @ 2538255.000 1152385.000 2650
+OBJE 503 203 @ 2538230.000 1152346.000 2000
+ETAB
+ETOP
+EMOD
+ENDE
+</script>
+
+<script type="text/markdown">
+:::attention
+Dans `Bien_fonds_Geometrie`, aucune ligne ne dit à quel bien-fonds elle appartient. C'est la règle de l'`AREA` en INTERLIS 1 : chaque limite n'est écrite **qu'une fois**, même si elle sépare deux biens-fonds. Le logiciel reconstruit les surfaces à partir des lignes et du **point de référence** de chaque bien-fonds (les coordonnées de la table `Bien_fonds`). Résultat : ni chevauchement, ni vide possible entre voisins.
+:::
+
+:::exo 15 min, à deux
+Répondez à l'aide du fichier, du modèle et du lecteur ci-dessus.
+
+1. Quels points limites ont été posés lors de la mutation `MUT2026-017` ?
+2. Quelle est la superficie du bien-fonds 1288 ? Par quelles lignes du fichier passez-vous pour la trouver ?
+3. Comment est matérialisé le point limite 1008 ?
+4. Combien de lignes délimitent le bien-fonds 1287 ? Donnez leurs TID.
+5. Par quelle mutation la ligne `407` a-t-elle été créée ?
+
+??? Solution
+1. **1002 et 1005** : leur `Origine` vaut `2`, le TID de la mutation `MUT2026-017` dans `Mise_a_jourBF`. Ce sont les deux extrémités de la nouvelle limite.
+2. **2650 m²**. `Immeuble` : l'objet `202` porte le numéro 1288. `Bien_fonds` : l'objet `502` renvoie à `202`, sa dernière valeur est la superficie.
+3. **Un tuyau** : `Signe` vaut `3`. En ITF, une énumération est codée par sa position, en partant de 0 : `borne` = 0, `borne_artificielle` = 1, `cheville` = 2, `tuyau` = 3.
+4. **Quatre** : `401` (sud), `407` (est, la nouvelle limite), `405` (nord) et `406` (ouest).
+5. **On ne peut pas le savoir** avec ce modèle. Les lignes de l'`AREA` n'ont pas d'origine : seuls les points limites et les immeubles en ont une. On peut seulement le déduire : ses deux extrémités, 1002 et 1005, viennent de `MUT2026-017`.
+???
+:::
+
+## Ouvrir l'ITF dans QGIS
+
+QGIS lit les fichiers INTERLIS directement, grâce à la bibliothèque GDAL qu'il contient. Sans modèle, il en tire déjà beaucoup.
+
+1. Téléchargez le fichier avec le bouton **Télécharger l'ITF** ci-dessus.
+2. **Glissez** le fichier `montavaux_bf.itf` dans la fenêtre de QGIS. QGIS affiche la liste des tables du fichier : sélectionnez-les toutes.
+3. Le fichier ne dit pas dans quel système de référence sont les coordonnées. Pour chaque couche, définissez le SCR de la couche (clic droit sur la couche) sur **EPSG:2056** (CH1903+ / LV95).
+
+| Table | Ce que QGIS affiche sans modèle |
+|---|---|
+| `Bien_fonds_Geometrie` | les **lignes** des limites : c'est la seule géométrie que l'ITF décrit lui-même (`STPT`, `LIPT`, `ELIN`) |
+| `Point_limite`, `Bien_fonds`, `PosImmeuble` | des tables **sans géométrie** : les coordonnées sont là, mais dans des colonnes `Field04`, `Field05` |
+| `Immeuble`, `Mise_a_jourBF` | des tables attributaires, aux colonnes nommées `Field01`, `Field02`… |
+
+Pourquoi ? Une ligne `OBJE 105 2 1005 2538230.000 …` n'est qu'une suite de valeurs. Sans le modèle, rien ne dit que la 4<sup>e</sup> et la 5<sup>e</sup> valeur forment une coordonnée, ni que la 3<sup>e</sup> s'appelle `Identification`. C'est exactement ce que vous avez fait à la main dans le lecteur ci-dessus.
+
+:::exo 10 min
+Dans QGIS, affichez les points limites. Utilisez l'outil de traitement **Créer une couche de points à partir d'une table**, sur la table `Point_limite`, avec `Field04` comme X, `Field05` comme Y, et le SCR EPSG:2056. Étiquetez les points avec `Field03`. Retrouvez-vous le plan de la figure 4.2 ?
+:::
+
+:::terrain
+Faites le même essai avec un vrai fichier ITF de la MO de votre canton, si vous y avez accès : quelques centaines de milliers de lignes, une douzaine de thèmes, et pourtant le même principe. Pour obtenir directement les surfaces et les vrais noms de colonnes, il faut fournir le modèle à QGIS (voir [Outils et pratique](outils.html)).
+:::
+
+:::prof
+Déroulement conseillé : faire d'abord lire le modèle (Immeuble et Bien_fonds : pourquoi deux tables ?), puis lancer *Lire pas à pas* au projecteur sans commentaire, puis laisser les groupes répondre aux questions avec le lecteur.
+
+La question 5 est volontairement sans réponse directe : elle fait comprendre ce que le modèle enregistre et ce qu'il n'enregistre pas.
+
+Pour la partie QGIS, vérifier à l'avance que la version installée dans la salle ouvre les ITF (QGIS 3.x pour Windows inclut le pilote INTERLIS de GDAL). Prévoir le fichier sur une clé USB en secours.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : lecteur ITF ↔ plan ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = GEO.esc;
+  const SRC = $('itfSrc').textContent.replace(/^\s*\n/, '').replace(/\s+$/, '') + '\n';
+  const LINES = SRC.trim().split('\n');
+
+  // colonnes de chaque table, d'après le modèle (enum : liste des valeurs dans l'ordre)
+  const MATERIEL = ['borne','borne_artificielle','cheville','tuyau','pieu','croix','non_materialise','autre'];
+  const COLS = {
+    Mise_a_jourBF: [['TID'],['IdentDN'],['Identification'],['Description'],['Validite',['projete','valable']],['En_vigueur','date'],['Enregistrement_RF','date'],['Date1','date'],['Date2','date']],
+    Point_limite: [['TID'],['Origine','->Mise_a_jourBF'],['Identification'],['Geometrie (E)'],['Geometrie (N)'],['PrecPlan','cm'],['FiabPlan',['oui','non']],['Signe',MATERIEL],['Defini_exactement',['oui','non']],['Anc_borne_speciale',['oui','non']]],
+    Immeuble: [['TID'],['Origine','->Mise_a_jourBF'],['IdentDN'],['Numero'],['EGRIS_EGRID'],['Validite',['en_vigueur','litigieux']],['Integralite',['complet','incomplet']],['Genre',['bien_fonds','DDP.superficie','DDP.source','DDP.concession','DDP.autre','mine']],['Superficie_totale','m2']],
+    PosImmeuble: [['TID'],['PosImmeuble_de','->Immeuble'],['Pos (E)'],['Pos (N)'],['Ori','gon'],['HAli',['Left','Center','Right']],['VAli',['Top','Cap','Half','Base','Bottom']],['Grandeur',['petite','moyenne','grande']]],
+    Bien_fonds_Geometrie: [['TID'],['Genre_ligne',['litigieux','incomplet']]],
+    Bien_fonds: [['TID'],['Bien_fonds_de','->Immeuble'],['PartieNumeroImmeuble'],['Point de référence (E)'],['Point de référence (N)'],['Superficie','m2']],
+  };
+  const KW = {SCNT:"Début du fichier : la description libre suit, jusqu'à ////.", MTID:'Nom du transfert (TRANSFER du modèle).', MODL:'Nom du modèle.', TOPI:'Début du thème.', TABL:'Début de la table.', ETAB:'Fin de la table.', ETOP:'Fin du thème.', EMOD:'Fin du modèle.', ENDE:'Fin du fichier.', STPT:'Premier point de la ligne.', LIPT:'Point suivant de la ligne (segment droit).', ARCP:"Point intermédiaire d'un arc.", ELIN:'Fin de la ligne.', '////':'Fin de la description libre.'};
+
+  // ---- analyse du fichier
+  const info = [];            // par ligne : {table, key, rec}
+  const recs = {};            // clé → enregistrement
+  let table = null, curLine = null;
+  LINES.forEach((ln, i) => {
+    const w = ln.trim().split(/\s+/), k = w[0];
+    const it = {table, key:null};
+    if(k === 'TABL'){ table = w[1]; it.table = table; }
+    else if(k === 'ETAB'){ table = null; curLine = null; }
+    else if(k === 'OBJE'){
+      const pfx = {Mise_a_jourBF:'M', Point_limite:'P', Immeuble:'I', PosImmeuble:'T', Bien_fonds_Geometrie:'L', Bien_fonds:'B'}[table];
+      const key = pfx + w[1];
+      recs[key] = {key, table, vals:w.slice(1), line:i, pts:[]};
+      it.key = key; curLine = recs[key];
+    } else if(['STPT','LIPT','ARCP','ELIN'].includes(k) && curLine){
+      it.key = curLine.key;
+      if(k !== 'ELIN') curLine.pts.push([+w[1], +w[2]]);
+    }
+    info.push(it);
+  });
+
+  // relations (pour surligner ce qui est lié)
+  const rel = key => {
+    const r = recs[key], out = new Set();
+    if(!r) return out;
+    const ref = (tbl, col) => r.table === tbl ? r.vals[col] : null;
+    if(r.table === 'Point_limite') out.add('M' + r.vals[1]);
+    if(r.table === 'Immeuble'){ out.add('M' + r.vals[1]); Object.values(recs).forEach(x => { if((x.table === 'PosImmeuble' || x.table === 'Bien_fonds') && x.vals[1] === r.vals[0]) out.add(x.key); }); }
+    if(r.table === 'PosImmeuble' || r.table === 'Bien_fonds'){ const im = 'I' + r.vals[1]; out.add(im); rel(im).forEach(k => k !== key && out.add(k)); }
+    if(r.table === 'Mise_a_jourBF') Object.values(recs).forEach(x => { if((x.table === 'Point_limite' || x.table === 'Immeuble') && x.vals[1] === r.vals[0]) out.add(x.key); });
+    out.delete(key);
+    return out;
+  };
+
+  // ---- plan
+  const all = Object.values(recs);
+  const xs = [], ys = [];
+  all.forEach(r => { r.pts.forEach(p => { xs.push(p[0]); ys.push(p[1]); }); if(['Point_limite','PosImmeuble','Bien_fonds'].includes(r.table)){ const o = r.table === 'PosImmeuble' ? 2 : 3; /* Bien_fonds : PartieNumeroImmeuble avant E, N */ xs.push(+r.vals[o]); ys.push(+r.vals[o+1]); } });
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const W = 560, H = 400, M = 50, sc = Math.min((W - 2*M) / (maxX - minX), (H - 2*M) / (maxY - minY));
+  const ox = (W - (maxX - minX) * sc) / 2, oy = (H - (maxY - minY) * sc) / 2;
+  const X = e => (ox + (e - minX) * sc).toFixed(1), Y = n => (H - oy - (n - minY) * sc).toFixed(1);
+  let svg = '';
+  all.filter(r => r.table === 'Bien_fonds_Geometrie').forEach(r => {
+    const d = 'M' + r.pts.map(p => X(p[0]) + ' ' + Y(p[1])).join('L');
+    svg += `<g data-k="${r.key}" class="fade"><path class="bl" d="${d}"/><path class="bl hit" d="${d}"><title>ligne ${r.vals[0]}</title></path></g>`;
+  });
+  all.filter(r => r.table === 'Bien_fonds').forEach(r => {
+    const x = X(+r.vals[3]), y = Y(+r.vals[4]);
+    svg += `<g data-k="${r.key}" class="fade"><path class="ref" d="M${x-5} ${y}h10M${x} ${y-5}v10"><title>point de référence du bien-fonds (TID ${r.vals[0]})</title></path><text class="sub" x="${x}" y="${(+y) + 16}" text-anchor="middle">${r.vals[5]} m²</text></g>`;
+  });
+  all.filter(r => r.table === 'PosImmeuble').forEach(r => {
+    const im = recs['I' + r.vals[1]];
+    svg += `<g data-k="${r.key}" class="fade"><text class="lab" x="${X(+r.vals[2])}" y="${(+Y(+r.vals[3])) - 4}" text-anchor="middle">${esc(im ? im.vals[3] : '?')}</text></g>`;
+  });
+  all.filter(r => r.table === 'Point_limite').forEach(r => {
+    const x = X(+r.vals[3]), y = Y(+r.vals[4]);
+    svg += `<g data-k="${r.key}" class="fade"><circle class="pt" cx="${x}" cy="${y}" r="5"><title>point limite ${r.vals[2]}</title></circle><text class="pid" x="${(+x) + 8}" y="${(+y) - 7}">${r.vals[2]}</text></g>`;
+  });
+  const bar = 10 * sc;  // échelle graphique : 10 m
+  svg += `<g><path d="M${W-20-bar} ${H-18}h${bar}" stroke="var(--ink)" stroke-width="2"/><text class="sub" x="${W-20-bar/2}" y="${H-24}" text-anchor="middle">10 m</text></g>`;
+  $('plan').innerHTML = svg;
+
+  // ---- liste des lignes
+  $('itfl').innerHTML = LINES.map((ln, i) => `<li><button type="button" data-i="${i}">${GEO.hl(ln, 'itf')}</button></li>`).join('');
+  const btns = [...$('itfl').querySelectorAll('button')];
+
+  function decode(i){
+    const ln = LINES[i], w = ln.trim().split(/\s+/), it = info[i];
+    if(it.key){
+      const r = recs[it.key], cols = COLS[r.table] || [];
+      const head = {M:'Mutation', P:'Point limite', I:'Immeuble', T:"Position du numéro d'immeuble", L:'Ligne de limite (AREA)', B:'Bien-fonds'}[it.key[0]];
+      let rows = '';
+      if(w[0] === 'OBJE'){
+        rows = cols.map(([n, t], j) => {
+          let v = r.vals[j];
+          if(v === undefined) return '';
+          let s = v === '@' ? '<em>non défini</em>' : `<code>${esc(v)}</code>`;
+          if(v !== '@' && Array.isArray(t)) s += ` → ${esc(t[+v] ?? '?')}`;
+          else if(v !== '@' && t && t.startsWith('->')){ const tgt = recs[(t === '->Immeuble' ? 'I' : 'M') + v]; s += ` → renvoie à ${t.slice(2)} ${tgt ? (t === '->Immeuble' ? 'n° ' + esc(tgt.vals[3]) : esc(tgt.vals[2])) : ''}`; }
+          else if(v !== '@' && t === 'date') s += ` → ${v.slice(6,8)}.${v.slice(4,6)}.${v.slice(0,4)}`;
+          else if(v !== '@' && t) s += ' ' + t;
+          return `<tr><td>${esc(n)}</td><td>${s}</td></tr>`;
+        }).join('');
+        if(r.table === 'Bien_fonds_Geometrie') rows += `<tr><td>géométrie</td><td>${r.pts.length} points, décrits sur les lignes suivantes (STPT, LIPT, ELIN)</td></tr>`;
+        if(r.table === 'PosImmeuble') rows += `<tr><td>Ligne_auxiliaire</td><td><em>non définie</em> : la ligne ELIN suivante clôt une ligne vide</td></tr>`;
+      } else {
+        rows = `<tr><td>${esc(w[0])}</td><td>${esc(KW[w[0]] || '')}${w[1] ? ` <code>E ${esc(w[1])} · N ${esc(w[2])}</code>` : ''}</td></tr>`;
+      }
+      return `<h4>${head} · TID ${esc(r.vals[0])} <span class="muted small">(table ${esc(r.table)})</span></h4><table>${rows}</table>`;
+    }
+    if(KW[w[0]]) return `<h4><code>${esc(w[0])}</code></h4><p style="margin:0">${esc(KW[w[0]])}${w[1] ? ` <code>${esc(w.slice(1).join(' '))}</code>` : ''}</p>`;
+    return `<h4>Description libre</h4><p style="margin:0">Texte libre de l'en-tête, ignoré par les logiciels.</p>`;
+  }
+
+  function select(i, scroll){
+    const key = info[i].key, related = key ? rel(key) : new Set();
+    btns.forEach((b, j) => {
+      const k = info[j].key;
+      b.classList.toggle('sel', key ? k === key : j === i);
+      b.classList.toggle('rel', !!k && related.has(k) && LINES[j].startsWith('OBJE'));
+    });
+    $('plan').querySelectorAll('[data-k]').forEach(g => {
+      const on = g.dataset.k === key || related.has(g.dataset.k);
+      g.querySelectorAll('.bl:not(.hit),.pt,.ref,text').forEach(e => e.classList.toggle('on', on));
+    });
+    $('dec').innerHTML = decode(i);
+    if(scroll) btns[i].scrollIntoView({block:'nearest'});
+  }
+  btns.forEach((b, i) => b.onclick = () => { stop(); showAll(); select(i); });
+  $('plan').querySelectorAll('[data-k]').forEach(g => {
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => { stop(); const r = recs[g.dataset.k]; select(r.line, true); });
+  });
+
+  // ---- lecture pas à pas
+  let timer = null, pos = 0;
+  const showAll = () => { btns.forEach(b => b.classList.remove('unread', 'cur')); $('plan').querySelectorAll('[data-k]').forEach(g => g.classList.remove('hide')); };
+  function stop(){ if(timer){ clearInterval(timer); timer = null; $('btPlay').textContent = 'Lire pas à pas'; } }
+  function step(){
+    if(pos >= LINES.length){ stop(); btns.forEach(b => b.classList.remove('cur')); return; }
+    btns.forEach((b, j) => { b.classList.toggle('unread', j > pos); b.classList.toggle('cur', j === pos); });
+    const key = info[pos].key;
+    if(key && LINES[pos].match(/^(OBJE|ELIN)/)){ const g = $('plan').querySelector(`[data-k="${key}"]`); if(g && (LINES[pos].startsWith('ELIN') || recs[key].table !== 'Bien_fonds_Geometrie')) g.classList.remove('hide'); }
+    $('dec').innerHTML = decode(pos);
+    btns[pos].scrollIntoView({block:'nearest'});
+    pos++;
+  }
+  $('btPlay').onclick = () => {
+    if(timer){ stop(); return; }
+    if(pos === 0 || pos >= LINES.length){ pos = 0; $('plan').querySelectorAll('[data-k]').forEach(g => g.classList.add('hide')); $('plan').querySelectorAll('.on').forEach(e => e.classList.remove('on')); btns.forEach(b => b.classList.remove('sel', 'rel')); }
+    $('btPlay').textContent = 'Pause';
+    timer = setInterval(step, 260);
+  };
+  $('btAll').onclick = () => { stop(); pos = 0; showAll(); $('dec').innerHTML = '<p class="muted" style="margin:0">Cliquez sur une ligne du fichier ou sur un élément du plan.</p>'; };
+  $('btDl').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([SRC.replace(/\n/g, '\r\n')], {type:'text/plain'}));
+    a.download = 'montavaux_bf.itf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $('dec').innerHTML = '<p class="muted" style="margin:0">Cliquez sur une ligne du fichier ou sur un élément du plan.</p>';
+})();
+</script>
+</body>
+</html>

@@ -74,7 +74,7 @@ Votre travail est enregistré dans ce navigateur. Il sera encore là si vous fer
   </div>
   <figure class="fig gridbg uml-pane">
     <div class="scroll-x"><svg id="uml" role="img" aria-label="Diagramme de classes généré à partir du modèle"></svg></div>
-    <figcaption id="umlCap">Fig. 7.1 · Diagramme généré à partir du texte ci-dessus.</figcaption>
+    <figcaption id="umlCap">Fig. 8.1 · Diagramme généré à partir du texte ci-dessus.</figcaption>
   </figure>
 </div>
 
@@ -90,7 +90,7 @@ Chaque défi se valide tout seul dès que votre modèle est correct *et* contien
 
 <script type="text/markdown">
 :::attention
-Cet éditeur vérifie une **partie** des règles d'INTERLIS 2.3 : structure du texte, noms, héritage, types connus, associations. Le vrai compilateur, **ili2c**, fait beaucoup plus de contrôles (chapitre 9). Un modèle accepté ici peut encore être refusé par ili2c.
+Cet éditeur vérifie une **partie** des règles d'INTERLIS 2.3 : structure du texte, noms, héritage, types connus, associations. Le vrai compilateur, **ili2c**, fait beaucoup plus de contrôles (chapitre Outils et pratique). Un modèle accepté ici peut encore être refusé par ili2c.
 :::
 
 ## Les erreurs les plus fréquentes
@@ -104,13 +104,13 @@ Cet éditeur vérifie une **partie** des règles d'INTERLIS 2.3 : structure du t
 | Le modèle finit par un point | `END Atelier_V1.` : c'est un point, pas un point-virgule. |
 
 :::exo pour aller plus loin
-Reprenez votre classe `Banc` du chapitre 2 et écrivez-la dans un nouveau thème `TOPIC Mobilier`. Utilisez une énumération pour le matériau et l'état. Téléchargez le fichier et gardez-le : vous pourrez le compiler avec ili2c au chapitre 9.
+Reprenez votre classe `Banc` du chapitre Modéliser le territoire et écrivez-la dans un nouveau thème `TOPIC Mobilier`. Utilisez une énumération pour le matériau et l'état. Téléchargez le fichier et gardez-le : vous pourrez le compiler avec ili2c au chapitre Outils et pratique.
 :::
 
 :::prof
 Faire commencer par **casser** volontairement le modèle : effacer un `;`, changer `END Arbre` en `END Arbres`. Lire le message ensemble. Les élèves perdent ainsi la peur du message d'erreur.
 
-Le défi 3 est le plus difficile (sens de lecture des cardinalités). Si un groupe bloque, le renvoyer au banc d'essai du chapitre 4.
+Le défi 3 est le plus difficile (sens de lecture des cardinalités). Si un groupe bloque, le renvoyer au banc d'essai du chapitre INTERLIS 2.
 :::
 </script>
 
@@ -573,7 +573,7 @@ function drawUml(M){
   svg.style.minWidth = Math.min(W, 520) + 'px';
   svg.innerHTML = out;
   const nc = M.classes.filter(c=>c.kind==='CLASS').length, ns = M.classes.length - nc;
-  $('umlCap').textContent = `Fig. 7.1 · ${M.name} : ${nc} classe${nc>1?'s':''}, ${ns} structure${ns>1?'s':''}, ${M.assocs.length} association${M.assocs.length>1?'s':''}.`;
+  $('umlCap').textContent = `Fig. 8.1 · ${M.name} : ${nc} classe${nc>1?'s':''}, ${ns} structure${ns>1?'s':''}, ${M.assocs.length} association${M.assocs.length>1?'s':''}.`;
 }
 
 /* =================== défis =================== */
@@ -603,7 +603,7 @@ END Controle;
 !! dans CLASS ObjetVegetal :
   Controles : BAG {0..*} OF Controle;`},
 ];
-const BONUS = {t:"Bonus : votre banc", d:"Ajoutez la classe <code>Banc</code> de l'exercice du chapitre 2, avec au moins cinq attributs dont au moins deux obligatoires.",
+const BONUS = {t:"Bonus : votre banc", d:"Ajoutez la classe <code>Banc</code> de l'exercice du chapitre Modéliser le territoire, avec au moins cinq attributs dont au moins deux obligatoires.",
   ok:M=>{ const c = M.classes.find(c=>c.n==='Banc'); return !!(c && c.kind==='CLASS' && c.attrs.length >= 5 && c.attrs.filter(a=>a.mand).length >= 2); },
   sol:`CLASS Banc =
   Numero : MANDATORY TEXT*8;
