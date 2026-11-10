@@ -255,17 +255,7 @@ function buildHeader(doc){
       const lastCell = k === cells.length - 1, cls = [lastCell && cells.length % 2 ? 'full' : '', lastCell && !q ? 'last' : ''].filter(Boolean).join(' ');
       return `<div${cls ? ` class="${cls}"` : ''}><i>${c[0]}</i><b>${esc(c[1])}</b></div>`; }).join('')}${q ? `<div class="full last"><i>Question clé</i><b>${esc(q)}</b></div>` : ''}</div>`;
   doc.prepend(h);
-  if(CH.goals && CH.goals.length){
-    const g = document.createElement('section');
-    g.className = 'goals';
-    g.innerHTML = `<h4>${esc(C.labels.goals)}</h4><ul>${CH.goals.map(t => `<li><label><input type="checkbox"><span>${inline(esc(t))}</span></label></li>`).join('')}</ul>`;
-    h.after(g);
-    const key = 'goals.' + FILE, done = new Set(store.get(key, []));
-    g.querySelectorAll('input').forEach((cb, i) => {
-      cb.checked = done.has(i);
-      cb.addEventListener('change', () => { cb.checked ? done.add(i) : done.delete(i); store.set(key, [...done]); });
-    });
-  }
+  // CH.goals (objectifs) reste dans config.js comme référence pour les auteurs : il n'est plus affiché.
   document.title = CH.title + ' · ' + C.title;
 }
 

@@ -24,7 +24,6 @@ var COURSE = {
     exo:       'Exercice',
     prof:      'Formateur',
     solution:  'Solution',
-    goals:     'Objectifs du chapitre',
   },
 
   /* Chapitres, dans l'ordre du menu.

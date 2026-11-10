@@ -16,6 +16,8 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 - Aide-mémoire : cartes « XTF 2.4 », « Importer et étendre », « Contraintes ».
 
 ### Modifié
+- Le bloc « Objectifs du chapitre » (cases à cocher) n'est plus affiché en tête des chapitres ; le champ `goals` de `config.js` reste, comme référence pour les auteurs.
+- Chapitre Outils : visualiser un XTF dans QGIS par glisser-déposer (fichier d'exemple téléchargeable) ; QGIS Model Baker n'est plus qu'évoqué.
 - Mise à jour 2025-2026 : frise (INTERLIS 2.4 / eCH-0031 en 2017, révision 2024 ; DMAV en vigueur au 1.1.2024, délai transitoire au 31.12.2027), tableau des modèles du chapitre Outils, notes formateur.
 - Renumérotation des chapitres ; les renvois entre chapitres et les prérequis citent désormais le titre du chapitre, plus son numéro.
 

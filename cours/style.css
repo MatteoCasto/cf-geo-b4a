@@ -138,13 +138,6 @@ strong{font-weight:650}
 .cartouche b{font-weight:600}
 @media (max-width:760px){.chap{grid-template-columns:1fr}.cartouche{max-width:420px}}
 
-/* ---------- objectifs ---------- */
-.goals{margin-top:28px;border:1px solid var(--rule);background:var(--sheet);border-radius:6px;padding:14px 18px}
-.goals h4{font:600 .75rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.goals ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
-.goals label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-.goals input{margin-top:.35em;accent-color:var(--ok)}
-.goals label:has(input:checked) span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--ok)}
 
 /* ---------- encadrés ---------- */
 .box{position:relative;border:1px solid var(--rule);background:var(--sheet);border-radius:6px;padding:16px 18px 14px;margin:1.6rem 0 1.2rem}
