@@ -65,7 +65,7 @@ Suivons l'inventaire des arbres, du modèle jusqu'à la livraison. Cliquez sur u
   </div>
   <ol class="chain" id="chain"></ol>
   <div class="chain-d" id="chainD" aria-live="polite"></div>
-  <figcaption>Fig. 7.1 · Carrés : fichiers. Ronds : outils. Tous ces outils sont libres et gratuits. Ils nécessitent Java.</figcaption>
+  <figcaption>Fig. 9.1 · Carrés : fichiers. Ronds : outils. Tous ces outils sont libres et gratuits. Ils nécessitent Java.</figcaption>
 </figure>
 
 <script type="text/markdown">
@@ -179,7 +179,7 @@ const S = [
    h:"ili2db : de la base au fichier", d:"Le même outil exporte le contenu de la base dans un fichier XTF conforme au modèle. Dans Model Baker, c'est l'onglet d'export.",
    c:"java -jar ili2gpkg.jar --export --dbfile arbres.gpkg --models Arbres_Communaux_V1 livraison.xtf"},
   {k:'tool', ic:'ilival.', b:'Contrôler', s:'ilivalidator',
-   h:"ilivalidator : le contrôle des données", d:"Avant d'envoyer le fichier, on le contrôle (chapitre 6). ilivalidator vérifie les types, les obligatoires, les cardinalités, les références, l'unicité et les géométries. Model Baker l'intègre aussi, avec un panneau qui zoome sur chaque erreur.",
+   h:"ilivalidator : le contrôle des données", d:"Avant d'envoyer le fichier, on le contrôle (chapitre 8). ilivalidator vérifie les types, les obligatoires, les cardinalités, les références, l'unicité et les géométries. Model Baker l'intègre aussi, avec un panneau qui zoome sur chaque erreur.",
    c:"java -jar ilivalidator.jar --log controle.log livraison.xtf"},
   {k:'file', ic:'.xtf', b:'Livrer', s:'au canton',
    h:"La livraison", d:"Le fichier XTF contrôlé part chez le destinataire : commune, canton ou plateforme d'agrégation. De son côté, le destinataire contrôle à nouveau, puis importe avec ses propres outils, qui peuvent être complètement différents. C'est tout l'intérêt : seul le modèle est commun.", c:null},

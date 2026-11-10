@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le modèle qui dit non</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.truth td,.truth th{text-align:center}
+.truth td.f{background:var(--err-soft);color:var(--err);font-weight:600}
+.truth td.t{background:var(--ok-soft);color:var(--ok);font-weight:600}
+/* banc des contraintes */
+.rules{display:grid;gap:6px;margin:0 0 12px}
+.rules label{display:flex;gap:10px;align-items:flex-start;font-size:.86rem;cursor:pointer}
+.rules code{font-size:.78rem}
+.rules input{margin-top:.3em;accent-color:var(--accent)}
+.cb table{font-size:.84rem}
+.cb td{padding:4px 6px;vertical-align:middle}
+.cb input,.cb select{width:100%;min-width:5.5em;font:400 .8rem var(--f-mono);padding:3px 5px}
+.cb tr.bad td{background:var(--err-soft)}
+.cb tr.good td{background:var(--ok-soft)}
+.cb td.tid{font:600 .78rem var(--f-mono);color:var(--muted)}
+.console{background:#10181d;color:#dbe4e6;border-radius:6px;padding:10px 12px;font:400 .76rem/1.55 var(--f-mono);max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin-top:12px}
+.console .i{color:#8b9aa1}
+.console .e{color:#ff8a95}
+.console .ok{color:#5fd07e}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Ce qu'un type ne peut pas dire
+
+Un type contrôle **une valeur à la fois** : la hauteur est-elle entre 0 et 60 m ? L'état fait-il partie de la liste ? Mais beaucoup de règles du métier portent sur **plusieurs attributs** d'un même objet, ou sur **plusieurs objets**. Un type ne peut pas les exprimer. On les écrit dans le modèle sous forme de **contraintes**.
+
+| Règle | Ce qu'elle concerne | Où l'écrire |
+|---|---|---|
+| La hauteur est comprise entre 0 et 60 m. | une valeur | type : `0.0 .. 60.0 [INTERLIS.m]` |
+| L'état est sain, affaibli, malade ou mort. | une valeur | type : énumération |
+| Deux arbres n'ont jamais le même numéro. | tous les objets de la classe | `UNIQUE` |
+| Un arbre mort doit avoir une date d'abattage prévue. | plusieurs attributs d'un objet | `MANDATORY CONSTRAINT` |
+| Le code de l'espèce doit figurer dans la liste cantonale. | une valeur et une autre classe | `EXISTENCE CONSTRAINT` |
+
+:::retenir
+Une règle écrite dans le modèle est contrôlée **automatiquement, à chaque livraison**, par ilivalidator. Une règle écrite seulement dans un cahier des charges dépend de la vigilance de chacun.
+:::
+
+## Unicité : UNIQUE
+
+Vous connaissez déjà `UNIQUE NumeroInventaire;` (chapitre INTERLIS 2) : deux arbres du même fichier ne peuvent pas avoir le même numéro. L'unicité peut aussi porter sur une **combinaison** d'attributs. C'est le cas dans le modèle cantonal du chapitre précédent :
+
+```ili Arbres_Cantonaux_V1 (extrait)
+CLASS Arbre =
+  Commune : MANDATORY CHAdminCodes_V1.CHMunicipalityCode;
+  NumeroInventaire : MANDATORY TEXT*10;
+  ...
+UNIQUE Commune, NumeroInventaire;
+END Arbre;
+```
+
+Le numéro `A-0042` peut exister à Montavaux **et** dans une autre commune. Ce qui est interdit, c'est deux fois le même couple (commune, numéro).
+
+## Si… alors… : MANDATORY CONSTRAINT
+
+La commune ajoute un attribut `AbattagePrevu` (date). Règle du service des parcs : **si un arbre est mort, alors une date d'abattage doit être prévue.**
+
+```ili Arbres_Communaux_V1 (extrait)
+CLASS Arbre EXTENDS ObjetVegetal =
+  Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+  AnneePlantation : 1800 .. 2100;
+  Position : MANDATORY Coord2;
+  AbattagePrevu : INTERLIS.XMLDate;
+  !! si l'arbre est mort, une date d'abattage doit être prévue
+  MANDATORY CONSTRAINT Etat != #mort OR DEFINED(AbattagePrevu);
+END Arbre;
+```
+
+Une `MANDATORY CONSTRAINT` est une condition que **chaque objet** de la classe doit remplir. Elle se place après les attributs. Elle peut utiliser les attributs hérités, comme ici `Etat`, qui vient d'`ObjetVegetal`.
+
+INTERLIS n'a pas de « si… alors… ». On le traduit avec `OR` :
+
+:::info Règle de traduction
+**Si A alors B** s'écrit **`NOT (A) OR B`**. Quand A est une simple égalité, on écrit directement son contraire : « si `Etat == #mort` alors B » devient `Etat != #mort OR B`.
+:::
+
+« Si l'arbre est mort, alors la date est définie » devient « l'arbre n'est pas mort, **ou** la date est définie ». Le tableau montre pourquoi c'est la même chose : la règle n'est violée que dans un seul cas.
+</script>
+
+<div class="tbl truth"><table>
+  <thead><tr><th>L'arbre est mort ?</th><th>Date d'abattage définie ?</th><th><code>Etat != #mort</code></th><th><code>DEFINED(AbattagePrevu)</code></th><th>Contrainte</th></tr></thead>
+  <tbody>
+    <tr><td>non</td><td>non</td><td>vrai</td><td>faux</td><td class="t">respectée</td></tr>
+    <tr><td>non</td><td>oui</td><td>vrai</td><td>vrai</td><td class="t">respectée</td></tr>
+    <tr><td>oui</td><td>oui</td><td>faux</td><td>vrai</td><td class="t">respectée</td></tr>
+    <tr><td>oui</td><td>non</td><td>faux</td><td>faux</td><td class="f">violée</td></tr>
+  </tbody>
+</table></div>
+
+<script type="text/markdown">
+| Écriture | Signification |
+|---|---|
+| `==` `!=` | égal, différent |
+| `<` `<=` `>` `>=` | comparaisons de nombres |
+| `#mort` | une valeur d'énumération (précédée de `#`) |
+| `DEFINED(Attribut)` | l'attribut a une valeur |
+| `AND` `OR` | et, ou |
+| `NOT (…)` | contraire de ce qui est entre parenthèses (les parenthèses sont obligatoires) |
+
+:::attention
+L'erreur classique est d'écrire la règle **à l'envers** : `Etat == #mort AND DEFINED(AbattagePrevu)` exigerait que **tous** les arbres soient morts avec une date. Relisez toujours votre contrainte en vous demandant : « un arbre sain, sans date, passe-t-il ? »
+:::
+
+## Le banc des contraintes
+
+Le service des parcs applique trois règles. Activez-les une à une, lancez le contrôle, puis corrigez les données dans le tableau jusqu'à obtenir zéro erreur. Comme au chapitre Contrôler, on ne corrige pas en inventant : imaginez que vous avez obtenu l'information manquante auprès du service.
+</script>
+
+<!-- composant interactif : banc des contraintes -->
+<figure class="fig">
+  <div class="rules" id="rules"></div>
+  <div class="tbl cb"><table>
+    <thead><tr><th>TID</th><th>NumeroInventaire</th><th>Etat</th><th>Hauteur</th><th>AnneePlantation</th><th>AbattagePrevu</th></tr></thead>
+    <tbody id="cbBody"></tbody>
+  </table></div>
+  <div class="row">
+    <button class="btn primary" type="button" id="cbRun">Contrôler</button>
+    <button class="btn" type="button" id="cbReset">Données de départ</button>
+  </div>
+  <div class="console" id="cbOut" aria-live="polite"><span class="i">Rapport de contrôle : pas encore lancé.</span></div>
+  <figcaption>Fig. 6.1 · Banc des contraintes. Une cellule vide = valeur non définie. Messages simplifiés, sur le modèle de ceux d'ilivalidator.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+ilivalidator **numérote** les contraintes sans nom de chaque classe : `Constraint1`, `Constraint2`… dans l'ordre où elles sont écrites. Le message ne dit donc pas *pourquoi* la règle existe. D'où l'intérêt d'un commentaire `!!` juste au-dessus de chaque contrainte : c'est là qu'on ira lire la règle en clair.
+:::
+
+:::terrain
+Les vrais modèles en sont remplis. Lors d'un contrôle de données de biens-fonds avec un modèle de test de la mensuration officielle, ilivalidator a par exemple renvoyé :
+
+```sh rapport ilivalidator (extrait réel)
+Error: line 4103: DM_Flex_AV_CH_LS_V1_0.Liegenschaften.Liegenschaft: tid 554ee393-…: Mandatory Constraint DM_Flex_AV_CH_LS_V1_0.Liegenschaften.LiegenschaftGrundstueckBez.Constraint1 is not true.
+```
+
+Pour comprendre l'erreur, on ouvre le modèle, on cherche `LiegenschaftGrundstueckBez`, et on lit la **première** contrainte.
+:::
+
+## Exigence d'existence : EXISTENCE CONSTRAINT
+
+Parfois, une valeur doit **exister ailleurs**. Supposons que le canton tienne une liste d'espèces avec un code, et que chaque arbre indique le code de son espèce :
+
+```ili exigence d'existence
+CLASS EspeceCantonale =
+  Code : MANDATORY TEXT*12;
+  NomLatin : MANDATORY TEXT*60;
+UNIQUE Code;
+END EspeceCantonale;
+
+CLASS Arbre =
+  CodeEspece : MANDATORY TEXT*12;
+  ...
+  !! le code doit exister dans la liste des espèces
+  EXISTENCE CONSTRAINT CodeEspece REQUIRED IN EspeceCantonale : Code;
+END Arbre;
+```
+
+Cette forme est plus rare. Le plus souvent, une **association** vers la classe des espèces (chapitre INTERLIS 2) fait le même travail, en mieux : le lien est vérifié et il est visible dans le diagramme.
+
+:::info Pour aller plus loin
+Il existe d'autres sortes de contraintes : les contraintes d'ensemble (`SET CONSTRAINT`, qui portent sur un groupe d'objets) et les contraintes de plausibilité (une règle qui doit être vraie pour un pourcentage minimal d'objets). Vous les croiserez dans certains modèles officiels. Elles dépassent ce cours.
+:::
+
+:::exo 10 min
+Écrivez les contraintes suivantes, pour la classe `Arbre` ci-dessus.
+
+1. Si l'année de plantation est connue, la hauteur doit l'être aussi.
+2. Un arbre pour lequel un abattage est prévu ne peut pas être « sain ».
+
+??? Solution
+```ili contraintes
+!! 1. année connue → hauteur connue
+MANDATORY CONSTRAINT NOT (DEFINED(AnneePlantation)) OR DEFINED(Hauteur);
+
+!! 2. abattage prévu → pas sain
+MANDATORY CONSTRAINT NOT (DEFINED(AbattagePrevu)) OR Etat != #sain;
+```
+
+Vérification par le cas « normal » : un arbre sain, sans date ni année, passe-t-il les deux règles ? Oui : `NOT (DEFINED(…))` est vrai.
+???
+:::
+
+:::prof
+Le passage de « si… alors… » à `NOT (A) OR B` est le point dur du chapitre. Faire remplir le tableau de vérité au tableau avant de le montrer, puis faire reformuler deux ou trois règles du métier à l'oral (« si un point est matérialisé, alors le type de signe est connu »).
+
+Banc des contraintes : départ avec trois erreurs (une par règle). Faire activer les règles une à une pour voir apparaître les erreurs, puis corriger. Faire remarquer que les contraintes ne se déclenchent que si elles sont écrites dans le modèle : une règle désactivée laisse passer des données fausses sans aucun message.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : banc des contraintes (vérificateur simplifié) ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = GEO.esc;
+  const CLS = 'Arbres_Communaux_V1.Inventaire.Arbre';
+  const ETATS = ['', 'sain', 'affaibli', 'malade', 'mort'];
+  const START = [
+    {tid:'a41', num:'A-0041', etat:'sain',     h:'18.0', an:'1965', ab:''},
+    {tid:'a42', num:'A-0042', etat:'affaibli', h:'12.5', an:'1987', ab:''},
+    {tid:'a43', num:'A-0043', etat:'sain',     h:'14.0', an:'1979', ab:''},
+    {tid:'a44', num:'A-0043', etat:'malade',   h:'9.5',  an:'2001', ab:''},
+    {tid:'a45', num:'A-0045', etat:'mort',     h:'21.0', an:'1932', ab:''},
+    {tid:'a46', num:'A-0046', etat:'mort',     h:'',     an:'',     ab:'2027-02-15'},
+    {tid:'a47', num:'A-0047', etat:'sain',     h:'6.0',  an:'',     ab:''},
+  ];
+  const RULES = [
+    {id:'u',  code:'UNIQUE NumeroInventaire;', on:true},
+    {id:'c1', code:'MANDATORY CONSTRAINT Etat != #mort OR DEFINED(AbattagePrevu);', note:'Constraint1', on:false},
+    {id:'c2', code:'MANDATORY CONSTRAINT NOT (DEFINED(Hauteur)) OR DEFINED(AnneePlantation);', note:'Constraint2', on:false},
+  ];
+  let rows;
+  const def = v => v.trim() !== '';
+
+  $('rules').innerHTML = RULES.map(r =>
+    `<label><input type="checkbox" data-r="${r.id}"${r.on ? ' checked' : ''}><span><code>${esc(r.code)}</code>${r.note ? ` <span class="muted small">(${r.note})</span>` : ''}</span></label>`).join('');
+  $('rules').querySelectorAll('input').forEach(cb => cb.onchange = () => { RULES.find(r => r.id === cb.dataset.r).on = cb.checked; clear(); });
+
+  function render(){
+    $('cbBody').innerHTML = rows.map((r, i) => `<tr data-i="${i}">
+      <td class="tid">${r.tid}</td>
+      <td><input data-k="num" value="${esc(r.num)}" aria-label="Numéro de ${r.tid}"></td>
+      <td><select data-k="etat" aria-label="État de ${r.tid}">${ETATS.map(e => `<option${e === r.etat ? ' selected' : ''}>${e}</option>`).join('')}</select></td>
+      <td><input data-k="h" value="${esc(r.h)}" inputmode="decimal" aria-label="Hauteur de ${r.tid}"></td>
+      <td><input data-k="an" value="${esc(r.an)}" inputmode="numeric" aria-label="Année de plantation de ${r.tid}"></td>
+      <td><input data-k="ab" value="${esc(r.ab)}" placeholder="AAAA-MM-JJ" aria-label="Abattage prévu de ${r.tid}"></td></tr>`).join('');
+    $('cbBody').querySelectorAll('input,select').forEach(el => el.oninput = el.onchange = () => {
+      rows[+el.closest('tr').dataset.i][el.dataset.k] = el.value; clear();
+    });
+  }
+  function clear(){
+    $('cbBody').querySelectorAll('tr').forEach(tr => tr.classList.remove('bad', 'good'));
+  }
+  function run(){
+    const on = id => RULES.find(r => r.id === id).on;
+    const E = [], bad = new Set();
+    const add = (i, msg) => { bad.add(i); E.push(`Error: ${CLS}: tid ${rows[i].tid}: ${msg}`); };
+    rows.forEach((r, i) => {
+      if(on('c1') && r.etat === 'mort' && !def(r.ab)) add(i, `Mandatory Constraint ${CLS}.Constraint1 is not true.`);
+      if(on('c2') && def(r.h) && !def(r.an)) add(i, `Mandatory Constraint ${CLS}.Constraint2 is not true.`);
+    });
+    if(on('u')){
+      const seen = new Map();
+      rows.forEach((r, i) => {
+        const v = r.num.trim();
+        if(seen.has(v)) add(i, `Unique is violated! Values ${v} already exist in Object: ${rows[seen.get(v)].tid}`);
+        else seen.set(v, i);
+      });
+    }
+    $('cbBody').querySelectorAll('tr').forEach((tr, i) => tr.classList.add(bad.has(i) ? 'bad' : 'good'));
+    const active = RULES.filter(r => r.on).length;
+    const L = [`<span class="i">Info: ${rows.length} objects in CLASS ${CLS}</span>`, `<span class="i">Info: ${active} règle${active > 1 ? 's' : ''} active${active > 1 ? 's' : ''} sur 3</span>`];
+    E.forEach(e => L.push(`<span class="e">${esc(e)}</span>`));
+    L.push(E.length ? `<span class="e">Info: ...validation failed (${E.length} erreur${E.length > 1 ? 's' : ''})</span>` : '<span class="ok">Info: ...validation done</span>');
+    $('cbOut').innerHTML = L.join('\n');
+  }
+  function reset(){ rows = START.map(r => ({...r})); render(); $('cbOut').innerHTML = '<span class="i">Rapport de contrôle : pas encore lancé.</span>'; }
+  $('cbRun').onclick = run;
+  $('cbReset').onclick = reset;
+  reset();
+})();
+</script>
+</body>
+</html>

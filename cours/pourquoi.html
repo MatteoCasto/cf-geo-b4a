@@ -167,7 +167,7 @@ Concrètement : la mensuration officielle, le cadastre RDPPF, les zones d'affect
 
 <script type="text/markdown">
 :::terrain
-Comme géomaticienne ou géomaticien, vous livrerez des mises à jour de la mensuration officielle au canton sous forme de fichier INTERLIS. Vous téléchargerez des données cantonales (zones à bâtir, cadastre des sites pollués…) au format XTF. Vous importerez aussi des modèles dans QGIS avec Model Baker (chapitre 7).
+Comme géomaticienne ou géomaticien, vous livrerez des mises à jour de la mensuration officielle au canton sous forme de fichier INTERLIS. Vous téléchargerez des données cantonales (zones à bâtir, cadastre des sites pollués…) au format XTF. Vous importerez aussi des modèles dans QGIS avec Model Baker (chapitre 9).
 :::
 
 :::exo 5 min, à deux
@@ -275,7 +275,7 @@ Les dates de la frise sont données à titre d'orientation. Vérifier les dates 
   const NOTES = [
     "<strong>Format de transfert.</strong> Les règles d'encodage d'INTERLIS disent comment écrire chaque classe et chaque attribut dans un fichier XTF (ou ITF en INTERLIS 1). Personne n'a à inventer un format.",
     "<strong>Base de données.</strong> L'outil ili2db lit le modèle et crée les tables, les colonnes, les types et les clés étrangères, par exemple dans PostGIS ou un GeoPackage.",
-    "<strong>Contrôles.</strong> Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (chapitre 6).",
+    "<strong>Contrôles.</strong> Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (chapitre 8).",
     "<strong>Documentation.</strong> Le modèle se traduit en diagramme de classes UML et en catalogue d'objets. C'est la même source que pour le reste : la documentation ne peut pas être « en retard » sur les données.",
   ];
   const outs = document.querySelectorAll('#mbd .bx.out');

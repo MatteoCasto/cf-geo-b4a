@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Importer et étendre</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.mx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.mx .codeblock{margin:0}
+@media (max-width:860px){.mx{grid-template-columns:minmax(0,1fr)}}
+/* lecture polymorphique */
+.poly{list-style:none;margin:0;padding:10px 0;background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;font:400 .78rem/1.6 var(--f-mono);overflow-x:auto}
+.poly li{white-space:pre;padding:0 12px;border-left:4px solid transparent;color:var(--code-fg)}
+.poly li.ext{border-left-color:var(--accent)}
+.poly.canton li.ext{opacity:.35;text-decoration:line-through;border-left-color:var(--rule)}
+.poly-note{font-size:.92rem;border-left:3px solid var(--accent);padding:2px 0 2px 14px;margin:12px 0 0}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Ne pas réinventer la roue
+
+Au chapitre [INTERLIS 2](interlis2.html), Montavaux a écrit elle-même son domaine de coordonnées : trois lignes avec les bornes MN95, l'unité et la rotation. Toutes les communes, tous les cantons et tous les services fédéraux ont besoin du même domaine. Si chacun l'écrit à sa façon (autres bornes, autres décimales), les modèles ne se ressemblent plus.
+
+La Confédération publie donc des **modèles de base** : de petits modèles qui ne contiennent que des définitions réutilisables. Un modèle les **importe** avec `IMPORTS`, puis utilise leurs définitions en les préfixant du nom du modèle. Survolez `Coord2` pour comparer.
+</script>
+
+<div class="mx">
+  <script type="text/x-code" data-lang="ili" data-file="avant : domaine écrit à la main" data-links="Coord2" data-group="imp">
+    INTERLIS 2.3;
+
+    MODEL Arbres_Communaux_V1 (fr)
+      AT "https://models.montavaux.ch"
+      VERSION "2026-09-30" =
+
+      DOMAIN
+        Coord2 = COORD 2460000.000 .. 2870000.000 [INTERLIS.m],
+                       1045000.000 .. 1310000.000 [INTERLIS.m],
+                       ROTATION 2 -> 1;
+
+      TOPIC Inventaire =
+        CLASS Arbre =
+          Position : MANDATORY Coord2;
+        END Arbre;
+      END Inventaire;
+
+    END Arbres_Communaux_V1.
+  </script>
+  <script type="text/x-code" data-lang="ili" data-file="après : domaine importé" data-links="Coord2,IMPORTS,GeometryCHLV95_V1" data-group="imp">
+    INTERLIS 2.3;
+
+    MODEL Arbres_Communaux_V1 (fr)
+      AT "https://models.montavaux.ch"
+      VERSION "2026-09-30" =
+
+      IMPORTS GeometryCHLV95_V1;
+
+      TOPIC Inventaire =
+        CLASS Arbre =
+          Position : MANDATORY GeometryCHLV95_V1.Coord2;
+        END Arbre;
+      END Inventaire;
+
+    END Arbres_Communaux_V1.
+  </script>
+</div>
+
+<script type="text/markdown">
+Quelques modèles de base que vous croiserez partout :
+
+| Modèle de base | Ce qu'il apporte | Exemples d'utilisation |
+|---|---|---|
+| `GeometryCHLV95_V1` | Coordonnées et géométries en MN95 | `GeometryCHLV95_V1.Coord2`, `.Coord3`, `.Line`, `.Surface`, `.Area` |
+| `Units` | Unités au-delà du mètre | `0 .. 1000000 [Units.m2]` |
+| `CHAdminCodes_V1` | Codes officiels | `CHAdminCodes_V1.CHCantonCode` (ZH, BE, … JU), `CHAdminCodes_V1.CHMunicipalityCode` (numéro OFS de la commune) |
+| `LocalisationCH_V1` | Textes en plusieurs langues | `LocalisationCH_V1.MultilingualText` |
+
+:::retenir
+- `IMPORTS NomDuModele;` se place juste après l'en-tête du modèle, avant `DOMAIN` et `TOPIC`.
+- On utilise ensuite une définition importée avec son nom complet : `NomDuModele.NomDeLaDefinition`.
+- On ne copie pas le modèle importé dans le sien : ili2c et ilivalidator vont le chercher dans les **dépôts de modèles** (voir [Outils et pratique](outils.html)).
+:::
+
+:::attention
+Un modèle importé est cherché **par son nom**. Une faute de frappe (`GeometryCHLV95_v1`) ou un ordinateur sans accès à internet, et ili2c s'arrête : il ne trouve pas le modèle. Hors ligne, copiez les fichiers `.ili` des modèles de base dans le dossier de travail et indiquez `--modeldir "."`.
+:::
+
+## Étendre un modèle existant
+
+Nouvelle situation : le canton publie un modèle `Arbres_Cantonaux_V1`. Toutes les communes doivent lui livrer leurs arbres selon ce modèle. Montavaux, elle, veut garder deux informations de plus : la **hauteur** de l'arbre, et sa **propriété** (communale ou privée), car le règlement communal ne protège pas de la même façon les arbres des deux catégories.
+
+Montavaux pourrait écrire son propre modèle à côté. Mais elle aurait alors deux modèles à tenir à jour, et deux fichiers à produire à chaque livraison. Elle fait mieux : elle **étend** le modèle cantonal. Survolez les noms pour suivre le lien entre les deux.
+</script>
+
+<div class="mx">
+  <script type="text/x-code" data-lang="ili" data-file="Arbres_Cantonaux_V1.ili · publié par le canton" data-links="Arbres_Cantonaux_V1,Arbres,Arbre,EtatSanitaire" data-group="ext">
+    INTERLIS 2.3;
+
+    MODEL Arbres_Cantonaux_V1 (fr)
+      AT "https://models.canton-exemple.ch"
+      VERSION "2026-01-15" =
+
+      IMPORTS GeometryCHLV95_V1, CHAdminCodes_V1;
+
+      DOMAIN
+        EtatSanitaire = (sain, affaibli, malade, mort);
+
+      TOPIC Arbres =
+
+        CLASS Arbre =
+          Commune : MANDATORY CHAdminCodes_V1.CHMunicipalityCode;
+          NumeroInventaire : MANDATORY TEXT*10;
+          Etat : MANDATORY EtatSanitaire;
+          Position : MANDATORY GeometryCHLV95_V1.Coord2;
+        UNIQUE Commune, NumeroInventaire;
+        END Arbre;
+
+      END Arbres;
+
+    END Arbres_Cantonaux_V1.
+  </script>
+  <script type="text/x-code" data-lang="ili" data-file="Arbres_Montavaux_V1.ili · écrit par la commune" data-links="Arbres_Cantonaux_V1,Arbres,Arbre,EXTENDS,EXTENDED" data-group="ext">
+    INTERLIS 2.3;
+
+    MODEL Arbres_Montavaux_V1 (fr)
+      AT "https://models.montavaux.ch"
+      VERSION "2026-09-30" =
+
+      IMPORTS Arbres_Cantonaux_V1;
+
+      TOPIC Arbres EXTENDS Arbres_Cantonaux_V1.Arbres =
+
+        CLASS Arbre (EXTENDED) =
+          Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+          Propriete : (communale, privee);
+        END Arbre;
+
+      END Arbres;
+
+    END Arbres_Montavaux_V1.
+  </script>
+</div>
+
+<script type="text/markdown">
+Le modèle de la commune tient en quelques lignes :
+
+- `IMPORTS Arbres_Cantonaux_V1;` rend le modèle cantonal disponible.
+- `TOPIC Arbres EXTENDS Arbres_Cantonaux_V1.Arbres` : le thème communal **reprend tout** le thème cantonal.
+- `CLASS Arbre (EXTENDED)` : la classe `Arbre` du canton est complétée, **sous le même nom**. Un arbre de Montavaux a les quatre attributs du canton, plus `Hauteur` et `Propriete`.
+
+:::retenir
+Une extension peut **ajouter** (attributs, classes) ou **resserrer** (rendre obligatoire un attribut facultatif, raccourcir un texte, réduire une plage). Elle ne peut **jamais retirer ni élargir** ce que dit le modèle de base. C'est ce qui garantit qu'un arbre de Montavaux reste un arbre cantonal valide.
+:::
+
+## Un fichier, deux lectures
+
+Voici un arbre du fichier livré par Montavaux. Le canton reçoit des fichiers de toutes ses communes, certains étendus, d'autres non. Son logiciel est réglé sur le seul modèle cantonal. Basculez entre les deux points de vue.
+</script>
+
+<!-- composant interactif : lecture polymorphique -->
+<figure class="fig">
+  <div class="row" style="margin-bottom:10px">
+    <div class="seg" role="group" aria-label="Point de vue">
+      <button type="button" aria-pressed="true" data-v="commune">Lu par la commune</button>
+      <button type="button" aria-pressed="false" data-v="canton">Lu par le canton</button>
+    </div>
+  </div>
+  <ol class="poly" id="poly" aria-label="Extrait XTF d'un arbre de Montavaux"></ol>
+  <p class="poly-note" id="polyNote" aria-live="polite"></p>
+  <figcaption>Fig. 5.1 · Le même objet, lu avec le modèle communal ou avec le seul modèle cantonal. Données fictives (commune 9999).</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+Un objet d'une classe étendue **est aussi** un objet de la classe de base. Le canton peut donc traiter les données de toutes ses communes avec son seul modèle. C'est la **lecture polymorphique**. Le logiciel doit seulement pouvoir trouver le modèle de la commune (dans un dépôt de modèles, ou joint à la livraison) pour reconnaître l'extension.
+:::
+
+:::terrain
+La mensuration officielle fonctionne ainsi depuis longtemps : le modèle fédéral DM.01-AV-CH est complété par des **extensions cantonales** (par exemple MD.01-MO-VD pour Vaud). Les modèles de géodonnées minimaux de la Confédération sont, eux aussi, souvent étendus par les cantons : zones d'affectation, cadastre des sites pollués… Quand vous ouvrez un modèle cantonal, cherchez d'abord la ligne `IMPORTS` et le mot `EXTENDS` : ils vous disent sur quel modèle fédéral il s'appuie.
+:::
+
+:::exo 5 min
+Montavaux veut modifier son extension. Pour chaque idée, dites si elle est **permise** dans `Arbres_Montavaux_V1`, et pourquoi.
+
+1. Ajouter l'attribut `AnneePlantation : 1800 .. 2100;`
+2. Rendre `NumeroInventaire` facultatif, parce que certains vieux arbres n'en ont pas.
+3. Raccourcir `NumeroInventaire` à `TEXT*8`, parce que les numéros de la commune ont toujours 6 caractères.
+4. Supprimer l'attribut `Commune`, puisque tous les arbres du fichier sont à Montavaux.
+5. Ajouter une classe `Banc` dans le thème `Arbres`.
+
+??? Solution
+1. **Permis** : on ajoute un attribut.
+2. **Interdit** : on élargirait la règle du canton (obligatoire → facultatif). Le canton recevrait des arbres sans numéro.
+3. **Permis** : on resserre. `NumeroInventaire (EXTENDED) : MANDATORY TEXT*8;` Tout numéro de 8 caractères au plus respecte aussi la limite cantonale de 10.
+4. **Interdit** : on ne retire jamais un attribut du modèle de base. Le canton en a besoin pour distinguer les communes.
+5. **Permis** : on ajoute une classe. Le canton l'ignorera, puisqu'elle n'existe pas dans son modèle.
+???
+:::
+
+:::exo 5 min
+Un service cantonal veut un modèle `Fontaines_V1` avec une classe `Fontaine` : la commune où elle se trouve (numéro OFS, obligatoire), sa position en MN95 (obligatoire) et son débit en litres par minute (facultatif, de 0 à 500). Écrivez l'en-tête du modèle avec `IMPORTS` et la classe.
+
+??? Solution
+```ili Fontaines_V1.ili
+INTERLIS 2.3;
+
+MODEL Fontaines_V1 (fr)
+  AT "https://models.canton-exemple.ch"
+  VERSION "2026-10-01" =
+
+  IMPORTS GeometryCHLV95_V1, CHAdminCodes_V1;
+
+  TOPIC Fontaines =
+    CLASS Fontaine =
+      Commune : MANDATORY CHAdminCodes_V1.CHMunicipalityCode;
+      Position : MANDATORY GeometryCHLV95_V1.Coord2;
+      Debit : 0 .. 500;   !! litres par minute
+    END Fontaine;
+  END Fontaines;
+
+END Fontaines_V1.
+```
+
+Le débit n'a pas d'unité prédéfinie simple : on l'indique en commentaire, ou on définit une unité (`UNIT`), ce qui dépasse ce cours.
+???
+:::
+
+:::prof
+Faire lire le modèle cantonal **avant** le modèle communal, et demander : « que manque-t-il à Montavaux ? ». La réponse (hauteur, propriété) amène naturellement l'extension.
+
+Pour le composant « Un fichier, deux lectures » : faire remarquer que les attributs ajoutés viennent **après** ceux du canton dans le XTF. C'est la même règle que pour l'héritage (chapitre INTERLIS 2).
+
+Montrer en direct un vrai modèle cantonal qui étend un modèle fédéral, tiré du dépôt de modèles de votre canton : chercher `IMPORTS` et `EXTENDS`.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : lecture polymorphique ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const P = 'Arbres_Montavaux_V1.Arbres';
+  // [texte, ligne de l'extension ?]
+  const L = [
+    [`<${P} BID="b1">`, 0],
+    [`  <${P}.Arbre TID="a42">`, 0],
+    [`    <Commune>9999</Commune>`, 0],
+    [`    <NumeroInventaire>A-0042</NumeroInventaire>`, 0],
+    [`    <Etat>affaibli</Etat>`, 0],
+    [`    <Position>`, 0],
+    [`      <COORD><C1>2538214.250</C1><C2>1152388.100</C2></COORD>`, 0],
+    [`    </Position>`, 0],
+    [`    <Hauteur>12.5</Hauteur>`, 1],
+    [`    <Propriete>communale</Propriete>`, 1],
+    [`  </${P}.Arbre>`, 0],
+    [`</${P}>`, 0],
+  ];
+  const NOTE = {
+    commune: "La commune connaît son modèle : elle lit les six attributs. Les deux lignes marquées viennent de l'extension communale.",
+    canton: "Le canton lit un <strong>Arbre</strong> cantonal : commune, numéro, état, position. Il laisse de côté <code>Hauteur</code> et <code>Propriete</code>, qu'il ne connaît pas. Le fichier reste valide pour lui.",
+  };
+  $('poly').innerHTML = L.map(([t, ext]) => `<li${ext ? ' class="ext"' : ''}>${GEO.hl(t, 'xtf')}</li>`).join('');
+  const show = v => {
+    $('poly').classList.toggle('canton', v === 'canton');
+    $('polyNote').innerHTML = NOTE[v];
+    document.querySelectorAll('.seg [data-v]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v));
+  };
+  document.querySelectorAll('.seg [data-v]').forEach(b => b.onclick = () => show(b.dataset.v));
+  show('commune');
+})();
+</script>
+</body>
+</html>

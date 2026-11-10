@@ -4,6 +4,14 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+### Ajouté
+- Tests statiques `node tests/check.mjs` : pages de `config.js`, JavaScript inline, encadrés `:::` et `???`, liens internes, numérotation, absence de données internes.
+- Chapitre 5 **Importer et étendre** : modèles de base de la Confédération (`IMPORTS`), extension d'un modèle cantonal par une commune (`TOPIC … EXTENDS`, `CLASS … (EXTENDED)`), lecture polymorphique (composant « Un fichier, deux lectures »).
+- Chapitre 6 **Le modèle qui dit non** : `UNIQUE` sur plusieurs attributs, `MANDATORY CONSTRAINT` (traduire « si… alors… »), `EXISTENCE CONSTRAINT`, banc des contraintes interactif.
+
+### Modifié
+- Renumérotation : Atelier devient le chapitre 7, Contrôler le 8, Outils le 9, Quiz le 10 (renvois et numéros de figures mis à jour).
+
 ## [0.1.0] – 2026-11-10
 
 Première version numérotée.
