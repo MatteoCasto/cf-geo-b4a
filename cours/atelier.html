@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atelier .ili</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.ws{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+.ed-wrap{border:1px solid var(--rule);border-radius:6px;background:var(--code-bg);overflow:hidden;min-width:0}
+.ed{position:relative;height:540px;font:400 .82rem/1.6 var(--f-mono)}
+.ed pre,.ed textarea{position:absolute;inset:0;margin:0;padding:12px 14px 12px 3.8em;font:inherit;line-height:inherit;letter-spacing:0;white-space:pre;overflow-wrap:normal;word-wrap:normal;tab-size:2;border:0;border-radius:0}
+.ed pre{color:var(--code-fg);background:transparent;overflow:hidden;pointer-events:none;z-index:1}
+.ed textarea{z-index:2;overflow:auto;background:transparent;color:transparent;caret-color:var(--ink);resize:none;outline:none}
+.ed textarea::selection{background:rgba(250,190,40,.38);color:transparent}
+.ed textarea:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.ed-gut{position:absolute;top:0;left:0;bottom:0;width:3em;overflow:hidden;border-right:1px solid var(--rule);color:var(--code-com);text-align:right;z-index:0}
+.ed-gut > div{padding:12px 0}
+.ed-gut span{display:block;padding-right:.55em}
+.ed-gut span.err{background:var(--err);color:var(--sheet);font-weight:600}
+.ed-msg{border-top:1px solid var(--rule);padding:10px 12px;font-size:.86rem;min-height:3.4em;background:var(--sheet)}
+.ed-msg button{all:unset;cursor:pointer;text-decoration:underline;text-decoration-color:var(--err);text-underline-offset:3px}
+.ed-msg .hint{display:block;color:var(--muted);font-size:.8rem;margin-top:3px}
+.uml-pane{margin:0;min-width:0}
+.uml-pane .scroll-x{max-height:640px;overflow:auto}
+#uml{min-width:320px}
+#uml.stale{opacity:.45;filter:grayscale(1);transition:opacity .2s}
+#uml .gen{stroke:var(--ink-2);stroke-width:1.3;fill:none}
+#uml .ass{stroke:var(--ink-2);stroke-width:1.4}
+#uml .bag{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 3}
+#uml .an{font:500 10.5px var(--f-mono);fill:var(--muted)}
+#uml .new rect{stroke:var(--accent)}
+.defis{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.defis > li{border:1px solid var(--rule);border-radius:6px;background:var(--sheet);padding:12px 14px;margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;transition:border-color .3s,background .3s}
+.defis > li.ok{border-color:var(--ok);background:var(--ok-soft)}
+.defis .num{grid-row:span 3;font:800 1.6rem/1 var(--f-display);color:var(--accent);min-width:1.2em}
+.defis > li.ok .num{color:var(--ok)}
+.defis b{font:700 1rem var(--f-display)}
+.defis p{margin:0;font-size:.9rem;color:var(--ink-2)}
+.defis details{margin-top:.3rem}
+.prog{display:flex;align-items:center;gap:12px;margin:.4rem 0 1rem}
+.prog .bar{flex:1;height:8px;background:var(--rule);border-radius:4px;overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+.prog b{font:600 .8rem var(--f-mono)}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## L'éditeur
+
+Votre travail est enregistré dans ce navigateur. Il sera encore là si vous fermez la page. La touche ++Tab++ insère deux espaces ; appuyez sur ++Échap++ puis ++Tab++ pour quitter l'éditeur au clavier.
+</script>
+
+<!-- composant interactif : éditeur .ili + diagramme UML généré -->
+<div class="ws">
+  <div class="ed-wrap">
+    <div class="cb-bar">
+      <span class="cb-file" id="edFile">Atelier_V1.ili</span>
+      <span class="row" style="gap:6px">
+        <button class="cb-copy" type="button" id="btDl">Télécharger .ili</button>
+        <button class="cb-copy" type="button" id="btReset">Réinitialiser</button>
+      </span>
+    </div>
+    <div class="ed" id="ed">
+      <div class="ed-gut" aria-hidden="true"><div id="gut"></div></div>
+      <pre aria-hidden="true"><code id="hlc"></code></pre>
+      <textarea id="src" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Modèle INTERLIS 2 à éditer" aria-describedby="msg"></textarea>
+    </div>
+    <div class="ed-msg" id="msg" aria-live="polite"></div>
+  </div>
+  <figure class="fig gridbg uml-pane">
+    <div class="scroll-x"><svg id="uml" role="img" aria-label="Diagramme de classes généré à partir du modèle"></svg></div>
+    <figcaption id="umlCap">Fig. 5.1 · Diagramme généré à partir du texte ci-dessus.</figcaption>
+  </figure>
+</div>
+
+<script type="text/markdown">
+## Quatre défis
+
+Chaque défi se valide tout seul dès que votre modèle est correct *et* contient ce qui est demandé.
+</script>
+
+<!-- composant interactif : défis validés automatiquement -->
+<div class="prog"><div class="bar"><i id="progBar"></i></div><b id="progTxt">0 / 4</b></div>
+<ol class="defis" id="defis"></ol>
+
+<script type="text/markdown">
+:::attention
+Cet éditeur vérifie une **partie** des règles d'INTERLIS 2.3 : structure du texte, noms, héritage, types connus, associations. Le vrai compilateur, **ili2c**, fait beaucoup plus de contrôles (chapitre 7). Un modèle accepté ici peut encore être refusé par ili2c.
+:::
+
+## Les erreurs les plus fréquentes
+
+| Message | Cause habituelle |
+|---|---|
+| Point-virgule manquant | Chaque attribut, chaque `END Classe` et chaque rôle se termine par `;`. |
+| `END X` ne correspond pas… | Faute de frappe dans le nom de fin, ou un `END` oublié plus haut. |
+| Type inconnu | Un domaine utilisé sans être défini dans `DOMAIN`, ou une faute de frappe (`EtatSanitair`). |
+| Classe de base inconnue | `EXTENDS` vers une classe qui n'existe pas (encore). |
+| Le modèle finit par un point | `END Atelier_V1.` : c'est un point, pas un point-virgule. |
+
+:::exo pour aller plus loin
+Reprenez votre classe `Banc` du chapitre 2 et écrivez-la dans un nouveau thème `TOPIC Mobilier`. Utilisez une énumération pour le matériau et l'état. Téléchargez le fichier et gardez-le : vous pourrez le compiler avec ili2c au chapitre 7.
+:::
+
+:::prof
+Faire commencer par **casser** volontairement le modèle : effacer un `;`, changer `END Arbre` en `END Arbres`. Lire le message ensemble. Les élèves perdent ainsi la peur du message d'erreur.
+
+Le défi 3 est le plus difficile (sens de lecture des cardinalités). Si un groupe bloque, le renvoyer au banc d'essai du chapitre 4.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : analyseur INTERLIS 2 simplifié, diagramme UML, défis ----
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+
+const START = `INTERLIS 2.3;
+
+MODEL Atelier_V1 (fr)
+  AT "https://models.montavaux.ch"
+  VERSION "2026-09-30" =
+
+  DOMAIN
+    EtatSanitaire = (sain, affaibli, malade, mort);
+    Coord2 = COORD 2460000.000 .. 2870000.000 [INTERLIS.m],
+                   1045000.000 .. 1310000.000 [INTERLIS.m],
+                   ROTATION 2 -> 1;
+
+  TOPIC Inventaire =
+
+    CLASS ObjetVegetal (ABSTRACT) =
+      NumeroInventaire : MANDATORY TEXT*10;
+      Etat : EtatSanitaire;
+    END ObjetVegetal;
+
+    CLASS Arbre EXTENDS ObjetVegetal =
+      Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+      Position : MANDATORY Coord2;
+    END Arbre;
+
+    CLASS Espece =
+      NomLatin : MANDATORY TEXT*60;
+      NomFrancais : TEXT*60;
+    END Espece;
+
+  END Inventaire;
+
+END Atelier_V1.
+`;
+
+/* =================== analyse =================== */
+const SECTION = new Set(['DOMAIN','TOPIC','CLASS','STRUCTURE','ASSOCIATION','END','UNIT','IMPORTS','FUNCTION','VIEW','GRAPHIC','CONSTRAINTS']);
+const TYPE_KW = new Set(['TEXT','MTEXT','NAME','URI','BOOLEAN','COORD','MULTICOORD','POLYLINE','MULTIPOLYLINE','SURFACE','MULTISURFACE','AREA','MULTIAREA',
+  'BAG','LIST','REFERENCE','NUMERIC','DATE','TIMEOFDAY','DATETIME','OID','BLACKBOX','ALL','FORMAT','CLASS','ATTRIBUTE','HALIGNMENT','VALIGNMENT','UUIDOID']);
+
+class IliError extends Error { constructor(line, msg, hint){ super(msg); this.line = line; this.hint = hint; } }
+const show = t => t.t === 'eof' ? 'fin du texte' : t.t === 'str' ? `"${t.v}"` : t.v;
+
+function tokenize(src){
+  const T = []; let i = 0, line = 1; const n = src.length;
+  const reId = /[A-Za-z_][A-Za-z0-9_]*/y, reNum = /\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+  while(i < n){
+    const c = src[i];
+    if(c === '\n'){ line++; i++; continue; }
+    if(c === ' ' || c === '\t' || c === '\r'){ i++; continue; }
+    if(c === '!' && src[i+1] === '!'){ while(i < n && src[i] !== '\n') i++; continue; }
+    if(c === '/' && src[i+1] === '*'){
+      const j = src.indexOf('*/', i+2);
+      if(j < 0) throw new IliError(line, 'Commentaire /* … non fermé', 'Ajoutez */ à la fin du commentaire.');
+      for(let k = i; k < j; k++) if(src[k] === '\n') line++;
+      i = j + 2; continue;
+    }
+    if(c === '"'){
+      let j = i + 1;
+      while(j < n && src[j] !== '"' && src[j] !== '\n'){ if(src[j] === '\\') j++; j++; }
+      if(src[j] !== '"') throw new IliError(line, 'Guillemet fermant manquant', 'Un texte entre guillemets doit tenir sur une ligne.');
+      T.push({t:'str', v:src.slice(i+1, j), line}); i = j + 1; continue;
+    }
+    reId.lastIndex = i;
+    let m = reId.exec(src);
+    if(m){ T.push({t:'id', v:m[0], line}); i += m[0].length; continue; }
+    reNum.lastIndex = i;
+    m = reNum.exec(src);
+    if(m){ T.push({t:'num', v:m[0], line}); i += m[0].length; continue; }
+    const p = ['-<#>','-<>','--','->','..'].find(p => src.startsWith(p, i));
+    if(p){ T.push({t:'p', v:p, line}); i += p.length; continue; }
+    if('{}()[]=;:,*.<>/-+#'.includes(c)){ T.push({t:'p', v:c, line}); i++; continue; }
+    throw new IliError(line, `Caractère inattendu « ${c} »`, 'Les noms ne peuvent contenir que des lettres sans accent, des chiffres et _.');
+  }
+  T.push({t:'eof', v:'', line});
+  return T;
+}
+
+function parse(src){
+  const T = tokenize(src);
+  let p = 0;
+  const peek = (k = 0) => T[Math.min(p+k, T.length-1)];
+  const next = () => T[Math.min(p++, T.length-1)];
+  const is = (v, k = 0) => peek(k).t !== 'str' && peek(k).v === v;
+  const prevLine = () => T[Math.max(0, p-1)].line;
+  function expect(v, ctx, hint){
+    const t = peek();
+    if(t.t === 'str' || t.v !== v){
+      if(v === ';') throw new IliError(prevLine(), `Point-virgule manquant ${ctx}`, hint || `Ajoutez ; à la fin de la ligne ${prevLine()}.`);
+      throw new IliError(t.line, `« ${v} » attendu ${ctx}, trouvé « ${show(t)} »`, hint);
+    }
+    return next();
+  }
+  function name(ctx){
+    const t = peek();
+    if(t.t !== 'id') throw new IliError(t.line, `Nom attendu ${ctx}, trouvé « ${show(t)} »`);
+    return next();
+  }
+  function qname(ctx){
+    let s = name(ctx).v;
+    while(is('.') && peek(1).t === 'id'){ next(); s += '.' + next().v; }
+    return s;
+  }
+  function skipTo(v){
+    let d = 0;
+    for(;;){
+      const t = next();
+      if(t.t === 'eof') throw new IliError(t.line, `« ${v} » manquant`);
+      if(t.t === 'p' && '([{'.includes(t.v)) d++;
+      if(t.t === 'p' && ')]}'.includes(t.v)) d--;
+      if(d <= 0 && t.t !== 'str' && t.v === v) return;
+    }
+  }
+  // lit un type jusqu'au ';' de fin et détecte un ';' oublié
+  function typeTokens(owner){
+    const out = []; let d = 0;
+    for(;;){
+      const t = peek();
+      if(t.t === 'eof') throw new IliError(prevLine(), `Point-virgule manquant après ${owner}`);
+      if(d === 0 && t.t !== 'str' && t.v === ';') break;
+      if(d === 0 && out.length && t.t === 'p' && t.v === ':')
+        throw new IliError(out[out.length-2] ? out[out.length-2].line : t.line, `Point-virgule manquant après ${owner}`, `La ligne ${out[out.length-2] ? out[out.length-2].line : t.line} doit se terminer par ;`);
+      if(d === 0 && t.t === 'id' && (t.v === 'END' || (SECTION.has(t.v) && t.v !== 'CLASS')))
+        throw new IliError(prevLine(), `Point-virgule manquant après ${owner}`, `Ajoutez ; à la fin de la ligne ${prevLine()}.`);
+      if(t.t === 'p' && '([{'.includes(t.v)) d++;
+      if(t.t === 'p' && ')]}'.includes(t.v)) d--;
+      out.push(next());
+    }
+    next();
+    if(!out.length) throw new IliError(prevLine(), `Type manquant pour ${owner}`, 'Exemples : TEXT*20, 0 .. 100, (oui, non), Coord2.');
+    return out;
+  }
+  const M = {name:null, domains:new Map(), classes:[], assocs:[], topics:[]};
+
+  expect('INTERLIS', 'au début du fichier', 'La première ligne est : INTERLIS 2.3;');
+  const ver = next();
+  if(ver.t !== 'num') throw new IliError(ver.line, 'Numéro de version attendu après INTERLIS', 'Écrivez INTERLIS 2.3;');
+  if(ver.v !== '2.3' && ver.v !== '2.4') throw new IliError(ver.line, `Version « ${ver.v} » non prise en charge par cet atelier`, 'Utilisez INTERLIS 2.3;');
+  expect(';', 'après INTERLIS ' + ver.v);
+  expect('MODEL', 'après la ligne INTERLIS');
+  const mn = name('après MODEL');
+  M.name = mn.v;
+  if(is('(')){ next(); name('pour la langue, par ex. (fr)'); expect(')', 'après la langue'); }
+  if(is('AT')){ next(); if(next().t !== 'str') throw new IliError(prevLine(), 'Adresse entre guillemets attendue après AT'); }
+  if(is('VERSION')){ next(); if(next().t !== 'str') throw new IliError(prevLine(), 'Version entre guillemets attendue après VERSION', 'Par ex. VERSION "2026-09-30"'); }
+  expect('=', `après l'en-tête du modèle ${mn.v}`);
+
+  function domains(){
+    while(peek().t === 'id' && !SECTION.has(peek().v)){
+      const dn = name('pour un domaine');
+      if(is('(') ){ next(); skipTo(')'); }        // (ABSTRACT) etc.
+      expect('=', `après le nom de domaine ${dn.v}`);
+      const ty = typeTokens('le domaine ' + dn.v);
+      M.domains.set(dn.v, {line:dn.line, ty});
+    }
+  }
+  function classDef(topic){
+    const kind = next().v, cn = name(`après ${kind}`);
+    let abstract = false, ext = null;
+    if(is('(')){
+      next();
+      while(!is(')')){
+        const t = next();
+        if(t.t === 'eof') throw new IliError(cn.line, `Parenthèse fermante manquante après ${kind} ${cn.v} (`);
+        if(t.v === 'ABSTRACT') abstract = true;
+        else if(!['EXTENDED','FINAL',','].includes(t.v)) throw new IliError(t.line, `Propriété inconnue « ${show(t)} »`, 'Propriétés permises : ABSTRACT, EXTENDED, FINAL.');
+      }
+      next();
+    }
+    if(is('EXTENDS')){ next(); ext = qname('après EXTENDS'); }
+    expect('=', `après ${kind} ${cn.v}`, `Écrivez ${kind} ${cn.v} =`);
+    const attrs = [];
+    while(!is('END')){
+      const t = peek();
+      if(t.t === 'eof') throw new IliError(cn.line, `END ${cn.v}; manquant`, `La ${kind === 'CLASS' ? 'classe' : 'structure'} ${cn.v} n'est jamais fermée.`);
+      if(t.t === 'id' && SECTION.has(t.v)) throw new IliError(t.line, `END ${cn.v}; manquant avant ${t.v}`, `Fermez ${kind} ${cn.v} avant d'ouvrir autre chose.`);
+      if(['UNIQUE','CONSTRAINT','EXISTENCE','SET'].includes(t.v) || (t.v === 'MANDATORY' && is('CONSTRAINT', 1))){ next(); skipTo(';'); continue; }
+      const an = name(`pour un attribut de ${cn.v}`);
+      expect(':', `après le nom d'attribut ${an.v}`, `Un attribut s'écrit : ${an.v} : TYPE;`);
+      let mand = false;
+      if(is('MANDATORY')){ next(); mand = true; }
+      const ty = typeTokens(`l'attribut ${an.v}`);
+      if(attrs.some(a=>a.n === an.v)) throw new IliError(an.line, `Attribut ${an.v} défini deux fois dans ${cn.v}`);
+      attrs.push({n:an.v, line:an.line, mand, ty});
+    }
+    next();
+    const en = name('après END');
+    if(en.v !== cn.v) throw new IliError(en.line, `END ${en.v} ne correspond pas à ${kind} ${cn.v}`, `Écrivez END ${cn.v};`);
+    expect(';', `après END ${en.v}`);
+    M.classes.push({kind, n:cn.v, line:cn.line, abstract, ext, attrs, topic});
+  }
+  function card(){
+    const r = {lo:0, hi:Infinity, txt:'{0..*}'};
+    if(!is('{')) return r;
+    const o = next();
+    const lo = next();
+    if(lo.t !== 'num' && lo.v !== '*') throw new IliError(lo.line, 'Cardinalité invalide', 'Exemples : {1}, {0..1}, {0..*}, {1..*}');
+    r.lo = lo.v === '*' ? 0 : +lo.v; r.hi = lo.v === '*' ? Infinity : r.lo;
+    if(is('..')){
+      next();
+      const hi = next();
+      if(hi.t !== 'num' && hi.v !== '*') throw new IliError(hi.line, 'Cardinalité invalide après ..', 'Exemples : {0..1}, {1..*}');
+      r.hi = hi.v === '*' ? Infinity : +hi.v;
+    }
+    expect('}', 'pour fermer la cardinalité');
+    if(r.hi < r.lo) throw new IliError(o.line, `Cardinalité {${r.lo}..${r.hi}} : le maximum est plus petit que le minimum`);
+    r.txt = `{${r.lo === r.hi ? r.lo : r.lo + '..' + (r.hi === Infinity ? '*' : r.hi)}}`;
+    return r;
+  }
+  function assocDef(topic){
+    next();
+    const asn = name('après ASSOCIATION');
+    if(is('(')){ next(); skipTo(')'); }
+    expect('=', `après ASSOCIATION ${asn.v}`);
+    const roles = [];
+    while(!is('END')){
+      const t = peek();
+      if(t.t === 'eof') throw new IliError(asn.line, `END ${asn.v}; manquant`);
+      if(t.t === 'id' && SECTION.has(t.v)) throw new IliError(t.line, `END ${asn.v}; manquant avant ${t.v}`);
+      if(['UNIQUE','CONSTRAINT','MANDATORY'].includes(t.v)){ next(); skipTo(';'); continue; }
+      const rn = name(`pour un rôle de ${asn.v}`);
+      if(is(':')){ next(); if(is('MANDATORY')) next(); typeTokens(`l'attribut ${rn.v}`); continue; }
+      const op = next();
+      if(!['--','-<>','-<#>'].includes(op.v)) throw new IliError(op.line, `« -- » attendu après le rôle ${rn.v}`, `Un rôle s'écrit : ${rn.v} -- {0..*} Classe;`);
+      const c = card();
+      const target = qname(`comme classe du rôle ${rn.v}`);
+      expect(';', `après le rôle ${rn.v}`);
+      roles.push({n:rn.v, line:rn.line, kind:op.v, target, ...c});
+    }
+    next();
+    const en = name('après END');
+    if(en.v !== asn.v) throw new IliError(en.line, `END ${en.v} ne correspond pas à ASSOCIATION ${asn.v}`, `Écrivez END ${asn.v};`);
+    expect(';', `après END ${en.v}`);
+    if(roles.length < 2) throw new IliError(asn.line, `L'association ${asn.v} doit avoir au moins deux rôles`);
+    M.assocs.push({n:asn.v, line:asn.line, roles, topic});
+  }
+  function topicDef(){
+    next();
+    const tn = name('après TOPIC');
+    if(is('EXTENDS')){ next(); qname('après EXTENDS'); }
+    expect('=', `après TOPIC ${tn.v}`);
+    M.topics.push(tn.v);
+    while(!is('END')){
+      const t = peek();
+      if(t.t === 'eof') throw new IliError(tn.line, `END ${tn.v}; manquant`, 'Le thème n\'est jamais fermé.');
+      if(is('DOMAIN')){ next(); domains(); }
+      else if(is('CLASS') || is('STRUCTURE')) classDef(tn.v);
+      else if(is('ASSOCIATION')) assocDef(tn.v);
+      else if(is('DEPENDS') || is('BASKET') || is('OID') || is('UNIT') || is('CONSTRAINTS')){ next(); skipTo(is('CONSTRAINTS') ? 'END' : ';'); }
+      else throw new IliError(t.line, `« ${show(t)} » inattendu dans le thème ${tn.v}`, 'On attend CLASS, STRUCTURE, ASSOCIATION, DOMAIN ou END.');
+    }
+    next();
+    const en = name('après END');
+    if(en.v !== tn.v) throw new IliError(en.line, `END ${en.v} ne correspond pas à TOPIC ${tn.v}`, `Écrivez END ${tn.v};`);
+    expect(';', `après END ${en.v}`, 'Un thème se termine par ; (le modèle, lui, par un point).');
+  }
+  while(!is('END')){
+    const t = peek();
+    if(t.t === 'eof') throw new IliError(t.line, `END ${mn.v}. manquant à la fin du modèle`);
+    if(is('IMPORTS')){ next(); skipTo(';'); }
+    else if(is('DOMAIN')){ next(); domains(); }
+    else if(is('UNIT')){ next(); while(peek().t === 'id' && !SECTION.has(peek().v)) skipTo(';'); }
+    else if(is('TOPIC')) topicDef();
+    else if(is('CLASS') || is('STRUCTURE')) classDef(null);
+    else throw new IliError(t.line, `« ${show(t)} » inattendu ici`, 'On attend DOMAIN, TOPIC, CLASS, STRUCTURE ou END.');
+  }
+  next();
+  const en = name('après END');
+  if(en.v !== mn.v) throw new IliError(en.line, `END ${en.v} ne correspond pas à MODEL ${mn.v}`, `Écrivez END ${mn.v}.`);
+  if(is(';')) throw new IliError(peek().line, 'Le modèle se termine par un point, pas un point-virgule', `Écrivez END ${mn.v}.`);
+  expect('.', `après END ${en.v}`, `Écrivez END ${mn.v}.`);
+  if(peek().t !== 'eof') throw new IliError(peek().line, 'Texte après la fin du modèle', `Tout doit se trouver avant END ${mn.v}.`);
+  check(M);
+  return M;
+}
+
+function check(M){
+  const by = new Map();
+  M.classes.forEach(c=>{
+    if(by.has(c.n) || M.domains.has(c.n)) throw new IliError(c.line, `Le nom ${c.n} est déjà utilisé`);
+    by.set(c.n, c);
+  });
+  M.assocs.forEach(a=>{ if(by.has(a.n)) throw new IliError(a.line, `Le nom ${a.n} est déjà utilisé`); });
+  M.classes.forEach(c=>{
+    if(!c.ext || c.ext.includes('.')) return;
+    const b = by.get(c.ext);
+    if(!b) throw new IliError(c.line, `Classe de base inconnue : ${c.ext}`, `Définissez ${c.ext} ou corrigez le nom après EXTENDS.`);
+    if(b.kind !== c.kind) throw new IliError(c.line, `${c.kind} ${c.n} ne peut pas étendre ${b.kind} ${b.n}`, 'Une classe étend une classe, une structure étend une structure.');
+    let x = b, seen = new Set([c]);
+    while(x && x.ext){ if(seen.has(x)) throw new IliError(c.line, `Héritage circulaire autour de ${c.n}`); seen.add(x); x = by.get(x.ext); }
+  });
+  const inherited = c => { const out = []; let x = c.ext && by.get(c.ext), guard = 0; while(x && guard++ < 20){ out.push(...x.attrs.map(a=>[a.n, x.n])); x = x.ext && by.get(x.ext); } return out; };
+  M.classes.forEach(c=>{
+    const inh = inherited(c);
+    c.attrs.forEach(a=>{
+      const dup = inh.find(([n])=>n === a.n);
+      if(dup) throw new IliError(a.line, `L'attribut ${a.n} est déjà hérité de ${dup[1]}`, 'Choisissez un autre nom (ou utilisez EXTENDED, hors programme ici).');
+      const v = a.ty.map(t=>t.v), first = a.ty[0];
+      a.of = null;
+      if(v[0] === 'BAG' || v[0] === 'LIST'){
+        const k = v.indexOf('OF');
+        if(k < 0 || k === v.length-1) throw new IliError(a.line, `${v[0]} … OF Structure attendu pour ${a.n}`, `Exemple : ${a.n} : BAG {0..*} OF Controle;`);
+        a.of = v.slice(k+1).join('');
+        if(!a.of.includes('.')){
+          const s = by.get(a.of);
+          if(!s) throw new IliError(a.line, `Structure inconnue : ${a.of}`, `Définissez STRUCTURE ${a.of} = … END ${a.of}; dans le thème.`);
+          if(s.kind !== 'STRUCTURE') throw new IliError(a.line, `${v[0]} OF attend une STRUCTURE, or ${a.of} est une CLASS`, 'Pour relier deux classes, utilisez une ASSOCIATION.');
+        }
+      } else if(v[0] === 'REFERENCE'){
+        const k = v.indexOf('TO'); const tg = k >= 0 ? v.slice(k+1).filter(x=>x !== '(' && x !== ')' && x !== 'EXTERNAL').join('') : '';
+        if(!tg) throw new IliError(a.line, `REFERENCE TO Classe attendu pour ${a.n}`);
+        if(c.kind === 'CLASS') throw new IliError(a.line, 'REFERENCE TO n\'est permis que dans une STRUCTURE', 'Entre deux classes, utilisez une ASSOCIATION.');
+        if(!tg.includes('.') && !by.has(tg)) throw new IliError(a.line, `Classe inconnue : ${tg}`);
+      } else if(a.ty.length === 1 && first.t === 'id' && !TYPE_KW.has(first.v)){
+        if(!M.domains.has(first.v) && !(by.has(first.v) && by.get(first.v).kind === 'STRUCTURE')){
+          const near = [...M.domains.keys()].find(d=>d.toLowerCase().startsWith(first.v.toLowerCase().slice(0,4)));
+          throw new IliError(a.line, `Type inconnu : ${first.v}`, near ? `Vouliez-vous dire ${near} ?` : 'Définissez-le dans DOMAIN, ou utilisez un type de base : TEXT*20, 0 .. 100, (oui, non)…');
+        }
+      } else if(first.v === 'TEXT' || first.v === 'MTEXT'){
+        if(a.ty.length > 1 && !(a.ty[1].v === '*' && a.ty[2] && a.ty[2].t === 'num')) throw new IliError(a.line, `Longueur de texte invalide pour ${a.n}`, 'Exemple : TEXT*60');
+      } else if(first.t === 'num' || first.v === '-'){
+        if(!v.includes('..')) throw new IliError(a.line, `Plage numérique invalide pour ${a.n}`, 'Exemple : 0.0 .. 60.0 [INTERLIS.m]');
+        const nums = a.ty.filter(t=>t.t === 'num');
+        if(nums.length >= 2 && +nums[0].v > +nums[1].v && v[0] !== '-') throw new IliError(a.line, `Plage ${nums[0].v} .. ${nums[1].v} : le minimum est plus grand que le maximum`);
+      }
+    });
+  });
+  M.assocs.forEach(a=>a.roles.forEach(r=>{
+    if(r.target.includes('.')) return;
+    const t = by.get(r.target);
+    if(!t) throw new IliError(r.line, `Classe inconnue : ${r.target}`, `Le rôle ${r.n} doit viser une classe du modèle.`);
+    if(t.kind !== 'CLASS') throw new IliError(r.line, `Un rôle doit viser une CLASS, or ${r.target} est une STRUCTURE`);
+  }));
+}
+
+/* =================== affichage du type =================== */
+function shortType(a){
+  const v = a.ty.map(t=>t.v), f = v[0];
+  let s;
+  if(f === 'TEXT' || f === 'MTEXT') s = v.join('');
+  else if(f === 'BAG' || f === 'LIST') s = `${f} OF ${a.of}`;
+  else if(f === 'REFERENCE') s = '→ ' + v.slice(v.indexOf('TO')+1).join('');
+  else if(['COORD','POLYLINE','SURFACE','AREA','MULTISURFACE','MULTIPOLYLINE','MULTIAREA','MULTICOORD','BOOLEAN','UUIDOID'].includes(f)) s = f;
+  else if(f === '('){ const items = v.filter(x=>/^[A-Za-z_]/.test(x)); s = '(' + items.slice(0,2).join(', ') + (items.length > 2 ? ', …' : '') + ')'; }
+  else if(a.ty[0].t === 'num' || f === '-'){
+    const k = v.indexOf('[');
+    s = (k >= 0 ? v.slice(0,k) : v).join('');
+    if(k >= 0){ const u = v.slice(k+1, v.indexOf(']')); s += ' [' + u[u.length-1] + ']'; }
+  }
+  else s = v.join('').replace(/^INTERLIS\./, '');
+  if(s.length > 30) s = s.slice(0, 29) + '…';
+  return s + (a.mand ? ' [1]' : '');
+}
+
+/* =================== diagramme =================== */
+const NS = 'http://www.w3.org/2000/svg';
+const CW = 7.25, LH = 18;
+let prevNames = null;
+function drawUml(M){
+  const by = new Map(M.classes.map(c=>[c.n, c]));
+  const depth = c => { let d = 0, x = c, g = 0; while(x.ext && by.has(x.ext) && g++ < 20){ x = by.get(x.ext); d++; } return d; };
+  const boxes = M.classes.map(c=>{
+    const lines = c.attrs.map(a=>`${a.n} : ${shortType(a)}`);
+    const w = Math.max(130, 22 + CW * Math.max(c.n.length + 2, ...lines.map(l=>l.length)));
+    const hh = (c.abstract || c.kind === 'STRUCTURE') ? 36 : 28;
+    return {c, lines, w:Math.round(w), hh, h:hh + Math.max(1, lines.length)*LH + 8};
+  });
+  const B = new Map(boxes.map(b=>[b.c.n, b]));
+  const rows = [];
+  boxes.filter(b=>b.c.kind === 'CLASS').forEach(b=>{ const d = depth(b.c); (rows[d] = rows[d] || []).push(b); });
+  const R = rows.filter(Boolean);
+  const st = boxes.filter(b=>b.c.kind === 'STRUCTURE');
+  if(st.length) R.push(st);
+  let y = 26;
+  R.forEach((row,k)=>{
+    if(k > 0 && row[0].c.kind === 'CLASS'){
+      const px = b => { const p = b.c.ext && B.get(b.c.ext); return p && p.x !== undefined ? p.x + p.w/2 : 1e6; };
+      row.sort((a,b)=>px(a) - px(b));
+    }
+    let x = 0;
+    row.forEach(b=>{ b.x = x; b.y = y; x += b.w + 46; });
+    row.W = x - 46;
+    y += Math.max(...row.map(b=>b.h)) + 74;
+  });
+  const W = Math.max(320, ...R.map(r=>r.W || 0)) + 40;
+  R.forEach(row=>{ const off = 20 + (W - 40 - row.W)/2; row.forEach(b=>b.x += off); });
+  // enfants sous le parent quand c'est possible (sans chevauchement)
+  const H = Math.max(160, y - 40);
+  let out = '';
+  const esc = GEO.esc;
+  // héritage
+  boxes.forEach(b=>{
+    const p = b.c.ext && B.get(b.c.ext);
+    if(!p) return;
+    const cx = b.x + b.w/2, px = p.x + p.w/2, my = b.y - 30;
+    out += `<path class="gen" d="M${cx} ${b.y}V${my}H${px}V${p.y + p.h + 2}" marker-end="url(#tri)"/>`;
+  });
+  // structures (BAG OF)
+  const clip = (b, tx, ty) => {
+    const cx = b.x + b.w/2, cy = b.y + b.h/2, dx = tx - cx, dy = ty - cy;
+    const t = Math.min(Math.abs((b.w/2) / (dx || 1e-9)), Math.abs((b.h/2) / (dy || 1e-9)));
+    return [cx + dx*t, cy + dy*t];
+  };
+  boxes.forEach(b=>b.c.attrs.forEach(a=>{
+    const s = a.of && B.get(a.of);
+    if(!s) return;
+    const [x1,y1] = clip(b, s.x + s.w/2, s.y + s.h/2), [x2,y2] = clip(s, b.x + b.w/2, b.y + b.h/2);
+    out += `<line class="bag" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/><text class="an" x="${(x1+x2)/2 + 6}" y="${(y1+y2)/2 - 4}">${esc(a.n)}</text>`;
+  }));
+  // associations
+  M.assocs.forEach(as=>{
+    const [r1, r2] = as.roles, b1 = B.get(r1.target), b2 = B.get(r2.target);
+    if(!b1 || !b2) return;
+    if(b1 === b2) return;
+    const [x1,y1] = clip(b1, b2.x + b2.w/2, b2.y + b2.h/2), [x2,y2] = clip(b2, b1.x + b1.w/2, b1.y + b1.h/2);
+    const L = Math.hypot(x2-x1, y2-y1) || 1, ux = (x2-x1)/L, uy = (y2-y1)/L, nx = -uy, ny = ux;
+    out += `<line class="ass" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+    if(r1.kind !== '--' || r2.kind !== '--'){
+      const agg = r1.kind !== '--' ? [x1,y1,ux,uy,r1.kind] : [x2,y2,-ux,-uy,r2.kind];
+      const [ax,ay,dx,dy,k] = agg, px = -dy, py = dx;
+      out += `<path d="M${ax} ${ay}L${ax+dx*8+px*5} ${ay+dy*8+py*5}L${ax+dx*16} ${ay+dy*16}L${ax+dx*8-px*5} ${ay+dy*8-py*5}Z" class="${k === '-<#>' ? 'fillink' : 'fillsheet'} strokeink" stroke-width="1.2"/>`;
+    }
+    // la cardinalité d'un rôle s'écrit du côté de sa classe cible
+    const lab = (x, y, dx, dy, r) => {
+      const bx = x + dx*22, by = y + dy*22;
+      out += `<text class="uml-card" x="${bx + nx*10}" y="${by + ny*10 + 4}" text-anchor="middle">${esc(r.txt.slice(1,-1))}</text>`;
+      out += `<text class="uml-role" x="${bx - nx*12}" y="${by - ny*12 + 4}" text-anchor="middle">${esc(r.n)}</text>`;
+    };
+    lab(x1, y1, ux, uy, r1);
+    lab(x2, y2, -ux, -uy, r2);
+    out += `<text class="an" x="${(x1+x2)/2}" y="${(y1+y2)/2 - 6}" text-anchor="middle">${esc(as.n)}</text>`;
+  });
+  // boîtes (dessus)
+  const names = new Set();
+  boxes.forEach(b=>{
+    const c = b.c, isNew = prevNames && !prevNames.has(c.n);
+    names.add(c.n);
+    out += `<g class="uml-box${isNew ? ' new' : ''}"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}"/><rect class="hd" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.hh}"/>`;
+    if(b.hh > 28) out += `<text class="st" x="${b.x + b.w/2}" y="${b.y + 13}" text-anchor="middle">${c.kind === 'STRUCTURE' ? '«structure»' : '«abstract»'}</text>`;
+    out += `<text class="nm${c.abstract ? ' ab' : ''}" x="${b.x + b.w/2}" y="${b.y + b.hh - 9}" text-anchor="middle">${esc(c.n)}</text>`;
+    b.lines.forEach((l,i)=>{ out += `<text x="${b.x + 10}" y="${b.y + b.hh + 17 + i*LH}">${esc(l)}</text>`; });
+    if(!b.lines.length) out += `<text class="st" x="${b.x + 10}" y="${b.y + b.hh + 17}">(aucun attribut)</text>`;
+    out += '</g>';
+  });
+  if(!boxes.length) out = `<text x="20" y="40" class="fillmuted" font-size="14">Aucune classe pour l'instant.</text>`;
+  prevNames = names;
+  const svg = $('uml');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.style.width = '100%';
+  svg.style.minWidth = Math.min(W, 520) + 'px';
+  svg.innerHTML = out;
+  const nc = M.classes.filter(c=>c.kind==='CLASS').length, ns = M.classes.length - nc;
+  $('umlCap').textContent = `Fig. 5.1 · ${M.name} : ${nc} classe${nc>1?'s':''}, ${ns} structure${ns>1?'s':''}, ${M.assocs.length} association${M.assocs.length>1?'s':''}.`;
+}
+
+/* =================== défis =================== */
+const DEFIS = [
+  {t:"Un état toujours connu", d:"Dans <code>ObjetVegetal</code>, rendez l'attribut <code>Etat</code> obligatoire.",
+   ok:M=>{ const c = M.classes.find(c=>c.n==='ObjetVegetal'); const a = c && c.attrs.find(a=>a.n==='Etat'); return !!(a && a.mand); },
+   sol:`Etat : MANDATORY EtatSanitaire;`},
+  {t:"Les haies", d:"Ajoutez une classe <code>Haie</code>, qui est une sorte d'<code>ObjetVegetal</code>, avec un tracé obligatoire de type <code>POLYLINE</code>.",
+   ok:M=>{ const c = M.classes.find(c=>c.n==='Haie'); return !!(c && c.kind==='CLASS' && c.ext==='ObjetVegetal' && c.attrs.some(a=>a.mand && a.ty[0].v==='POLYLINE')); },
+   sol:`CLASS Haie EXTENDS ObjetVegetal =
+  Trace : MANDATORY POLYLINE WITH (STRAIGHTS) VERTEX Coord2;
+END Haie;`},
+  {t:"Une espèce par arbre", d:"Reliez <code>Arbre</code> et <code>Espece</code> par une association : chaque arbre a <strong>exactement une</strong> espèce, une espèce concerne un nombre quelconque d'arbres.",
+   ok:M=>M.assocs.some(as=>{ const ra = as.roles.find(r=>r.target==='Arbre'), re = as.roles.find(r=>r.target==='Espece'); return !!(ra && re && re.lo===1 && re.hi===1 && ra.lo===0 && ra.hi===Infinity); }),
+   sol:`ASSOCIATION ArbreEspece =
+  Arbre -- {0..*} Arbre;
+  Espece -- {1} Espece;
+END ArbreEspece;`},
+  {t:"L'historique des contrôles", d:"Créez une structure <code>Controle</code> (au moins une date obligatoire, type <code>INTERLIS.XMLDate</code>) et ajoutez à <code>ObjetVegetal</code> un attribut <code>Controles</code> qui en contient zéro, un ou plusieurs.",
+   ok:M=>{ const s = M.classes.find(c=>c.n==='Controle'); const o = M.classes.find(c=>c.n==='ObjetVegetal');
+     return !!(s && s.kind==='STRUCTURE' && s.attrs.some(a=>a.mand && a.ty.map(t=>t.v).join('')==='INTERLIS.XMLDate') && o && o.attrs.some(a=>a.of==='Controle')); },
+   sol:`STRUCTURE Controle =
+  Date : MANDATORY INTERLIS.XMLDate;
+  Remarque : TEXT*200;
+END Controle;
+
+!! dans CLASS ObjetVegetal :
+  Controles : BAG {0..*} OF Controle;`},
+];
+const BONUS = {t:"Bonus : votre banc", d:"Ajoutez la classe <code>Banc</code> de l'exercice du chapitre 2, avec au moins cinq attributs dont au moins deux obligatoires.",
+  ok:M=>{ const c = M.classes.find(c=>c.n==='Banc'); return !!(c && c.kind==='CLASS' && c.attrs.length >= 5 && c.attrs.filter(a=>a.mand).length >= 2); },
+  sol:`CLASS Banc =
+  Numero : MANDATORY TEXT*8;
+  Position : MANDATORY Coord2;
+  Materiau : MANDATORY (bois, metal, beton, mixte);
+  Places : 1 .. 10;
+  Etat : (bon, a_repeindre, a_reparer, a_remplacer);
+END Banc;`};
+const ALL = [...DEFIS, BONUS];
+$('defis').innerHTML = ALL.map((d,i)=>`<li data-i="${i}"><span class="num">${i < DEFIS.length ? i+1 : '★'}</span>
+  <b>${d.t} <span class="chip" data-st>à faire</span></b><p>${d.d}</p>
+  <details><summary>Indice</summary><div class="sol"></div></details></li>`).join('');
+$('defis').querySelectorAll('.sol').forEach((el,i)=>el.appendChild(GEO.makeCodeBlock(ALL[i].sol, 'ili', 'solution possible')));
+function updDefis(M){
+  let n = 0;
+  $('defis').querySelectorAll('li[data-i]').forEach(li=>{
+    const i = +li.dataset.i, ok = !!(M && ALL[i].ok(M));
+    if(ok && i < DEFIS.length) n++;
+    li.classList.toggle('ok', ok);
+    const ch = li.querySelector('[data-st]');
+    ch.className = 'chip ' + (ok ? 'ok' : '');
+    ch.textContent = ok ? 'réussi' : (M ? 'à faire' : 'modèle à corriger');
+  });
+  $('progBar').style.width = (n / DEFIS.length * 100) + '%';
+  $('progTxt').textContent = `${n} / ${DEFIS.length}`;
+}
+
+/* =================== éditeur =================== */
+const ta = $('src'), hlc = $('hlc'), pre = hlc.parentElement, gut = $('gut');
+let errLine = 0, timer = 0, lastModel = null;
+function paint(){
+  hlc.innerHTML = GEO.hl(ta.value, 'ili') + '\n';
+  const n = ta.value.split('\n').length;
+  let g = '';
+  for(let i = 1; i <= n; i++) g += `<span${i === errLine ? ' class="err"' : ''}>${i}</span>`;
+  gut.innerHTML = g;
+  sync();
+}
+function sync(){
+  pre.scrollTop = ta.scrollTop; pre.scrollLeft = ta.scrollLeft;
+  gut.style.transform = `translateY(${-ta.scrollTop}px)`;
+}
+function lineStart(line){
+  let pos = 0;
+  for(let i = 1; i < line; i++){ const k = ta.value.indexOf('\n', pos); if(k < 0) break; pos = k + 1; }
+  return pos;
+}
+function goLine(line){
+  const pos = lineStart(line);
+  ta.focus();
+  ta.setSelectionRange(pos, pos);
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 22;
+  ta.scrollTop = Math.max(0, (line - 4) * lh);
+  sync();
+}
+function run(){
+  const src = ta.value;
+  GEO.store.set('atelier.src', src);
+  try{
+    const M = parse(src);
+    errLine = 0;
+    lastModel = M;
+    $('uml').classList.remove('stale');
+    drawUml(M);
+    $('edFile').textContent = M.name + '.ili';
+    const nc = M.classes.length;
+    $('msg').innerHTML = `<span class="chip ok">correct</span> Modèle <strong>${GEO.esc(M.name)}</strong> : ${nc} classe${nc>1?'s':''} ou structure${nc>1?'s':''}, ${M.assocs.length} association${M.assocs.length>1?'s':''}.`;
+    updDefis(M);
+  }catch(e){
+    if(!(e instanceof IliError)){ console.error(e); e = new IliError(1, 'Erreur interne de l\'atelier : ' + e.message); }
+    errLine = e.line;
+    $('uml').classList.add('stale');
+    $('msg').innerHTML = `<span class="chip err">erreur</span> <button type="button" id="goErr">Ligne ${e.line}</button> : ${GEO.esc(e.message)}${e.hint ? `<span class="hint">${GEO.esc(e.hint)}</span>` : ''}`;
+    $('goErr').onclick = ()=>goLine(e.line);
+    updDefis(null);
+  }
+  paint();
+}
+ta.addEventListener('input', ()=>{ paint(); clearTimeout(timer); timer = setTimeout(run, 220); });
+ta.addEventListener('scroll', sync);
+let escaped = false;
+ta.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){ escaped = true; return; }
+  if(e.key === 'Tab' && !escaped && !e.shiftKey){
+    e.preventDefault();
+    const s = ta.selectionStart, en = ta.selectionEnd;
+    ta.setRangeText('  ', s, en, 'end');
+    ta.dispatchEvent(new Event('input'));
+  }
+  escaped = false;
+});
+$('btReset').onclick = ()=>{
+  if(ta.value !== START && !confirm('Remplacer votre modèle par le modèle de départ ?')) return;
+  ta.value = START; prevNames = null; run();
+};
+$('btDl').onclick = ()=>{
+  const blob = new Blob([ta.value], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (lastModel ? lastModel.name : 'atelier') + '.ili';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+};
+ta.value = GEO.store.get('atelier.src', null) || START;
+run();
+})();
+</script>
+</body>
+</html>

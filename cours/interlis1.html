@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>INTERLIS 1</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+/* éditeur de surfaces */
+.surf{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.surf{grid-template-columns:minmax(0,1fr)}}
+#sed{touch-action:none;user-select:none;-webkit-user-select:none;background:var(--sheet);border:1px solid var(--rule);border-radius:4px}
+#sed .poly{stroke:var(--c-line);stroke-width:1.6;fill-opacity:.32;cursor:pointer;transition:fill-opacity .2s}
+#sed .poly.sel{stroke:var(--accent);stroke-width:2.4;fill-opacity:.45}
+#sed .p0{fill:var(--c-tree)} #sed .p1{fill:var(--c-water)} #sed .p2{fill:var(--c-bat)}
+#sed .edge{stroke:var(--c-line);stroke-width:2;fill:none}
+#sed .edge.shared{stroke:var(--accent);stroke-width:3}
+#sed .h{fill:var(--sheet);stroke:var(--ink);stroke-width:1.8;cursor:grab}
+#sed .h:hover,#sed .h.drag{fill:var(--accent);stroke:var(--accent)}
+#sed .ref{stroke:var(--ink);stroke-width:2}
+#sed .vl{font:600 12px var(--f-mono);fill:var(--muted);paint-order:stroke;stroke:var(--sheet);stroke-width:3px}
+#sed .nm{font:700 13px var(--f-body);fill:var(--ink);paint-order:stroke;stroke:var(--sheet);stroke-width:3px}
+#sed .gap{fill:none;stroke:var(--err);stroke-width:2;stroke-dasharray:3 3}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 0}
+.stats div{border:1px solid var(--rule);border-radius:5px;padding:6px 10px;background:var(--sheet)}
+.stats i{display:block;font:500 .62rem var(--f-mono);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stats b{font:700 1.3rem var(--f-display)}
+.surf-msg{font-size:.88rem;min-height:3em;margin:.6rem 0 0}
+.surf .codeblock{margin-top:0}
+.surf .codeblock pre{max-height:360px}
+/* ITF annoté */
+.ann{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:18px;align-items:start}
+@media (max-width:900px){.ann{grid-template-columns:minmax(0,1fr)}}
+.ann ol{list-style:none;margin:0;padding:8px 0;background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;font:400 .82rem/1.55 var(--f-mono);counter-reset:l;overflow-x:auto}
+.ann li{margin:0}
+.ann li button{all:unset;display:block;box-sizing:border-box;width:100%;padding:0 12px 0 0;white-space:pre;cursor:pointer;color:var(--code-fg)}
+.ann li button::before{counter-increment:l;content:counter(l);display:inline-block;width:2.6em;padding-right:.8em;text-align:right;color:var(--code-com);opacity:.7}
+.ann li button:hover{background:var(--grid)}
+.ann li button[aria-pressed="true"]{background:var(--hl)}
+.ann li button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.ann-exp{position:sticky;top:20px;border:1.5px solid var(--ink);border-radius:6px;background:var(--sheet);padding:14px 16px}
+.ann-exp .tag{font:700 .8rem var(--f-mono);color:var(--accent)}
+.ann-exp h4{font:700 1.05rem var(--f-display);margin:.2rem 0 .4rem}
+.ann-exp p{font-size:.92rem;margin:.4rem 0 0}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Le modèle de Montavaux en INTERLIS 1
+
+Voici le modèle complet. Survolez un nom en surbrillance (`Espece`, `CoordCH`…) pour voir où il est défini et où il est utilisé.
+</script>
+
+<!-- bloc de code avec mots reliés (data-links) -->
+<script type="text/x-code" data-lang="ili1" data-file="Arbres_Communaux_V1.ili · INTERLIS 1" data-links="Espece,CoordCH,EtatSanitaire,Arbre,SecteurEntretien,Inventaire,Arbres_Communaux_V1" data-group="m1">
+  !! Inventaire des arbres de Montavaux (INTERLIS 1)
+  TRANSFER Arbres;
+
+  MODEL Arbres_Communaux_V1
+
+    DOMAIN
+      CoordCH = COORD2 2460000.000 1045000.000
+                       2870000.000 1310000.000;
+      EtatSanitaire = (sain, affaibli, malade, mort);
+
+    TOPIC Inventaire =
+
+      TABLE Espece =
+        NomLatin : TEXT*60;
+        NomFrancais : OPTIONAL TEXT*60;
+      IDENT
+        NomLatin;
+      END Espece;
+
+      TABLE Arbre =
+        NumeroInventaire : TEXT*10;
+        Espece : -> Espece;                     !! relation
+        Hauteur : OPTIONAL [0.0 .. 60.0];       !! en m
+        AnneePlantation : OPTIONAL [1800 .. 2100];
+        Etat : EtatSanitaire;
+        Position : CoordCH;
+      IDENT
+        NumeroInventaire;
+      END Arbre;
+
+      TABLE SecteurEntretien =
+        Equipe : TEXT*20;
+        Geometrie : AREA WITH (STRAIGHTS) VERTEX CoordCH
+                    WITHOUT OVERLAPS > 0.050;
+      NO IDENT
+      END SecteurEntretien;
+
+    END Inventaire.
+
+  END Arbres_Communaux_V1.
+
+  FORMAT FREE;
+
+  CODE
+    BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+    TID = ANY;
+  END.
+</script>
+
+<script type="text/markdown">
+| Bloc | Rôle |
+|---|---|
+| `TRANSFER` | Nom du transfert. Il apparaît dans l'en-tête du fichier ITF (`MTID`). |
+| `MODEL … END` | Le modèle lui-même. Le nom de fin doit répéter le nom de début. |
+| `DOMAIN` | Des types nommés, réutilisables dans toutes les tables : ici les coordonnées MN95 et la liste des états. |
+| `TOPIC` | Un thème qui regroupe des tables liées entre elles. Un modèle peut en avoir plusieurs. |
+| `TABLE` | L'équivalent d'une classe : la fiche commune de tous les objets d'un type. |
+| `IDENT` | Les attributs qui identifient un objet de façon unique. `NO IDENT` s'il n'y en a pas. |
+| `FORMAT`, `CODE` | Réglages du fichier ITF : longueur de ligne libre, caractères pour les blancs et les valeurs vides, forme des identifiants. |
+
+:::attention
+En INTERLIS 1, un attribut est **obligatoire par défaut**. On écrit `OPTIONAL` pour le rendre facultatif. En INTERLIS 2, c'est l'inverse : facultatif par défaut, `MANDATORY` pour le rendre obligatoire. C'est une source d'erreur classique quand on traduit un modèle.
+:::
+
+## Les types de base
+
+| Type | Syntaxe | Exemple de valeur |
+|---|---|---|
+| Texte | `TEXT*60` | `Tilia cordata` (60 caractères au plus) |
+| Énumération | `(sain, affaibli, malade, mort)` | `affaibli`, codé `1` dans l'ITF |
+| Plage numérique | `[0.0 .. 60.0]` | `12.5`. Le nombre de décimales fixe la précision. |
+| Date | `DATE` | `20260930` |
+| Coordonnée | `COORD2 Emin Nmin Emax Nmax` | `2538214.250 1152388.100` |
+| Ligne | `POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordCH` | une suite de points, avec segments droits ou arcs |
+| Surface | `SURFACE …` ou `AREA …` | voir 3.3 |
+| Relation | `-> Espece` | l'identifiant (TID) d'un objet de la table `Espece` |
+
+INTERLIS 1 ne connaît pas les unités : on les note en commentaire (`!! en m`). Les commentaires commencent par `!!` et vont jusqu'à la fin de la ligne.
+
+## SURFACE ou AREA ?
+
+La commune découpe le parc du Tilleul en trois **secteurs d'entretien**, un par équipe. Les secteurs couvrent tout le parc, sans trou ni chevauchement. INTERLIS 1 offre deux façons de décrire des surfaces :
+
+- `SURFACE` : chaque surface possède son propre contour complet. Les surfaces sont **indépendantes** et peuvent se chevaucher.
+- `AREA` : les surfaces forment une **partition** (on parle de *tessellation*). Chaque limite n'est stockée **qu'une fois**, et chaque surface est repérée par un point intérieur.
+
+Choisissez un mode, puis **faites glisser les sommets**. En mode SURFACE, cliquez d'abord sur un secteur pour voir ses sommets.
+</script>
+
+<!-- composant interactif : éditeur SURFACE / AREA -->
+<figure class="fig">
+  <div class="row" style="justify-content:space-between;margin-bottom:12px">
+    <div class="seg" role="group" aria-label="Type de géométrie">
+      <button type="button" data-m="SURFACE" aria-pressed="false">SURFACE</button>
+      <button type="button" data-m="AREA" aria-pressed="true">AREA</button>
+    </div>
+    <button class="btn sm" type="button" id="sedReset">Remettre les sommets</button>
+  </div>
+  <div class="surf">
+    <div>
+      <svg id="sed" viewBox="0 0 520 340" role="img" aria-label="Éditeur : trois secteurs d'entretien dont on peut déplacer les sommets"></svg>
+      <div class="stats">
+        <div><i>Lignes stockées</i><b id="stL">–</b></div>
+        <div><i>Limites en double</i><b id="stD">–</b></div>
+        <div><i>Partition</i><b id="stP">–</b></div>
+      </div>
+      <p class="surf-msg" id="sedMsg" aria-live="polite"></p>
+    </div>
+    <div id="sedItf"></div>
+  </div>
+  <figcaption>Fig. 3.1 · En rouge, les limites communes à deux secteurs. L'ITF à droite est recalculé à chaque déplacement.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+**SURFACE** : surfaces indépendantes, chacune avec son contour. Chevauchements possibles. Exemples : périmètres de projets, zones de protection qui se superposent.
+
+**AREA** : partition sans trou ni chevauchement. Chaque limite est stockée une fois, la topologie est garantie. Exemple type : la **couverture du sol** de la mensuration officielle, où chaque point du territoire appartient à exactement une surface.
+:::
+
+:::terrain
+Dans le modèle DM.01-AV-CH de la mensuration officielle, la couverture du sol et les biens-fonds sont des `AREA`. Si vous déplacez un sommet de limite dans votre logiciel, les deux surfaces voisines doivent suivre. Sinon le contrôle cantonal signalera un trou ou un chevauchement.
+:::
+
+## Le fichier ITF, ligne par ligne
+
+Un fichier ITF est un fichier texte. Chaque ligne commence par un **mot-clé de 4 lettres**. Cliquez sur une ligne pour savoir ce qu'elle signifie.
+</script>
+
+<!-- composant interactif : ITF annoté -->
+<div class="ann" id="ann">
+  <ol id="annL"></ol>
+  <div class="ann-exp" id="annE" aria-live="polite"></div>
+</div>
+
+<script type="text/markdown">
+:::retenir
+Une ligne `OBJE` ne contient **aucun nom d'attribut** : seulement des valeurs, dans l'ordre du modèle. Sans le fichier `.ili`, `OBJE 101 A-0042 1 12.5 1987 1 …` est une suite de chiffres sans signification. Le fichier ITF et son modèle vont toujours ensemble.
+:::
+
+:::exo 10 min
+Écrivez la ligne `OBJE` pour un nouvel arbre : TID `104`, numéro `A-0045`, érable plane, hauteur inconnue, planté en 2019, sain, position E 2538301.450 / N 1152412.800.
+
+??? Solution
+```itf extrait.itf
+OBJE 104 A-0045 2 @ 2019 0 2538301.450 1152412.800
+```
+
+L'espèce est référencée par son TID (`2` = *Acer platanoides*). La hauteur inconnue s'écrit `@`. L'état « sain » est la première valeur de l'énumération, codée `0`.
+???
+:::
+
+:::exo 5 min
+Un collègue vous envoie cette ligne. Trouvez les deux problèmes.
+
+```itf suspect.itf
+OBJE 105 A-0046 1 8.0 2021 affaibli 538214.250 152388.100
+```
+
+??? Solution
+1. L'état est écrit en toutes lettres. Dans l'ITF, une énumération est codée par son **numéro** : `1`.
+2. Les coordonnées sont en **MN03** (6 chiffres avant la virgule). Le domaine `CoordCH` exige du MN95 : `2538214.250 1152388.100`.
+???
+:::
+
+:::prof
+Pour l'éditeur de surfaces : faire d'abord déplacer le sommet central (celui des trois secteurs) en mode AREA, puis le même en mode SURFACE. Demander à la classe ce qui se passe « dans la réalité » quand les deux secteurs ne se touchent plus : qui entretient la bande entre les deux ?
+
+Point technique : en ITF, les lignes d'une SURFACE portent une référence vers l'objet principal. Les lignes d'une AREA n'en ont pas. C'est le point intérieur, stocké dans la table principale, qui permet de retrouver quelle surface est laquelle.
+:::
+</script>
+
+</main>
+<script>
+// ---- composants interactifs de la page ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+
+  /* ---------- éditeur SURFACE / AREA ---------- */
+  const V0 = {a:[40,40], b:[250,40], c:[480,40], i:[40,180], g:[250,170], h:[480,160], d:[40,300], f:[480,300]};
+  const POLYS = [
+    {n:'Equipe_Nord', l:'Nord', v:['a','b','g','i']},
+    {n:'Equipe_Est',  l:'Est',  v:['b','c','h','g']},
+    {n:'Equipe_Sud',  l:'Sud',  v:['i','g','h','f','d']},
+  ];
+  let mode = 'AREA', sel = 0, V, P;   // V : sommets partagés (AREA) ; P : copies par polygone (SURFACE)
+  function reset(){
+    V = JSON.parse(JSON.stringify(V0));
+    P = POLYS.map(p => p.v.map(k => V0[k].slice()));
+  }
+  const E = x => (2538100 + x*0.25).toFixed(3);
+  const N = y => (1152500 - y*0.25).toFixed(3);
+  const coords = pi => mode === 'AREA' ? POLYS[pi].v.map(k => V[k]) : P[pi];
+  function centroid(pts){
+    let a = 0, cx = 0, cy = 0;
+    for(let i = 0; i < pts.length; i++){
+      const [x0,y0] = pts[i], [x1,y1] = pts[(i+1)%pts.length], f = x0*y1 - x1*y0;
+      a += f; cx += (x0+x1)*f; cy += (y0+y1)*f;
+    }
+    a /= 2;
+    return Math.abs(a) < 1e-6 ? pts[0] : [cx/(6*a), cy/(6*a)];
+  }
+  function uniqueEdges(){
+    const seen = new Map();
+    POLYS.forEach((p, pi) => p.v.forEach((k, j) => {
+      const k2 = p.v[(j+1)%p.v.length], key = [k,k2].sort().join('');
+      if(!seen.has(key)) seen.set(key, {a:k, b:k2, polys:[]});
+      seen.get(key).polys.push(pi);
+    }));
+    return [...seen.values()];
+  }
+  function divergences(){
+    const out = [];
+    Object.keys(V0).forEach(k => {
+      const copies = [];
+      POLYS.forEach((p, pi) => { const j = p.v.indexOf(k); if(j >= 0) copies.push({pi, pt:P[pi][j]}); });
+      if(copies.length < 2) return;
+      let max = 0;
+      copies.forEach(c1 => copies.forEach(c2 => { max = Math.max(max, Math.hypot(c1.pt[0]-c2.pt[0], c1.pt[1]-c2.pt[1])); }));
+      if(max > 0.5) out.push({k, d:max*0.25, copies});
+    });
+    return out;
+  }
+  const svg = $('sed');
+  function el(tag, attrs, parent){
+    const e = document.createElementNS(NS, tag);
+    for(const a in attrs) e.setAttribute(a, attrs[a]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function draw(){
+    svg.innerHTML = '';
+    const edges = uniqueEdges();
+    POLYS.forEach((p, pi) => {
+      const pts = coords(pi);
+      const poly = el('polygon', {points: pts.map(q => q.join(',')).join(' '), class:`poly p${pi}${mode==='SURFACE' && pi===sel ? ' sel' : ''}`});
+      poly.addEventListener('pointerdown', () => { if(mode === 'SURFACE'){ sel = pi; draw(); } });
+    });
+    if(mode === 'AREA'){
+      edges.forEach(e => el('line', {x1:V[e.a][0], y1:V[e.a][1], x2:V[e.b][0], y2:V[e.b][1], class:'edge' + (e.polys.length > 1 ? ' shared' : '')}));
+      POLYS.forEach((p, pi) => {
+        const [x,y] = centroid(coords(pi));
+        el('path', {d:`M${x-6} ${y-6}l12 12M${x+6} ${y-6}l-12 12`, class:'ref'});
+        el('text', {x:x+10, y:y-8, class:'nm'}).textContent = p.l;
+      });
+      Object.keys(V).forEach(k => {
+        const t = el('text', {x:V[k][0]+9, y:V[k][1]-9, class:'vl'}); t.textContent = k;
+        handle(V[k], k);
+      });
+    } else {
+      POLYS.forEach((p, pi) => {
+        const [x,y] = centroid(coords(pi));
+        el('text', {x:x-14, y:y+4, class:'nm'}).textContent = p.l;
+      });
+      divergences().forEach(dv => dv.copies.forEach((c, i) => { if(i) el('line', {x1:dv.copies[0].pt[0], y1:dv.copies[0].pt[1], x2:c.pt[0], y2:c.pt[1], class:'gap'}); }));
+      P[sel].forEach((pt, j) => {
+        const t = el('text', {x:pt[0]+9, y:pt[1]-9, class:'vl'}); t.textContent = POLYS[sel].v[j];
+        handle(pt, POLYS[sel].v[j]);
+      });
+    }
+    stats(edges);
+    itf(edges);
+  }
+  function handle(pt, name){
+    const h = el('circle', {cx:pt[0], cy:pt[1], r:8, class:'h', tabindex:0, 'aria-label':'sommet ' + name});
+    h.addEventListener('pointerdown', ev => {
+      ev.preventDefault(); ev.stopPropagation();
+      h.classList.add('drag');
+      const m = svg.getScreenCTM().inverse();
+      const move = e => {
+        const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m);
+        pt[0] = Math.round(Math.max(12, Math.min(508, p.x)));
+        pt[1] = Math.round(Math.max(12, Math.min(328, p.y)));
+        h.setAttribute('cx', pt[0]); h.setAttribute('cy', pt[1]);
+        requestDraw();
+      };
+      const up = () => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); draw(); };
+      addEventListener('pointermove', move);
+      addEventListener('pointerup', up);
+    });
+    h.addEventListener('keydown', e => {
+      const d = {ArrowLeft:[-4,0], ArrowRight:[4,0], ArrowUp:[0,-4], ArrowDown:[0,4]}[e.key];
+      if(!d) return;
+      e.preventDefault(); pt[0] += d[0]; pt[1] += d[1]; draw();
+      const again = [...svg.querySelectorAll('.h')].find(x => x.getAttribute('aria-label') === 'sommet ' + name);
+      if(again) again.focus();
+    });
+  }
+  let raf = 0;
+  function requestDraw(){
+    if(raf) return;
+    raf = requestAnimationFrame(() => { raf = 0; softDraw(); });
+  }
+  // pendant le glissement : on met à jour polygones, arêtes et textes sans recréer la poignée tenue
+  function softDraw(){
+    const polys = svg.querySelectorAll('.poly');
+    POLYS.forEach((p, pi) => polys[pi].setAttribute('points', coords(pi).map(q => q.join(',')).join(' ')));
+    const edges = uniqueEdges();
+    if(mode === 'AREA'){
+      svg.querySelectorAll('.edge').forEach((l, i) => { const e = edges[i]; l.setAttribute('x1',V[e.a][0]); l.setAttribute('y1',V[e.a][1]); l.setAttribute('x2',V[e.b][0]); l.setAttribute('y2',V[e.b][1]); });
+      const refs = svg.querySelectorAll('.ref'), nms = svg.querySelectorAll('.nm');
+      POLYS.forEach((p, pi) => { const [x,y] = centroid(coords(pi)); refs[pi].setAttribute('d', `M${x-6} ${y-6}l12 12M${x+6} ${y-6}l-12 12`); nms[pi].setAttribute('x', x+10); nms[pi].setAttribute('y', y-8); });
+      const vls = svg.querySelectorAll('.vl');
+      Object.keys(V).forEach((k, i) => { vls[i].setAttribute('x', V[k][0]+9); vls[i].setAttribute('y', V[k][1]-9); });
+    } else {
+      svg.querySelectorAll('.gap').forEach(g => g.remove());
+      const first = svg.querySelector('.vl');
+      divergences().forEach(dv => dv.copies.forEach((c, i) => { if(i){ const l = el('line', {x1:dv.copies[0].pt[0], y1:dv.copies[0].pt[1], x2:c.pt[0], y2:c.pt[1], class:'gap'}); svg.insertBefore(l, first); } }));
+      const vls = svg.querySelectorAll('.vl');
+      P[sel].forEach((pt, j) => { vls[j].setAttribute('x', pt[0]+9); vls[j].setAttribute('y', pt[1]-9); });
+    }
+    stats(edges);
+    itf(edges);
+  }
+  function stats(edges){
+    const shared = edges.filter(e => e.polys.length > 1).length;
+    if(mode === 'AREA'){
+      $('stL').textContent = edges.length;
+      $('stD').textContent = '0';
+      $('stP').innerHTML = '<span class="chip ok">garantie</span>';
+      $('sedMsg').innerHTML = `Chaque limite est stockée une seule fois : ${edges.length} lignes, dont ${shared} communes à deux secteurs. En déplaçant un sommet, tous les secteurs qui le partagent suivent. Une croix marque le point intérieur de chaque secteur.`;
+    } else {
+      const segs = POLYS.reduce((s, p) => s + p.v.length, 0);
+      const dv = divergences();
+      $('stL').textContent = `${POLYS.length} contours`;
+      $('stD').textContent = shared;
+      $('stP').innerHTML = dv.length ? '<span class="chip err">cassée</span>' : '<span class="chip warn">par hasard</span>';
+      $('sedMsg').innerHTML = dv.length
+        ? `Les copies du sommet <strong>${dv.map(d => d.k).join(', ')}</strong> ne coïncident plus (jusqu'à ${dv.map(d => d.d.toFixed(1)).join(' / ')} m). C'est permis pour une SURFACE, mais le parc n'est plus découpé proprement : il y a un trou ou un chevauchement.`
+        : `Chaque secteur stocke son contour complet : ${segs} segments, dont ${shared} limites communes écrites deux fois. Rien ne garantit qu'elles restent identiques. Cliquez sur un secteur, puis déplacez un de ses sommets.`;
+    }
+  }
+  const pt = ([x,y]) => `${E(x)} ${N(y)}`;
+  function itf(edges){
+    const L = [];
+    L.push('TABL SecteurEntretien');
+    POLYS.forEach((p, pi) => {
+      L.push(mode === 'AREA' ? `OBJE ${201+pi} ${p.n} ${pt(centroid(coords(pi)))}` : `OBJE ${201+pi} ${p.n}`);
+    });
+    L.push('ETAB', 'TABL SecteurEntretien_Geometrie');
+    if(mode === 'AREA'){
+      edges.forEach((e, i) => { L.push(`OBJE ${301+i}`, `STPT ${pt(V[e.a])}`, `LIPT ${pt(V[e.b])}`, 'ELIN'); });
+    } else {
+      POLYS.forEach((p, pi) => {
+        const c = coords(pi);
+        L.push(`OBJE ${301+pi} ${201+pi}`, `STPT ${pt(c[0])}`);
+        c.slice(1).forEach(q => L.push(`LIPT ${pt(q)}`));
+        L.push(`LIPT ${pt(c[0])}`, 'ELIN');
+      });
+    }
+    L.push('ETAB');
+    const box = $('sedItf');
+    const fig = GEO.makeCodeBlock(L.join('\n'), 'itf', `Geometrie : ${mode} … → extrait .itf`);
+    const old = box.querySelector('pre'), top = old ? old.scrollTop : 0;
+    box.replaceChildren(fig);
+    fig.querySelector('pre').scrollTop = top;
+  }
+  document.querySelectorAll('.seg button[data-m]').forEach(b => b.onclick = () => {
+    mode = b.dataset.m;
+    document.querySelectorAll('.seg button[data-m]').forEach(x => x.setAttribute('aria-pressed', x===b));
+    draw();
+  });
+  $('sedReset').onclick = () => { reset(); draw(); };
+  reset(); draw();
+
+  /* ---------- ITF annoté ---------- */
+  const A = [
+    ['SCNT', "En-tête libre", "<code>SCNT</code> ouvre le fichier. Les lignes qui suivent sont un commentaire libre : qui livre, quand, pourquoi."],
+    ['', "Commentaire", "Texte libre, ignoré par les logiciels. Utile pour les humains."],
+    ['', "Commentaire", "Texte libre, ignoré par les logiciels."],
+    ['////', "Fin de l'en-tête", "Quatre barres obliques terminent la zone de commentaire. Les données commencent."],
+    ['MTID', "Nom du transfert", "Reprend le nom donné dans <code>TRANSFER Arbres;</code> du modèle."],
+    ['MODL', "Modèle", "Le nom du modèle. C'est grâce à lui que le logiciel sait quel fichier <code>.ili</code> utiliser pour lire la suite."],
+    ['TOPI', "Thème", "Début du thème <code>Inventaire</code>. Les tables suivent dans l'ordre du modèle."],
+    ['TABL', "Table", "Début de la table <code>Espece</code>. Chaque ligne <code>OBJE</code> jusqu'au prochain <code>ETAB</code> est une espèce."],
+    ['OBJE', "Un objet", "TID <code>1</code>, puis les valeurs dans l'ordre du modèle : <code>NomLatin</code>, <code>NomFrancais</code>. Les espaces du texte sont remplacés par <code>_</code>, car l'espace sépare les valeurs."],
+    ['OBJE', "Un objet", "L'espèce de TID <code>2</code> : <i>Acer platanoides</i>, érable plane."],
+    ['ETAB', "Fin de table", "Fin de la table <code>Espece</code>."],
+    ['TABL', "Table", "Début de la table <code>Arbre</code>."],
+    ['OBJE', "L'arbre A-0042", "Dans l'ordre : TID <code>101</code> · <code>NumeroInventaire</code> A-0042 · <code>Espece</code> → TID <code>1</code> (le tilleul) · <code>Hauteur</code> 12.5 · <code>AnneePlantation</code> 1987 · <code>Etat</code> <code>1</code> = affaibli (on compte depuis 0) · <code>Position</code> : deux valeurs, E puis N."],
+    ['OBJE', "L'arbre A-0043", "Même structure. État <code>0</code> = sain. Il est lui aussi un tilleul (<code>1</code>)."],
+    ['OBJE', "L'arbre A-0044", "Un érable (<code>2</code>). La hauteur et l'année sont inconnues : elles valent <code>@</code>, la valeur « non définie ». C'est permis parce qu'elles sont <code>OPTIONAL</code> dans le modèle. État <code>2</code> = malade."],
+    ['ETAB', "Fin de table", "Fin de la table <code>Arbre</code>."],
+    ['ETOP', "Fin du thème", "Fin du thème <code>Inventaire</code>."],
+    ['EMOD', "Fin du modèle", "Fin des données du modèle."],
+    ['ENDE', "Fin du fichier", "Dernière ligne. Un fichier sans <code>ENDE</code> est incomplet, probablement tronqué pendant la copie."],
+  ];
+  const ITF = `SCNT
+Inventaire des arbres de Montavaux
+Commune de Montavaux, livraison du 30.09.2026
+////
+MTID Arbres
+MODL Arbres_Communaux_V1
+TOPI Inventaire
+TABL Espece
+OBJE 1 Tilia_cordata Tilleul_a_petites_feuilles
+OBJE 2 Acer_platanoides Erable_plane
+ETAB
+TABL Arbre
+OBJE 101 A-0042 1 12.5 1987 1 2538214.250 1152388.100
+OBJE 102 A-0043 1 14.0 1979 0 2538241.600 1152387.300
+OBJE 103 A-0044 2 @ @ 2 2538268.900 1152386.700
+ETAB
+ETOP
+EMOD
+ENDE`.split('\n');
+  const ol = $('annL');
+  ol.innerHTML = ITF.map((l, i) => `<li><button type="button" aria-pressed="false" data-i="${i}">${GEO.hl(l, 'itf')}</button></li>`).join('');
+  const pick = i => {
+    ol.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', i===j));
+    const [tag, h, d] = A[i];
+    $('annE').innerHTML = `<span class="tag">ligne ${i+1}${tag ? ' · ' + tag : ''}</span><h4>${h}</h4><p>${d}</p>`;
+  };
+  ol.querySelectorAll('button').forEach(b => b.onclick = () => pick(+b.dataset.i));
+  ol.addEventListener('keydown', e => {
+    if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const cur = [...ol.querySelectorAll('button')].findIndex(b => b === document.activeElement);
+    if(cur < 0) return;
+    e.preventDefault();
+    const n = Math.max(0, Math.min(ITF.length-1, cur + (e.key === 'ArrowDown' ? 1 : -1)));
+    ol.querySelectorAll('button')[n].focus(); pick(n);
+  });
+  pick(12);
+})();
+</script>
+</body>
+</html>

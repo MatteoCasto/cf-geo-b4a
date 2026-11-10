@@ -1,0 +1,9 @@
+- nous travaillons à trois (les 3 enseigner): Yoann, Bryan et Matteo
+- Avant toute modif, regarde si on est bien HEAD (up-to-date), pour éviter les merge conflit, pull à annoncer, puis faire après confirmation
+- toujours respecter le format descriptif (markdown) avec la syntaxe pour former les pages (syntaxe), ne la change pas sauf si demandée explicitement. Cette charte graphique est obligatoire. Si on veut proposer des choses, ça se fait explicitement (nouveaux blocks).
+- Toujours veiller à la retro-comppatibilité dès la version 1.0 (le premier jour de cours donné car avant il y'aura bcp de modif, tanpis la page n'est pas connue des étudiants), notamment en matière d'annotations json. 
+- Le cours est toujours "statique"
+- maintient toujours le guide de rédaction (page non référencée mais accessible par URL uniquement)
+- avoir toujours à l'idée qu'il s'agit de techniciens en géomatique, il faut que ça soit compréhensible et le plus appréciable possible pour apprendre
+- tenir un changelog à jour (racine)
+- toujours lancer les tests (que l'on va mettre au point) après des modifs.

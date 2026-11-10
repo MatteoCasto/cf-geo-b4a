@@ -26,13 +26,14 @@ Le menu, les liens précédent / suivant, le plan de l'accueil, l'en-tête de ch
 
 ## Créer un chapitre
 
-1. Copier `modele.html` (page vide prête à remplir) sous un nouveau nom, par ex. `topographie.html`.
+1. Copier `modele.html` (page vide prête à remplir) sous un nouveau nom, par ex. `dmav.html`.
 2. Ajouter une entrée dans la liste `chapters` de `config.js` (titre, durée, chapeau, objectifs…). L'ordre de la liste est l'ordre du menu.
 3. Écrire le texte dans le bloc `script type="text/markdown"` de la page (il peut y en avoir plusieurs, entrecoupés de composants HTML).
 
 ```js config.js (extrait)
-{ file: 'topographie.html', num: '7', title: 'Topographie',
-  duration: '45 min', prereq: 'chapitre 3', activity: 'exercice',
+{ file: 'dmav.html', num: '9', title: 'Le modèle DMAV',
+  duration: '45 min', prereq: 'chapitre 7', activity: 'exercice',
+  info: { 'Fichiers': '.ili, .xtf' },          // cases libres de l'en-tête (facultatif)
   question: 'La question à laquelle le chapitre répond ?',
   lead: "Le chapeau : deux ou trois phrases d'introduction.",
   summary: "Le résumé affiché sur la page d'accueil.",
@@ -41,7 +42,7 @@ Le menu, les liens précédent / suivant, le plan de l'accueil, l'en-tête de ch
 ```
 
 :::attention
-Dans `config.js`, chaque texte est entre apostrophes `'…'` ou guillemets `"…"`. Si le texte contient une apostrophe (« l'altitude »), utiliser les guillemets. Ne pas oublier la virgule après chaque entrée.
+Dans `config.js`, chaque texte est entre apostrophes `'…'` ou guillemets `"…"`. Si le texte contient une apostrophe (« l'attribut »), utiliser les guillemets. Ne pas oublier la virgule après chaque entrée.
 :::
 
 ## Syntaxe du texte (Markdown)
@@ -52,7 +53,7 @@ Chaque exemple montre le rendu, puis ce qu'il faut écrire. Les espaces insécab
 <script type="text/markdown" data-demo="Titres et texte">
 ### Sous-section
 
-Un paragraphe avec du **gras**, de l'*italique*, du `code`, un [lien vers un chapitre](gnss.html) et une touche ++Ctrl++.
+Un paragraphe avec du **gras**, de l'*italique*, du `code`, un [lien vers un chapitre](pourquoi.html) et une touche ++Ctrl++.
 
 Une ligne vide sépare deux paragraphes. Les sections s'écrivent avec `##` : elles sont numérotées automatiquement.
 </script>
@@ -81,6 +82,10 @@ Le lien avec le métier.
 :::info Titre libre
 Un encadré dont on choisit le titre.
 :::
+
+:::prof
+Note pour le formateur : déroulement, pièges, questions à poser. Visible seulement avec « Notes formateur » activé dans le menu, et jamais à l'impression.
+:::
 </script>
 
 <script type="text/markdown" data-demo="Exercice avec solution">
@@ -94,30 +99,37 @@ La solution, cachée jusqu'au clic.
 </script>
 
 <script type="text/markdown" data-demo="Tableau">
-| Code | Système | Unité |
+| Notion | INTERLIS 1 | INTERLIS 2 |
 |---|---|---|
-| 2056 | MN95 | m |
-| 4326 | WGS84 | degré |
+| Type d'objet | `TABLE` | `CLASS` |
+| Fichier | ITF | XTF |
 </script>
 
 <script type="text/markdown" data-demo="Formule">
-$$ Δh = AR − AV $$
-$$ H<sub>avant</sub> = H<sub>arrière</sub> + Δh $$
+$$ E<sub>MN95</sub> ≈ E<sub>MN03</sub> + 2 000 000 $$
+$$ N<sub>MN95</sub> ≈ N<sub>MN03</sub> + 1 000 000 $$
 </script>
 
 <script type="text/markdown" data-demo="Code avec bouton Copier">
-```sql requete.sql
-SELECT nom FROM communes WHERE canton = 'VD';
+```ili Arbres.ili
+CLASS Arbre =
+  Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+END Arbre;
 ```
 </script>
 
+<script type="text/markdown">
+Langages colorés : `ili` (INTERLIS 2), `ili1` (INTERLIS 1), `itf`, `xtf` (ou `xml`), `sh` (ligne de commande), `sql`, `py`, `json`, `html`. Le texte après le langage est le nom affiché dans la barre du bloc.
+</script>
+
 <script type="text/markdown" data-demo="Cartes (aide-mémoire)">
-:::carte Nivellement
-$$ Δh = AR − AV $$
+:::carte Cardinalités
+- `{1}` exactement un
+- `{0..*}` quelconque
 :::
 
-:::carte GNSS
-- ≥ 4 satellites
+:::carte Contrôle
+- ilivalidator
 :::
 </script>
 
@@ -133,12 +145,41 @@ Le quiz est décrit en JSON dans la page (voir `quiz.html`) ; la correction, le 
  "o": ["Réponse A", "Réponse B", "Réponse C"],
  "a": 1,
  "w": "Explication affichée après la réponse.",
- "ch": "gnss.html"}
+ "ch": "interlis2.html",
+ "code": ["ili", "Espece -- {1} Espece;"]}
 ```
+
+`code` est facultatif : un extrait affiché sous la question, sous la forme `["langage", "texte"]`.
 
 ## Composants interactifs
 
-Les pages interactives (carte, simulation, carnet…) mélangent du Markdown et du HTML. Les blocs ci-dessous sont les briques disponibles ; le code JavaScript de chaque composant se trouve en bas de sa page, avec un commentaire.
+Les pages interactives (éditeur, banc d'essai, chasse aux erreurs…) mélangent du Markdown et du HTML. Les blocs ci-dessous sont les briques disponibles ; le code JavaScript de chaque composant se trouve en bas de sa page, avec un commentaire.
+
+Un composant HTML se place **entre** deux blocs `script type="text/markdown"`. Si son script lit un élément écrit en Markdown (par ex. un compteur dans une phrase), il doit attendre que la page soit construite : `document.addEventListener('cours:ready', () => { … })`.
+
+### Mots reliés entre blocs de code
+
+Survoler un mot le surligne dans tous les blocs du même groupe : pratique pour relier un modèle et son fichier de transfert. Le bloc s'écrit en HTML, avec la liste des mots (`data-links`) et un nom de groupe (`data-group`).
+</script>
+
+<div class="demo" data-html="Deux blocs reliés (survoler Hauteur ou Arbre)">
+<div class="demo-body">
+<div class="two">
+  <script type="text/x-code" data-lang="ili" data-file="modèle" data-links="Arbre,Hauteur" data-group="demo">
+    CLASS Arbre =
+      Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+    END Arbre;
+  </script>
+  <script type="text/x-code" data-lang="xtf" data-file="données" data-links="Arbre,Hauteur" data-group="demo">
+    <M.T.Arbre TID="a42">
+      <Hauteur>12.5</Hauteur>
+    </M.T.Arbre>
+  </script>
+</div>
+</div></div>
+
+<script type="text/markdown">
+### Panneaux, croquis, boutons
 </script>
 
 <div class="demo" data-html="Outil : figure + réglages + valeurs lues">
@@ -184,6 +225,8 @@ Les pages interactives (carte, simulation, carnet…) mélangent du Markdown et 
 
 - Phrases courtes, un fait par phrase. Vouvoiement.
 - Nombres suisses : `2'600'000` ou `2 600 000`. Toujours préciser le cadre (MN95) et l'unité.
+- Noms INTERLIS (classes, attributs) sans accents ni espaces : `NumeroInventaire`, `Espece`.
+- Un seul fil rouge : l'inventaire des arbres de Montavaux (commune fictive), modèle `Arbres_Communaux_V1`.
 - Données fictives clairement signalées.
 - Après une modification : ouvrir la page dans le navigateur pour vérifier, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
 </script>

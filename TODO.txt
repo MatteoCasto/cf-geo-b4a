@@ -4,3 +4,4 @@
 - rendre facile l'édition du contenu de texte pour les développeurs
 - progession de sauvarde des notes (p.ex. temps depuis dernière sauvegarde) + bouton simple dans downloads
 - texte caché (mode admin) -> on gère un seul document et on gère la partie théorie
+- versionnage pour publication

@@ -1,4 +1,4 @@
-/* Support de cours géomatique — feuille de style commune (gabarit).
+/* Support de cours INTERLIS (CF-geo B4a) — feuille de style commune.
    Mise en page : feuille technique ; table des chapitres dans la marge gauche, colonne de lecture ~70ch,
    figures « larges » jusqu'à 1100px, cartouche de plan en tête de chaque chapitre. */
 :root{
@@ -267,7 +267,7 @@ details > :not(summary){margin-top:.6rem}
   html{font-size:11pt}
   body{background:#fff}
   .site{display:block}
-  .toc,.pager,.cb-copy,.btn,.seg{display:none!important}
+  .toc,.pager,.cb-copy,.btn,.seg,.prof{display:none!important}
   .doc{padding:0}
   .fig,.box,.codeblock{box-shadow:none;break-inside:avoid}
   h2{break-after:avoid}
@@ -280,7 +280,7 @@ details > :not(summary){margin-top:.6rem}
 }
 
 /* ======================================================================
-   Ajouts du gabarit géomatique (composants réutilisables entre chapitres)
+   Composants réutilisables entre chapitres
    ====================================================================== */
 /* carte « plan » d'un chapitre (accueil) */
 .plan{list-style:none;padding:0;margin:1rem 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -352,7 +352,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   .card{break-inside:avoid}
 }
 
-/* classes de points LiDAR (réutilisées : accueil + chapitre 4) */
+/* classes de points LiDAR (inutilisées pour l'instant, gardées pour compatibilité) */
 :root{--cl-sol:var(--warn);--cl-veg:var(--c-tree);--cl-bat:var(--code-tag);--cl-bruit:var(--accent)}
 .p-sol{fill:var(--cl-sol)} .p-veg{fill:var(--cl-veg)} .p-bat{fill:var(--cl-bat)} .p-bruit{fill:var(--cl-bruit)}
 
@@ -427,3 +427,8 @@ html.annot .annot-target{outline:1.5px dashed var(--accent);outline-offset:5px;b
 }
 /* tout bloc de la colonne est centré, même s'il définit ses propres marges (.plan, .tbl, .box…) */
 main.doc > *{margin-left:auto;margin-right:auto}
+
+/* ---------- notes formateur  :::prof  (bouton « Notes formateur » du menu) ---------- */
+.box.prof{display:none}
+html.prof-on .box.prof{display:block;border:1.5px dashed var(--code-tag);background:var(--code-bg)}
+html.prof-on .box.prof > .lab{background:var(--code-tag);color:var(--sheet)}

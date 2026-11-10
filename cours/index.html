@@ -3,22 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cours de géomatique</title>
+<title>Cours INTERLIS</title>
 <script src="config.js"></script>
 <script src="app.js"></script>
 <style>
 /* styles propres à l'accueil */
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:center;padding-bottom:30px;border-bottom:2px solid var(--ink)}
-.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);font-stretch:108%;line-height:.98;overflow-wrap:anywhere}
-.hero h1 span{display:block;font-stretch:85%;font-weight:600;font-size:.45em;color:var(--ink-2);margin-top:.35em;line-height:1.15}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:32px;align-items:center;padding-bottom:30px;border-bottom:2px solid var(--ink)}
+.hero h1{font-size:clamp(2.2rem,4.4vw,3.3rem);font-stretch:100%;line-height:.95;overflow-wrap:anywhere}
+.hero h1 span{display:block;font-stretch:80%;font-weight:600;font-size:.42em;letter-spacing:.01em;color:var(--ink-2);margin-top:.35em;line-height:1.1}
 .hero .fig{margin:0;padding:10px}
 @media (max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}}
-#scan .gnd{fill:var(--c-road);stroke:var(--c-line);stroke-width:1.5}
-#scan .bld{fill:var(--c-bat);stroke:var(--c-bat-line);stroke-width:1.4}
-#scan .crown{fill:var(--c-tree-soft);stroke:var(--c-tree);stroke-width:1.5}
-#scan .trunk{stroke:var(--c-bat-line);stroke-width:3}
-#scan .beam{stroke:var(--accent);stroke-width:1;opacity:.55}
-#scan .plane{fill:var(--ink)}
+#xchg .actor rect{fill:var(--sheet);stroke:var(--ink);stroke-width:1.5}
+#xchg .actor text{font-family:var(--f-body);fill:var(--ink)}
+#xchg .actor .sub{font:500 11px var(--f-mono);fill:var(--muted)}
+#xchg .wire{fill:none;stroke:var(--rule);stroke-width:2;stroke-dasharray:3 5}
+#xchg .model .page{fill:var(--sheet);stroke:var(--ink);stroke-width:2;transition:stroke .2s,fill .2s}
+#xchg .model.flash .page{stroke:var(--accent);fill:var(--accent-soft)}
+#xchg .model text{font-family:var(--f-mono);fill:var(--ink)}
+#xchg .pk rect{fill:var(--accent)}
+#xchg .pk text{font:700 9px var(--f-mono);fill:var(--accent-ink)}
+#xchg .ok{font:600 12px var(--f-mono);fill:var(--ok);opacity:0;transition:opacity .25s}
+#xchg .model.flash + .ok{opacity:1}
+.fil{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:center}
+@media (max-width:760px){.fil{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -26,43 +33,74 @@
 
 <header class="hero">
   <div>
-    <div class="kicker">Gabarit de support de cours</div>
-    <h1>Géomatique<span>Un exemple de ce que le support peut devenir</span></h1>
-    <p class="lead">Des thèmes pris au hasard, chacun traité avec un type de page différent. Le contenu est indicatif : c'est la forme qu'on discute.</p>
+    <div class="kicker">Support de cours · géomatique · Suisse romande</div>
+    <h1>INTERLIS<span>La langue commune des géodonnées suisses</span></h1>
+    <p class="lead">Une commune, un bureau de géomètre et un canton utilisent trois logiciels différents. Ils échangent pourtant leurs données sans rien perdre. Ce cours explique comment, avec INTERLIS 1 et INTERLIS 2.</p>
     <div class="row" style="margin-top:20px">
-      <a class="btn primary" href="referentiels.html">Commencer →</a>
-      <a class="btn" href="guide.html">Guide de rédaction</a>
+      <a class="btn primary" href="pourquoi.html">Commencer le chapitre 1 →</a>
+      <a class="btn" href="aide-memoire.html">Aide-mémoire</a>
     </div>
   </div>
   <figure class="fig gridbg">
-    <svg id="scan" viewBox="0 0 520 340" role="img" aria-label="Un avion survole un terrain avec des arbres et un bâtiment ; le laser dépose des points colorés selon ce qu'il touche">
-      <g id="terrain"></g><g id="beam"></g><g id="pts"></g>
-      <g id="plane"><path class="plane" d="M-18 0h30l8-4h4l-4 6 4 6h-4l-8-4h-30z M-4 -2l-8 -10h5l12 10z"/></g>
+    <svg id="xchg" viewBox="0 0 520 380" role="img" aria-label="Quatre acteurs échangent des fichiers XTF en passant par un modèle INTERLIS commun">
+      <g id="wires"></g>
+      <g class="model" id="model">
+        <path class="page" d="M205 150h92l18 18v74h-110z"/>
+        <path d="M297 150v18h18" class="strokeink" fill="none" stroke-width="2"/>
+        <text x="215" y="176" font-size="10" class="fillmuted">MODÈLE</text>
+        <text x="215" y="196" font-size="11" font-weight="600">Arbres</text>
+        <text x="215" y="210" font-size="11" font-weight="600">Communaux_V1</text>
+        <text x="215" y="230" font-size="10" class="fillaccent">.ili</text>
+      </g>
+      <text class="ok" x="260" y="262" text-anchor="middle">contrôlé ✓</text>
+      <g id="actors"></g>
+      <g id="packets"></g>
     </svg>
-    <figcaption>Balayage LiDAR : <span style="color:var(--cl-sol)">sol</span>, <span style="color:var(--cl-veg)">végétation</span>, <span style="color:var(--cl-bat)">bâtiment</span>.</figcaption>
+    <figcaption>Fig. 0.1 · Chacun garde son logiciel. Tous écrivent et lisent selon le même modèle.</figcaption>
   </figure>
 </header>
+
+<div class="cartouche" style="margin-top:22px">
+  <div><i>Objet</i><b>INTERLIS 1 &amp; 2</b></div>
+  <div><i>Public</i><b>futurs techniciens en géomatique</b></div>
+  <div><i>Durée proposée</i><b>≈ 6 h, en 8 blocs</b></div>
+  <div><i>Module</i><b>CF-geo B4a</b></div>
+  <div class="full last"><i>Fil rouge</i><b>Inventaire des arbres de la commune de Montavaux (fictive), coordonnées MN95</b></div>
+</div>
+
+<script type="text/markdown">
+## Le fil rouge : les arbres de Montavaux
+</script>
+
+<div class="fil">
+  <div>
+    <p>Tout au long du cours, on travaille sur <strong>un seul jeu de données</strong> : l'inventaire des arbres d'une commune vaudoise fictive, Montavaux. Chaque arbre a un numéro d'inventaire, une espèce, une hauteur, un état et une position en MN95.</p>
+    <p>Vous allez d'abord <strong>modéliser</strong> cet inventaire, puis l'écrire en <strong>INTERLIS 1</strong> et en <strong>INTERLIS 2</strong>. Ensuite vous l'<strong>échangerez</strong> sous forme de fichier ITF et XTF et vous le <strong>contrôlerez</strong> comme le ferait un service cantonal.</p>
+  </div>
+  <figure class="fig gridbg" style="margin:0">
+    <svg class="sk" viewBox="0 0 260 180" role="img" aria-label="Croquis : une rue bordée de trois arbres numérotés">
+      <g class="crayon">
+        <path class="road" d="M0 120h260v34H0z"/>
+        <path class="ln thin" d="M0 120h260M0 154h260"/>
+        <path class="ln" d="M20 20h90v84H20zM110 20h120v84H110z"/>
+        <path class="bat" d="M40 38h44v40H40z"/>
+        <circle class="tree" cx="60" cy="112" r="11"/><circle class="tree" cx="135" cy="112" r="13"/><circle class="tree" cx="208" cy="112" r="10"/>
+      </g>
+      <text class="lbl-s" x="48" y="96">A-0042</text>
+      <text class="lbl-s" x="120" y="96">A-0043</text>
+      <text class="lbl-s" x="192" y="96">A-0044</text>
+      <text class="lbl" x="150" y="60">parcelle 1287</text>
+      <text class="lbl-s" x="8" y="172">Rue du Tilleul</text>
+    </svg>
+  </figure>
+</div>
 
 <script type="text/markdown">
 ## Le parcours
 
-Les chapitres se suivent, mais chacun peut être lu seul. Les durées sont des exemples.
+Les chapitres se suivent : chacun s'appuie sur le précédent. Les durées sont indicatives.
 
 <div data-plan></div>
-
-## Ce que montre ce gabarit
-
-Chaque chapitre associe un **thème** à une **forme de page**. Les thèmes seront remplacés ; les formes se réutilisent pour n'importe quel sujet.
-
-| Chapitre | Forme démontrée | Réutilisable pour… |
-|---|---|---|
-| 1 | Carte cliquable + calculateur | Conversions, formules, exercices de calcul |
-| 2 | Simulation animée avec réglages | Tout phénomène qu'on veut « faire varier » |
-| 3 | Carnet de terrain qui se calcule | Carnets, polygonales, compensations simples |
-| 4 | Graphique filtrable avec curseur | Profils, séries de mesures, classifications |
-| 5 | Outil SIG + code qui suit les réglages | Requêtes, géotraitements, scripts |
-| 6 | Quiz corrigé | Contrôle des acquis |
-| A, B | Fiche imprimable, guide de rédaction | Résumé d'examen, documentation des auteurs |
 
 ## Comment lire ce support
 
@@ -100,50 +138,70 @@ Ce support s'installe comme une application, sur ordinateur, tablette ou télép
 Il suffit d'avoir ouvert le site une fois en ligne. Les mises à jour arrivent automatiquement à la connexion suivante.
 :::
 
-## Questions pour la séance de brainstorming
+:::prof
+Les encadrés en pointillé bleu ne sont visibles qu'avec **Notes formateur** activé (menu de gauche). Ils contiennent le déroulement, les questions à poser à la classe et les pièges à anticiper.
 
-1. **Public et durée** : quel module, combien de périodes, quel niveau de départ ?
-2. **Fil rouge** : un seul jeu de données pour tout le cours, ou un exemple par chapitre ?
-3. **Part d'interactif** : quelles notions gagnent vraiment à être manipulées plutôt que lues ?
-4. **Papier ou écran** : faut-il aussi un support Word / PDF au gabarit CF-geo ?
-5. **Exercices** : solutions visibles dans le support, ou réservées au formateur ?
-6. **Maintenance** : qui écrit, qui relit, comment on suit les versions (ce dépôt git) ?
+Déroulement proposé sur une journée : ch. 1 et 2 le matin (avec l'exercice papier du ch. 2 en groupes de 3), ch. 3 et 4 en fin de matinée, atelier (ch. 5) et contrôle (ch. 6) sur ordinateur l'après-midi, puis ch. 7 et le quiz pour finir.
+:::
 </script>
 
 </main>
 <script>
-// ---- animation de l'accueil : balayage LiDAR ----
+// ---- animation de l'accueil : échanges XTF autour d'un modèle commun ----
 (function(){
-  const NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('scan');
-  const W = 520, BX0 = 300, BX1 = 362, BT = 196;
-  const gnd = x => 292 - 16*Math.sin(x/70) - 8*Math.sin(x/23 + 1);
-  const TREES = [{cx:118, r:21}, {cx:172, r:17}, {cx:440, r:24}].map(t => ({...t, cy: gnd(t.cx) - 50 - t.r/2}));
-  function hit(x){
-    let y = gnd(x), c = 'sol';
-    if(x >= BX0 && x <= BX1 && BT < y){ y = BT; c = 'bat'; }
-    for(const t of TREES){ const d = x - t.cx; if(Math.abs(d) < t.r){ const yc = t.cy - Math.sqrt(t.r*t.r - d*d); if(yc < y){ y = yc; c = 'veg'; } } }
-    return [y, c];
+  const svg = document.getElementById('xchg'), NS = 'http://www.w3.org/2000/svg';
+  const C = {x:260, y:196};
+  const A = [
+    {x:78,  y:62,  n:'Commune',         s:'SIG'},
+    {x:442, y:62,  n:'Bureau géomètre', s:'DAO'},
+    {x:78,  y:320, n:'Canton',          s:'base PostGIS'},
+    {x:442, y:320, n:'Services parcs',  s:'tableur + SIG'},
+  ];
+  const wires = svg.querySelector('#wires'), actors = svg.querySelector('#actors'), packets = svg.querySelector('#packets');
+  const paths = A.map((a, i) => {
+    const p = document.createElementNS(NS, 'path');
+    const mx = (a.x + C.x)/2 + (i%2 ? -30 : 30), my = (a.y + C.y)/2;
+    p.setAttribute('d', `M${a.x} ${a.y} Q${mx} ${my} ${C.x} ${C.y}`);
+    p.setAttribute('class', 'wire');
+    wires.appendChild(p);
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'actor');
+    g.innerHTML = `<rect x="${a.x-62}" y="${a.y-24}" width="124" height="48" rx="4"/>
+      <text x="${a.x}" y="${a.y-3}" text-anchor="middle" font-size="13" font-weight="600">${a.n}</text>
+      <text class="sub" x="${a.x}" y="${a.y+14}" text-anchor="middle">${a.s}</text>`;
+    actors.appendChild(g);
+    return p;
+  });
+  const model = svg.querySelector('#model');
+  function makePk(){
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'pk');
+    g.innerHTML = '<rect x="-14" y="-8" width="28" height="16" rx="2"/><text y="3.5" text-anchor="middle">XTF</text>';
+    packets.appendChild(g);
+    return g;
   }
-  let d = `M0 340 L0 ${gnd(0)}`; for(let x = 0; x <= W; x += 4) d += ` L${x} ${gnd(x).toFixed(1)}`; d += ` L${W} 340Z`;
-  svg.querySelector('#terrain').innerHTML = `<path class="gnd" d="${d}"/><path class="bld" d="M${BX0} ${gnd(BX0)+4}V${BT}H${BX1}V${gnd(BX1)+4}"/>` +
-    TREES.map(t => `<path class="trunk" d="M${t.cx} ${gnd(t.cx)}V${t.cy}"/><circle class="crown" cx="${t.cx}" cy="${t.cy}" r="${t.r}"/>`).join('');
-  const pts = svg.querySelector('#pts'), plane = svg.querySelector('#plane');
-  const dot = (x, y, c) => { const e = document.createElementNS(NS, 'circle'); e.setAttribute('cx', x.toFixed(1)); e.setAttribute('cy', (y-1.5).toFixed(1)); e.setAttribute('r', 2.1); e.setAttribute('class', 'p-' + c); pts.appendChild(e); };
+  const at = (p, t) => p.getPointAtLength(p.getTotalLength()*t);
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
-    for(let x = 4; x < W; x += 5){ const [y, c] = hit(x); dot(x, y, c); }
-    plane.setAttribute('transform', 'translate(260 60)');
+    [[0,.5],[3,.6]].forEach(([i, t]) => { const g = makePk(), q = at(paths[i], t); g.setAttribute('transform', `translate(${q.x},${q.y})`); });
     return;
   }
-  const line = document.createElementNS(NS, 'line'); line.setAttribute('class', 'beam'); svg.querySelector('#beam').appendChild(line);
-  let t0 = null, lastX = -999;
+  const live = [], DUR = 2600;
+  let lastSpawn = -2000;
+  function spawn(now){
+    const a = Math.floor(Math.random()*4);
+    let b = Math.floor(Math.random()*3); if(b >= a) b++;
+    live.push({a, b, t0:now, g:makePk(), flashed:false});
+  }
   function frame(now){
-    if(t0 === null) t0 = now;
-    const t = now - t0, px = (t*0.055) % (W + 120) - 60;
-    if(px < lastX) pts.replaceChildren();
-    lastX = px;
-    plane.setAttribute('transform', `translate(${px.toFixed(1)} 60)`);
-    const x = px + 70*Math.sin(t/90);
-    if(x >= 0 && x <= W){ const [y, c] = hit(x); dot(x, y, c); line.setAttribute('x1', px); line.setAttribute('y1', 64); line.setAttribute('x2', x); line.setAttribute('y2', y); }
+    if(now - lastSpawn > 1300 && live.length < 3){ spawn(now); lastSpawn = now; }
+    for(let i = live.length-1; i >= 0; i--){
+      const k = live[i], u = (now - k.t0)/DUR;
+      if(u >= 1){ k.g.remove(); live.splice(i, 1); continue; }
+      const e = u < .5 ? u*2 : (u-.5)*2;
+      const q = u < .5 ? at(paths[k.a], e) : at(paths[k.b], 1-e);
+      k.g.setAttribute('transform', `translate(${q.x},${q.y})`);
+      if(u >= .5 && !k.flashed){ k.flashed = true; model.classList.add('flash'); setTimeout(() => model.classList.remove('flash'), 450); }
+    }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

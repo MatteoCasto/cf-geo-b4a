@@ -49,6 +49,8 @@ const FILE = decodeURIComponent(location.pathname.split('/').pop() || 'index.htm
 const CHAPTERS = C.chapters;
 let IDX = CHAPTERS.findIndex(c => c.file === FILE); if(IDX < 0) IDX = 0;
 const CH = CHAPTERS[IDX];
+// pages du menu (une page « hidden: true » existe mais n'est accessible que par son adresse)
+const NAV = CHAPTERS.filter(c => !c.hidden), NIDX = NAV.indexOf(CH);
 
 // coloration syntaxique (volontairement simple)
 function tokenizer(re, kinds){
@@ -70,14 +72,30 @@ const HL = {
   py:   tokenizer(/(#.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]\w*\b)/gm, ['c','s','nb', word(PY_KW)]),
   json: tokenizer(/("(?:[^"\\]|\\.)*")(?=\s*:)|("(?:[^"\\]|\\.)*")|(-?\b\d+(?:\.\d+)?\b)|(\btrue\b|\bfalse\b|\bnull\b)/g, ['t','s','nb','k']),
   md:   src => src.split('\n').map(l => /^\s*(#{1,4} |:::|\?\?\?|\$\$|\|)/.test(l) ? `<span class="k">${esc(l)}</span>` : esc(l).replace(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g, '<span class="t">$1</span>')).join('\n'),
-  sh:   src => src.split('\n').map(l => /^\s*#/.test(l) ? `<span class="c">${esc(l)}</span>` : esc(l).replace(/(^|\s)(--?[\w-]+)/g, '$1<span class="k">$2</span>').replace(/^(\s*)(ogr2ogr|gdalinfo|gdalwarp|pdal|python|psql|qgis_process|git)\b/, '$1<span class="t">$2</span>')).join('\n'),
-  html: src => { const re = /(<!--[\s\S]*?-->)|<(\/?)([\w.:-]+)([^>]*?)(\/?)>/g; let out = '', last = 0, m;
+  sh:   src => src.split('\n').map(l => /^\s*#/.test(l) ? `<span class="c">${esc(l)}</span>` : esc(l).replace(/(^|\s)(--?[\w-]+)/g, '$1<span class="k">$2</span>').replace(/^(\s*)(java|ili2c|ilivalidator|ili2gpkg|ili2pg|ogr2ogr|gdalinfo|gdalwarp|pdal|python|psql|qgis_process|git)\b/, '$1<span class="t">$2</span>')).join('\n'),
+  html: src => { const re = /(<!--[\s\S]*?-->|<\?[\s\S]*?\?>)|<(\/?)([\w.:-]+)([^>]*?)(\/?)>/g; let out = '', last = 0, m;
     while((m = re.exec(src))){ out += esc(src.slice(last, m.index)); last = re.lastIndex;
       if(m[1]){ out += `<span class="c">${esc(m[0])}</span>`; continue; }
       out += `<span class="t">&lt;${m[2]}${m[3]}</span>${esc(m[4]).replace(/([\w.:-]+)=(&quot;.*?&quot;)/g, '<span class="nb">$1</span>=<span class="s">$2</span>')}<span class="t">${m[5]}&gt;</span>`; }
     return out + esc(src.slice(last)); },
+  // INTERLIS 1 et 2 (modèles .ili)
+  ili: (() => {
+    const KW = new Set(('INTERLIS MODEL TOPIC CLASS STRUCTURE ASSOCIATION END EXTENDS ABSTRACT EXTENDED FINAL MANDATORY OPTIONAL TEXT MTEXT ' +
+      'DOMAIN UNIT IMPORTS AT VERSION TABLE IDENT NO TRANSFER FORMAT FREE FIX CODE BLANK UNDEFINED CONTINUE DEFAULT TID ANY ' +
+      'COORD COORD2 COORD3 POLYLINE SURFACE AREA WITH STRAIGHTS ARCS VERTEX WITHOUT OVERLAPS DATE DIM1 DIM2 UNIQUE CONSTRAINT ' +
+      'BAG LIST OF REFERENCE TO BOOLEAN ROTATION NUMERIC VIEW BASKET OID IN NOT AND OR DEFINED ORDERED FUNCTION EXTERNAL ' +
+      'DEPENDS ON URI NAME LINE DIRECTED FROM ALL OBJECT OBJECTS SET TRANSLATION MULTISURFACE MULTIAREA MULTIPOLYLINE MULTICOORD').split(' '));
+    return tokenizer(/(!!.*$|\/\*[\s\S]*?\*\/)|("(?:[^"\\]|\\.)*")|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]\w*\b)|(-<#>|-<>|--|->|\.\.|#[A-Za-z_]\w*)/gm,
+      ['c', 's', 'nb', w => KW.has(w) ? `<span class="k">${w}</span>` : w, 'u']);
+  })(),
+  // fichier de transfert INTERLIS 1 (.itf)
+  itf: src => src.split('\n').map(line => {
+    const m = line.match(/^(SCNT|MTID|MODL|TOPI|TABL|OBJE|STPT|LIPT|ARCP|ELIN|ETAB|ETOP|EMOD|ENDE|CONT|PERI|\/\/\/\/)(.*)$/);
+    if(!m) return `<span class="c">${esc(line)}</span>`;
+    return `<span class="k">${esc(m[1])}</span>` + esc(m[2]).replace(/(^|\s)(@)(?=\s|$)/g, '$1<span class="u">@</span>').replace(/(^|\s)(-?\d+(?:\.\d+)?)(?=\s|$)/g, '$1<span class="nb">$2</span>');
+  }).join('\n'),
 };
-HL.geojson = HL.json; HL.xml = HL.html;
+HL.geojson = HL.json; HL.xml = HL.xtf = HL.html; HL.ili1 = HL.ili;
 const hl = (src, lang) => (HL[lang] || esc)(src);
 
 function copyText(btn, text){
@@ -97,6 +115,31 @@ function makeCodeBlock(src, lang, fileName){
   return fig;
 }
 
+// Mots reliés entre blocs de code : survoler un mot le surligne dans tous les blocs du même groupe.
+// <script type="text/x-code" data-lang="ili" data-links="Arbre,Espece" data-group="m1">
+function linkify(el, words, group){
+  const re = new RegExp('\\b(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'g');
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), nodes = [];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n => {
+    const t = n.nodeValue; re.lastIndex = 0;
+    if(!re.test(t)) return;
+    re.lastIndex = 0;
+    const frag = document.createDocumentFragment(); let last = 0, m;
+    while((m = re.exec(t))){
+      frag.append(t.slice(last, m.index));
+      const s = document.createElement('span');
+      s.className = 'lnk'; s.dataset.w = m[1]; s.dataset.g = group; s.textContent = m[1];
+      frag.append(s); last = re.lastIndex;
+    }
+    frag.append(t.slice(last));
+    n.replaceWith(frag);
+  });
+}
+const setLink = (t, on) => document.querySelectorAll(`.lnk[data-g="${t.dataset.g}"][data-w="${t.dataset.w}"]`).forEach(x => x.classList.toggle('on', on));
+document.addEventListener('mouseover', e => { const t = e.target.closest && e.target.closest('.lnk'); if(t) setLink(t, true); });
+document.addEventListener('mouseout',  e => { const t = e.target.closest && e.target.closest('.lnk'); if(t) setLink(t, false); });
+
 // ---------------------------------------------------------------- 3. Markdown
 /* Syntaxe (détaillée dans guide.html) :
    ## Section (numérotée automatiquement)   ### Sous-section
@@ -105,6 +148,7 @@ function makeCodeBlock(src, lang, fileName){
    ```sql fichier.sql … ```               bloc de code coloré avec bouton Copier
    :::retenir / :::attention / :::terrain / :::exo [précision]  …  :::
    :::info Titre libre … :::               encadré avec titre au choix
+   :::prof … :::                           note formateur (visible avec « Notes formateur »)
    :::carte Titre … :::                    carte (aide-mémoire), regroupées en grille
    ??? Solution … ???                      bloc dépliable (dans un exercice)
    Une ligne qui commence par < est du HTML, recopié tel quel. */
@@ -179,7 +223,7 @@ function markdown(src){
   return tpl.content;
 }
 
-window.GEO = {store, esc, dedent, fmtCH, hl, makeCodeBlock, markdown, inline, CHAPTERS, COURSE: C, FILE};
+window.GEO = {store, esc, dedent, fmtCH, hl, makeCodeBlock, linkify, markdown, inline, CHAPTERS, COURSE: C, FILE};
 
 // ---------------------------------------------------------------- 5a. thème (avant affichage)
 const THEMES = ['système', 'clair', 'sombre'];
@@ -187,6 +231,7 @@ let theme = store.get('theme', 'système');
 function applyTheme(t){ if(t === 'clair') root.dataset.theme = 'light'; else if(t === 'sombre') root.dataset.theme = 'dark'; else delete root.dataset.theme; }
 applyTheme(theme);
 root.classList.toggle('proj', !!store.get('proj', false));
+root.classList.toggle('prof-on', !!store.get('prof', false));
 
 // ---------------------------------------------------------------- 4. mise en page
 const label = c => (c.num ? c.num + '. ' : '') + c.title;
@@ -200,6 +245,7 @@ function buildHeader(doc){
   const cells = [
     [annex ? 'Annexe' : 'Chapitre', annex ? CH.num : `${CH.num} / ${total}`],
     ['Durée', CH.duration], ['Prérequis', CH.prereq], ['Activité', CH.activity],
+    ...Object.entries(CH.info || {}),                // cases libres : info: {'Fichiers': '.ili, .itf'}
   ].filter(c => c[1]);
   const q = CH.question;
   const h = document.createElement('header');
@@ -230,7 +276,8 @@ function buildPlan(doc){
   });
 }
 
-// Quiz : <script type="application/json" data-quiz>[{q, o:[…], a:index, w:"explication", ch:"page.html"}]</script>
+// Quiz : <script type="application/json" data-quiz>[{q, o:[…], a:index, w:"explication", ch:"page.html", code:["ili", "…"]}]</script>
+// (code est facultatif : un extrait affiché sous la question)
 function buildQuiz(doc){
   doc.querySelectorAll('script[data-quiz]').forEach(s => {
     let Q; try{ Q = JSON.parse(s.textContent); }catch(e){ s.outerHTML = '<p class="chip err">Quiz : JSON invalide</p>'; return; }
@@ -242,6 +289,8 @@ function buildQuiz(doc){
         <div class="opts" role="group" aria-label="Réponses à la question ${i + 1}">${q.o.map((o, k) => `<button type="button" data-k="${k}"><span class="l">${L[k]}</span><span>${inline(esc(o))}</span></button>`).join('')}</div>
         <p class="why"></p></li>`).join('')}</ol>
       <div class="res" hidden><div class="big"></div><p class="rtxt"></p><ul class="rlist"></ul></div>`;
+    box.querySelectorAll('.quiz .q').forEach(li => { const c = Q[+li.dataset.i].code;
+      if(c) li.querySelector('h3').after(makeCodeBlock(c[1], c[0], c[2] || 'extrait.' + c[0])); });
     s.replaceWith(...box.childNodes);
     let ans = store.get(key, {});
     const $ = sel => doc.querySelector(sel);
@@ -283,11 +332,12 @@ function buildToc(){
   toc.innerHTML = `
     <a class="brand" href="index.html">${LOGO}<span><b>${esc(C.title)}</b><small>${esc(C.subtitle)}</small></span></a>
     <button class="btn sm toc-toggle" type="button" aria-expanded="false">Menu</button>
-    <nav aria-label="Chapitres"><ol>${CHAPTERS.map((c, i) => `<li><a href="${c.file}"${i === IDX ? ' aria-current="page"' : ''}>
-      <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span><span class="v">${visited.has(c.file) && i !== IDX ? 'vu' : ''}</span></a></li>`).join('')}</ol></nav>
+    <nav aria-label="Chapitres"><ol>${NAV.map(c => `<li><a href="${c.file}"${c === CH ? ' aria-current="page"' : ''}>
+      <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span><span class="v">${visited.has(c.file) && c !== CH ? 'vu' : ''}</span></a></li>`).join('')}</ol></nav>
     <div class="toc-tools">
       <button class="tool" type="button" id="tTheme">Thème <span class="st"></span></button>
       <button class="tool" type="button" id="tProj">Mode projection <span class="st"></span></button>
+      <button class="tool" type="button" id="tProf">Notes formateur <span class="st"></span></button>
       <button class="tool" type="button" id="tApp" hidden>Installer l'appli <span class="st">hors ligne</span></button>
       <div class="toc-keys">← → chapitre · P projection</div>
       <div class="toc-keys" id="tOff"></div>
@@ -297,7 +347,10 @@ function buildToc(){
     q('#tTheme .st').textContent = theme;
     q('#tProj').setAttribute('aria-pressed', root.classList.contains('proj'));
     q('#tProj .st').textContent = root.classList.contains('proj') ? 'oui' : 'non';
+    q('#tProf').setAttribute('aria-pressed', root.classList.contains('prof-on'));
+    q('#tProf .st').textContent = root.classList.contains('prof-on') ? 'oui' : 'non';
   };
+  q('#tProf').onclick = () => { store.set('prof', root.classList.toggle('prof-on')); paint(); };
   q('#tTheme').onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; applyTheme(theme); store.set('theme', theme); paint(); };
   q('#tProj').onclick = () => { store.set('proj', root.classList.toggle('proj')); paint(); };
   q('.toc-toggle').onclick = e => { const o = toc.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', o); };
@@ -307,7 +360,7 @@ function buildToc(){
 }
 
 function buildPager(doc){
-  const p = CHAPTERS[IDX - 1], n = CHAPTERS[IDX + 1];
+  const p = NIDX > 0 && NAV[NIDX - 1], n = NIDX >= 0 && NAV[NIDX + 1];
   const nav = document.createElement('nav');
   nav.className = 'pager'; nav.setAttribute('aria-label', 'Chapitre précédent et suivant');
   nav.innerHTML = (p ? `<a class="prev" href="${p.file}"><small>← Précédent</small><b>${esc(label(p))}</b></a>` : '') +
@@ -328,7 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // définitions SVG partagées (effet crayon, flèches)
   document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fillink"/></marker></defs></svg>`);
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fillink"/></marker>
+    <marker id="arr-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="fillaccent"/></marker>
+    <marker id="tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1 1L11 6L1 11z" class="fillsheet strokeink" stroke-width="1.2"/></marker>
+    <marker id="dia" viewBox="0 0 14 10" refX="1" refY="5" markerWidth="15" markerHeight="11" orient="auto"><path d="M1 5L7 1L13 5L7 9z" class="fillsheet strokeink" stroke-width="1.2"/></marker></defs></svg>`);
 
   // contenu Markdown
   doc.querySelectorAll('script[type="text/markdown"]').forEach(s => {
@@ -345,6 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
   doc.querySelectorAll('script[type="text/x-code"]').forEach(s => {
     const fig = makeCodeBlock(dedent(s.textContent), s.dataset.lang, s.dataset.file);
     if(s.id) fig.id = s.id;
+    if(s.className) fig.classList.add(...s.className.split(/\s+/));
+    if(s.dataset.links) linkify(fig.querySelector('code'), s.dataset.links.split(','), s.dataset.group || 'g');
     s.replaceWith(fig);
   });
   // cartes consécutives → grille
@@ -368,8 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
 addEventListener('keydown', e => {
   if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable) return;
-  if(e.key === 'ArrowRight' && CHAPTERS[IDX + 1]) location.href = CHAPTERS[IDX + 1].file;
-  else if(e.key === 'ArrowLeft' && CHAPTERS[IDX - 1]) location.href = CHAPTERS[IDX - 1].file;
+  if(e.key === 'ArrowRight' && NIDX >= 0 && NAV[NIDX + 1]) location.href = NAV[NIDX + 1].file;
+  else if(e.key === 'ArrowLeft' && NIDX > 0) location.href = NAV[NIDX - 1].file;
   else if(e.key === 'p' || e.key === 'P'){ store.set('proj', root.classList.toggle('proj')); dispatchEvent(new Event('geo:proj')); }
 });
 

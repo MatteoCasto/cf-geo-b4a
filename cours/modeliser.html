@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Modéliser le territoire</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+#scene g{transition:opacity .6s}
+#scene .lamp{fill:var(--sheet);stroke:var(--c-line);stroke-width:1.4}
+#scene .bench{fill:var(--c-bat);stroke:var(--c-bat-line);stroke-width:1.2}
+#scene .pt{stroke:var(--accent);stroke-width:2.2;stroke-linecap:round}
+#scene .ptl{font:600 12px var(--f-mono);fill:var(--accent)}
+#scene .note{font-family:var(--f-hand);font-size:21px;fill:var(--ink-2)}
+#scene .note .ok{fill:var(--ok)} #scene .note .no{fill:var(--muted)}
+#scene #pts,#scene #uml,#scene .note{opacity:0}
+#scene[data-s="0"] .n0,#scene[data-s="1"] .n1,#scene[data-s="2"] .n2{opacity:1}
+#scene[data-s="1"] #ctx,#scene[data-s="2"] #ctx,#scene[data-s="3"] #ctx{opacity:.16}
+#scene[data-s="1"] #trees .tree{stroke:var(--accent);stroke-width:2.6}
+#scene[data-s="2"] #trees,#scene[data-s="3"] #trees{opacity:.18}
+#scene[data-s="2"] #pts,#scene[data-s="3"] #pts{opacity:1}
+#scene[data-s="3"] #uml{opacity:1}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.steps button{display:flex;gap:8px;align-items:center;border:1px solid var(--rule);background:var(--sheet);color:var(--ink-2);border-radius:5px;padding:6px 10px;font:600 .85rem var(--f-body);cursor:pointer}
+.steps button b{font:700 .75rem var(--f-mono);display:inline-grid;place-items:center;width:1.5em;height:1.5em;border-radius:50%;border:1px solid currentColor}
+.steps button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.step-txt{min-height:4.8em;margin:.8rem 0 0;font-size:.95rem}
+/* choix des types */
+.typ td{vertical-align:middle}
+.typ td:first-child code{white-space:nowrap}
+.typ select{width:100%}
+.typ .fb{font-size:.84rem;color:var(--ink-2);line-height:1.4}
+.typ tr.good td{background:var(--ok-soft)}
+.typ tr.bad td{background:var(--err-soft)}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Du terrain au modèle, en trois gestes
+
+Un modèle de données est une **simplification volontaire** de la réalité, faite pour un usage précis. Le même terrain donne des modèles différents selon qu'on s'occupe des arbres, de l'éclairage public ou des eaux.
+</script>
+
+<!-- composant interactif : croquis en quatre étapes -->
+<figure class="fig gridbg">
+  <div class="steps" id="steps" role="group" aria-label="Étapes de modélisation">
+    <button type="button" data-s="0" aria-pressed="true"><b>0</b>Le terrain</button>
+    <button type="button" data-s="1" aria-pressed="false"><b>1</b>Choisir</button>
+    <button type="button" data-s="2" aria-pressed="false"><b>2</b>Abstraire</button>
+    <button type="button" data-s="3" aria-pressed="false"><b>3</b>Décrire</button>
+  </div>
+  <svg class="sk" id="scene" data-s="0" viewBox="0 0 720 340" role="img" aria-label="Croquis d'une rue de Montavaux, simplifié étape par étape jusqu'à une classe Arbre">
+    <g id="ctx" class="crayon">
+      <path class="road" d="M0 228h470v36H0z"/>
+      <path class="ln thin" d="M0 228h470M0 264h470"/>
+      <path class="ln" d="M20 24h390v190H20zM140 24v190M250 24v190"/>
+      <path class="bat" d="M36 44h86v70H36z"/>
+      <path class="bat" d="M160 40h70v104h-70z"/>
+      <path class="bat" d="M300 150h60v44h-60z"/>
+      <path class="hedge" d="M250 30v176"/>
+      <path class="water" d="M440 0C412 70 462 150 432 228M432 264C412 292 446 316 438 340"/>
+      <g><path class="lamp" d="M110 270v18"/><circle class="lamp" cx="110" cy="270" r="5"/></g>
+      <g><path class="lamp" d="M320 270v18"/><circle class="lamp" cx="320" cy="270" r="5"/></g>
+      <path class="bench" d="M200 280h28v9h-28z"/>
+      <text class="lbl-s" x="14" y="310">Rue du Tilleul</text>
+      <text class="lbl-s" x="448" y="120" transform="rotate(80 448 120)">ruisseau</text>
+      <text class="lbl-s" x="260" y="56">haie</text>
+    </g>
+    <g id="trees" class="crayon">
+      <circle class="tree" cx="70"  cy="204" r="18"/>
+      <circle class="tree" cx="178" cy="200" r="22"/>
+      <circle class="tree" cx="282" cy="206" r="15"/>
+      <circle class="tree" cx="380" cy="198" r="20"/>
+      <circle class="tree" cx="300" cy="96"  r="24"/>
+    </g>
+    <g id="pts">
+      <path class="pt" d="M64 198l12 12M76 198l-12 12M172 194l12 12M184 194l-12 12M276 200l12 12M288 200l-12 12M374 192l12 12M386 192l-12 12M294 90l12 12M306 90l-12 12"/>
+      <text class="ptl" x="46"  y="186">A-0041</text>
+      <text class="ptl" x="154" y="182">A-0042</text>
+      <text class="ptl" x="258" y="190">A-0043</text>
+      <text class="ptl" x="356" y="180">A-0044</text>
+      <text class="ptl" x="276" y="78">A-0045</text>
+    </g>
+    <g class="note n0"><text x="496" y="80">Tout ce qu'on voit</text><text x="496" y="106">sur le terrain…</text><text x="496" y="150">rue, maisons, haie,</text><text x="496" y="176">ruisseau, banc,</text><text x="496" y="202">lampadaires, arbres</text></g>
+    <g class="note n1"><text x="496" y="60">Mandat :</text><text x="496" y="86">inventaire des arbres</text><text x="496" y="130" class="ok">✓ arbres</text><text x="496" y="158" class="no">✗ bâtiments</text><text x="496" y="186" class="no">✗ lampadaires, banc</text><text x="496" y="214" class="no">✗ ruisseau, haie</text></g>
+    <g class="note n2"><text x="496" y="70">arbre → un point</text><text x="496" y="96">(le tronc)</text><text x="496" y="146" class="no">couronne ignorée</text><text x="496" y="190">5 objets, même</text><text x="496" y="216">« forme » de fiche</text></g>
+    <g id="uml" class="uml-box">
+      <rect x="490" y="44" width="220" height="176"/>
+      <rect class="hd" x="490" y="44" width="220" height="30"/>
+      <text class="st" x="600" y="40" text-anchor="middle">classe</text>
+      <text class="nm" x="600" y="64" text-anchor="middle">Arbre</text>
+      <text x="500" y="96">NumeroInventaire : texte</text>
+      <text x="500" y="118">Espece : texte</text>
+      <text x="500" y="140">Hauteur : 0..60 m</text>
+      <text x="500" y="162">Etat : énumération</text>
+      <text x="500" y="184">Position : point MN95</text>
+      <text class="st" x="500" y="208">5 objets dans l'inventaire</text>
+    </g>
+  </svg>
+  <p class="step-txt" id="stepTxt" aria-live="polite"></p>
+  <figcaption>Fig. 2.1 · Choisir, abstraire, décrire. Utilisez les boutons ou les touches 0 à 3.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+1. **Choisir** ce qui est utile pour le mandat, et laisser le reste.
+2. **Abstraire** : décider comment représenter chaque chose (point, ligne, surface, ou pas de géométrie du tout).
+3. **Décrire** : regrouper les choses semblables en classes, et lister leurs attributs avec un type.
+
+Un modèle n'est jamais « vrai » ou « faux » dans l'absolu. Il est adapté, ou non, à l'usage prévu.
+:::
+
+## Le vocabulaire de base
+
+Ces mots reviendront dans tous les chapitres. Ils sont les mêmes en INTERLIS 1 et 2, sauf que INTERLIS 1 dit *table* là où INTERLIS 2 dit *classe*.
+
+| Terme | Ce que c'est | À Montavaux |
+|---|---|---|
+| **Modèle de données** | La description complète de ce qu'on échange. | `Arbres_Communaux_V1` |
+| **Classe** <span class="muted small">(ILI 1 : table)</span> | Un type de chose, avec une fiche commune. | `Arbre`, `Espece` |
+| **Objet** | Une chose concrète, un exemplaire de la classe. | l'arbre A-0042 |
+| **Attribut** | Une case de la fiche. | `Hauteur` |
+| **Type** <span class="muted small">(domaine de valeurs)</span> | Les valeurs permises pour un attribut. | 0.0 à 60.0 m |
+| **Identifiant** | Un attribut (ou une combinaison) qui distingue chaque objet. | `NumeroInventaire` |
+| **Relation** <span class="muted small">(association)</span> | Un lien entre objets de deux classes. | un arbre est d'une espèce |
+
+<div class="two">
+  <div class="box"><span class="lab">Classe</span><p>La fiche vierge : « un arbre a un numéro, une espèce, une hauteur, un état, une position ».</p></div>
+  <div class="box"><span class="lab">Objet</span><p>Une fiche remplie : « A-0042, <i>Tilia cordata</i>, 12.5 m, affaibli, 2538214.250 / 1152388.100 ».</p></div>
+</div>
+
+:::attention
+Le modèle ne contient **aucune donnée**. Il ne dit pas qu'il existe un arbre A-0042. Il dit à quoi doit ressembler la fiche de *n'importe quel* arbre. Les données sont dans le fichier de transfert.
+:::
+
+## Quel type pour quel attribut ?
+
+Pour chaque attribut, choisissez le type le plus adapté. La correction s'affiche tout de suite.
+</script>
+
+<!-- composant interactif : choix des types -->
+<div class="tbl typ" id="typ"><table>
+  <thead><tr><th>Attribut</th><th>Exemple de valeur</th><th style="width:13em">Type</th><th>Correction</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+<p class="small muted" id="typScore"></p>
+
+<script type="text/markdown">
+## Obligatoire ou facultatif ?
+
+Pour chaque attribut, il faut aussi décider s'il doit **toujours** avoir une valeur. Un arbre sans position n'a aucun sens dans l'inventaire : la position est **obligatoire**. En revanche, on ne connaît pas toujours l'année de plantation d'un vieux chêne : elle reste **facultative**.
+
+Ce choix a une conséquence directe. Un attribut obligatoire vide rendra le fichier invalide lors du contrôle (chapitre 6). Si on rend tout obligatoire, les livraisons seront bloquées pour des détails. Si rien ne l'est, les données seront incomplètes.
+
+:::terrain
+Avant de créer un modèle, cherchez s'il en existe déjà un. La Confédération publie les modèles de géodonnées minimaux, et de nombreux cantons publient leurs propres modèles. Réutiliser un modèle existant, c'est gagner du temps et pouvoir échanger avec d'autres dès le premier jour.
+:::
+
+## À vous : les bancs publics
+
+:::exo papier · 20 min, groupes de 3
+Le service de la voirie de Montavaux veut inventorier ses **bancs publics** pour planifier leur entretien (peinture, remplacement des lattes, vandalisme).
+
+1. **Choisir** : quelles informations sont utiles pour ce mandat ? Lesquelles sont inutiles ?
+2. **Abstraire** : un banc est-il un point, une ligne ou une surface ? Justifiez.
+3. **Décrire** : dessinez la classe `Banc` avec 5 à 7 attributs. Pour chacun : type, obligatoire ou non.
+
+??? Une solution possible
+| Attribut | Type | Oblig. |
+|---|---|---|
+| `Numero` | texte, 8 caractères (« B-0012 ») | oui |
+| `Position` | point MN95 | oui |
+| `Orientation` | angle 0 à 400 gon (vers où regarde-t-on ?) | non |
+| `Materiau` | énumération : bois, métal, béton, mixte | oui |
+| `Places` | entier de 1 à 10 | non |
+| `AnneePose` | entier de 1900 à 2100 | non |
+| `Etat` | énumération : bon, à repeindre, à réparer, à remplacer | oui |
+
+Le point suffit : un banc mesure 2 m, c'est négligeable à l'échelle d'un plan d'entretien. L'orientation est un bon exemple d'attribut qu'on oublie souvent, et qu'on regrette à l'heure de dessiner le symbole sur le plan.
+???
+:::
+
+:::exo discussion · 5 min
+Dans la classe `Arbre`, on a mis `Espece : texte`. Que se passe-t-il si une personne saisit « Tilia cordata », une autre « tilia cordata » et une troisième « Tilleul » ? Proposez une meilleure solution.
+
+??? Réponse
+On obtient trois espèces différentes pour un seul arbre réel, et les statistiques par espèce sont fausses. Mieux : créer une **classe `Espece`** séparée (nom latin, nom français) et **relier** chaque arbre à une espèce. On saisit l'espèce une seule fois, puis on la choisit dans une liste. C'est une *relation* (INTERLIS 1) ou une *association* (INTERLIS 2). On la verra aux chapitres 3 et 4.
+???
+:::
+
+:::prof
+Faire l'exercice des bancs sur papier A3, sans ordinateur. Chaque groupe présente sa classe en 1 minute. Relever les divergences (point ou surface ? matériau en texte libre ?) : elles montrent qu'il n'y a pas *une* solution, mais des choix à justifier.
+
+Garder les feuilles : au chapitre 5, les groupes pourront retranscrire leur banc en INTERLIS 2 dans l'atelier.
+:::
+</script>
+
+</main>
+<script>
+// ---- composants interactifs de la page ----
+(function(){
+  /* ---------- croquis en quatre étapes ---------- */
+  const TXT = [
+    "<strong>Le terrain.</strong> Un bout de Montavaux vu d'en haut : une rue, des maisons, une haie, un ruisseau, des lampadaires, un banc et cinq arbres. La réalité contient une infinité de détails. Il faut décider lesquels comptent.",
+    "<strong>Choisir.</strong> Le mandat est l'inventaire des arbres. On garde les arbres et on laisse le reste de côté. Ce n'est pas faux, c'est hors sujet. Pour un mandat d'éclairage public, on aurait gardé les lampadaires et ignoré les arbres.",
+    "<strong>Abstraire.</strong> Chaque arbre devient un point : la position du tronc. On renonce à la forme de la couronne. On aurait pu choisir un cercle ou une surface : c'est un choix de modélisation, qui dépend de l'usage.",
+    "<strong>Décrire.</strong> Les cinq arbres ont la même « fiche » : c'est une <strong>classe</strong>, <code>Arbre</code>. Chaque arbre est un <strong>objet</strong> de cette classe. Les cases de la fiche sont les <strong>attributs</strong>, chacun avec un <strong>type</strong>.",
+  ];
+  const scene = document.getElementById('scene'), btns = document.querySelectorAll('#steps button');
+  const go = s => {
+    scene.dataset.s = s;
+    btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.s == s));
+    document.getElementById('stepTxt').innerHTML = TXT[s];
+  };
+  btns.forEach(b => b.onclick = () => go(+b.dataset.s));
+  addEventListener('keydown', e => {
+    if(e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable) return;
+    if(/^[0-3]$/.test(e.key)) go(+e.key);
+  });
+  go(0);
+
+  /* ---------- choix des types ---------- */
+  const TYPES = ['— choisir —','Texte','Nombre entier','Nombre décimal + unité','Énumération','Coordonnée (point)','Date'];
+  const Q = [
+    {a:'NumeroInventaire', v:'A-0042', ok:'Texte',
+     fb:{'Texte':"Oui. Il contient une lettre et un tiret, et le zéro de tête compte : « A-0042 » n'est pas un nombre.",
+         'Nombre entier':"Non : « A-0042 » contient des lettres, et un nombre perdrait les zéros de tête (0042 → 42).",
+         '*':"Non : c'est un code. Même quand un identifiant ne contient que des chiffres, on le traite comme du texte."}},
+    {a:'Hauteur', v:'12.5', ok:'Nombre décimal + unité',
+     fb:{'Nombre décimal + unité':"Oui. On précise l'unité (m) et une plage réaliste, par exemple 0.0 à 60.0.",
+         'Nombre entier':"Presque : on veut des décimales (12.5 m), et surtout une unité.",
+         '*':"Non : c'est une mesure. Il faut un nombre, avec son unité et une plage de valeurs."}},
+    {a:'Etat', v:'affaibli', ok:'Énumération',
+     fb:{'Énumération':"Oui. Liste fermée : sain, affaibli, malade, mort. Impossible de saisir « malad » ou « Affaibli ».",
+         'Texte':"Possible, mais dangereux : chacun écrira l'état à sa façon, et on ne pourra plus compter les arbres malades.",
+         '*':"Non : il y a un petit nombre de valeurs connues à l'avance. C'est le cas typique de l'énumération."}},
+    {a:'AnneePlantation', v:'1987', ok:'Nombre entier',
+     fb:{'Nombre entier':"Oui, avec une plage : 1800 à 2100 par exemple.",
+         'Date':"Tentant, mais une date demande jour, mois et année. On ne connaît que l'année : un entier suffit.",
+         '*':"Non : c'est une année seule. Un entier avec une plage raisonnable suffit."}},
+    {a:'Position', v:'2538214.250 / 1152388.100', ok:'Coordonnée (point)',
+     fb:{'Coordonnée (point)':"Oui. Une coordonnée 2D dans le domaine MN95 (E 2 460 000 à 2 870 000, N 1 045 000 à 1 310 000).",
+         'Texte':"Non : sous forme de texte, aucun logiciel ne pourra placer l'arbre sur une carte, ni vérifier qu'il est en Suisse.",
+         '*':"Non : c'est une géométrie. INTERLIS a un type dédié aux coordonnées."}},
+    {a:'Remarque', v:'Tuteur à retirer en 2027', ok:'Texte',
+     fb:{'Texte':"Oui. Un texte libre, facultatif, avec une longueur maximale (200 caractères par exemple).",
+         '*':"Non : c'est une note libre, sans structure. Un texte facultatif convient."}},
+  ];
+  const tb = document.querySelector('#typ tbody');
+  tb.innerHTML = Q.map((q, i) => `<tr data-i="${i}"><td><code>${q.a}</code></td><td class="mono small">${GEO.esc(q.v)}</td>
+    <td><select aria-label="Type pour ${q.a}">${TYPES.map(t => `<option>${t}</option>`).join('')}</select></td><td class="fb"></td></tr>`).join('');
+  const score = () => {
+    const n = tb.querySelectorAll('tr.good').length, d = tb.querySelectorAll('tr.good,tr.bad').length;
+    document.getElementById('typScore').textContent = d ? `${n} bonne${n>1?'s':''} réponse${n>1?'s':''} sur ${Q.length}.` : '';
+  };
+  tb.querySelectorAll('tr').forEach(tr => {
+    const q = Q[+tr.dataset.i], sel = tr.querySelector('select'), fb = tr.querySelector('.fb');
+    sel.onchange = () => {
+      const v = sel.value;
+      tr.classList.remove('good','bad');
+      if(v === TYPES[0]){ fb.textContent = ''; score(); return; }
+      tr.classList.add(v === q.ok ? 'good' : 'bad');
+      fb.textContent = q.fb[v] || q.fb['*'];
+      score();
+    };
+  });
+})();
+</script>
+</body>
+</html>

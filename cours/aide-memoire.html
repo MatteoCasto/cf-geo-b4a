@@ -6,45 +6,176 @@
 <title>Aide-mémoire</title>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<style>
+/* fiche dense : deux colonnes de cartes, code et tableaux compacts */
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:700px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card .codeblock{margin:.4rem 0 0}
+.card pre{font-size:.74rem;line-height:1.5}
+.card .tbl{margin:.4rem 0 0}
+.card table{font-size:.82rem}
+.card th,.card td{padding:4px 8px}
+@media print{
+  .cards{gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .card{break-inside:avoid;padding:6px 8px}
+  .card pre{font-size:7.5pt}
+  .card table{font-size:8pt}
+}
+</style>
 </head>
 <body>
 <main class="doc">
 
 <script type="text/markdown">
-:::carte 1 · Systèmes de référence
-$$ E ≈ Y + 2 000 000 $$
-$$ N ≈ X + 1 000 000 $$
-MN95 : 7 chiffres, E commence par 2, N par 1. Transformation rigoureuse : REFRAME.
+:::carte A · Squelette INTERLIS 1
+```ili1 modele.ili · INTERLIS 1
+TRANSFER Nom;
+MODEL Modele
+  DOMAIN
+    CoordCH = COORD2 2460000.000 1045000.000
+                     2870000.000 1310000.000;
+  TOPIC Theme =
+    TABLE Arbre =
+      Numero : TEXT*10;              !! obligatoire
+      Hauteur : OPTIONAL [0.0 .. 60.0];
+      Etat : (sain, affaibli, malade, mort);
+      Espece : -> Espece;            !! relation
+      Position : CoordCH;
+    IDENT Numero;
+    END Arbre;
+  END Theme.
+END Modele.
+FORMAT FREE;
+CODE BLANK = DEFAULT, UNDEFINED = DEFAULT,
+  CONTINUE = DEFAULT; TID = ANY; END.
+```
 :::
 
-:::carte 2 · GNSS
-- ≥ 4 satellites (E, N, h, temps).
-- PDOP petit = bonne géométrie.
-- Masque d'élévation : compromis nombre / qualité.
+:::carte B · Squelette INTERLIS 2.3
+```ili modele.ili · INTERLIS 2.3
+INTERLIS 2.3;
+MODEL Modele_V1 (fr) AT "https://…" VERSION "2026-09-30" =
+  IMPORTS GeometryCHLV95_V1;
+  TOPIC Theme =
+    STRUCTURE Controle =
+      Date : MANDATORY INTERLIS.XMLDate;
+    END Controle;
+    CLASS Objet (ABSTRACT) =
+      Numero : MANDATORY TEXT*10;
+      Controles : BAG {0..*} OF Controle;
+    UNIQUE Numero;
+    END Objet;
+    CLASS Arbre EXTENDS Objet =
+      Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+      Position : MANDATORY GeometryCHLV95_V1.Coord2;
+    END Arbre;
+    ASSOCIATION ArbreEspece =
+      Arbre -- {0..*} Arbre;
+      Espece -- {1} Espece;
+    END ArbreEspece;
+  END Theme;
+END Modele_V1.
+```
 :::
 
-:::carte 3 · Nivellement
-$$ Δh = AR − AV $$
-$$ Σ AR − Σ AV = Σ Δh $$
-Boucle fermée : Σ Δh = écart de fermeture.
+:::carte C · INTERLIS 1 ou 2
+| | ILI 1 | ILI 2 |
+|---|---|---|
+| Objet | `TABLE` | `CLASS` |
+| Obligatoire | par défaut | `MANDATORY` |
+| Facultatif | `OPTIONAL` | par défaut |
+| Unicité | `IDENT` | `UNIQUE` |
+| Lien | `-> Table` | `ASSOCIATION` |
+| Fin de thème | `END Theme.` | `END Theme;` |
+| Fichier | ITF, valeurs dans l'ordre | XTF, balises nommées |
+| Énumération | numéro (0, 1, …) | en toutes lettres |
 :::
 
-:::carte 4 · LiDAR
-- Classes : 2 sol, 3–5 végétation, 6 bâtiment, 7 bruit.
-- MNT = terrain nu ; MNS = surface.
-- MNS − MNT = hauteur des objets.
+:::carte D · Types INTERLIS 2
+| `TEXT*60` | texte, 60 caractères au plus |
+| `(a, b, c)` | énumération |
+| `0.0 .. 60.0 [INTERLIS.m]` | nombre, plage, unité |
+| `BOOLEAN` | vrai / faux |
+| `INTERLIS.XMLDate` | date AAAA-MM-JJ |
+| `COORD …` | point |
+| `POLYLINE WITH (STRAIGHTS) VERTEX …` | ligne |
+| `SURFACE …` / `AREA …` | surfaces libres / partition |
+| `BAG {0..*} OF S` | plusieurs structures S |
 :::
 
-:::carte 5 · Analyse spatiale
-$$ ST_DWithin(a, b, d) $$
-Distance en mètres seulement dans un système projeté (MN95 = EPSG:2056).
+:::carte E · ITF : les mots-clés
+| `SCNT … ////` | en-tête libre |
+| `MTID` / `MODL` | nom du transfert / du modèle |
+| `TOPI` … `ETOP` | début / fin de thème |
+| `TABL` … `ETAB` | début / fin de table |
+| `OBJE` | un objet : TID puis valeurs |
+| `STPT LIPT ELIN` | début, point, fin de ligne |
+| `EMOD` / `ENDE` | fin du modèle / du fichier |
+| `@` · `_` | valeur non définie · espace dans un texte |
 :::
 
-:::carte Codes EPSG utiles
-- `2056` MN95 / CH1903+
-- `21781` MN03 / CH1903
-- `4326` WGS84 (degrés)
+:::carte F · XTF 2.3 : la structure
+```xtf donnees.xtf
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+  <HEADERSECTION SENDER="…" VERSION="2.3">
+    <MODELS><MODEL NAME="Modele_V1" VERSION="…" URI="…"/></MODELS>
+  </HEADERSECTION>
+  <DATASECTION>
+    <Modele_V1.Theme BID="b1">
+      <Modele_V1.Theme.Arbre TID="a42">
+        <Numero>A-0042</Numero>
+        <Position><COORD><C1>2538214.250</C1><C2>1152388.100</C2></COORD></Position>
+        <Espece REF="e1"/>
+      </Modele_V1.Theme.Arbre>
+    </Modele_V1.Theme>
+  </DATASECTION>
+</TRANSFER>
+```
 :::
+
+:::carte G · Cardinalités
+| `{1}` | exactement un |
+| `{0..1}` | au plus un |
+| `{1..*}` | au moins un |
+| `{0..*}` | quelconque |
+
+**Se lit depuis l'autre bout :** `Espece -- {1} Espece;` = depuis un arbre, exactement une espèce.
+
+`--` association · `-<>` agrégation · `-<#>` composition
+:::
+
+:::carte H · Contrôle : trois filtres
+1. **Bien formé** : XML correct.
+2. **Modèle** : types, plages, énumérations, obligatoires, références, coordonnées.
+3. **Contraintes** : UNIQUE, CONSTRAINT, géométries, règles cantonales.
+
+**Pièges classiques** : date `12.05.2026` au lieu de `2026-05-12` · casse d'une énumération (`Malade`) · coordonnées MN03 · virgule décimale · doublon d'identifiant · ordre des balises.
+:::
+
+### Commandes
+
+```sh terminal
+java -jar ili2c.jar Modele_V1.ili                                        # contrôler un modèle
+java -jar ili2gpkg.jar --schemaimport --dbfile d.gpkg --defaultSrsCode 2056 Modele_V1.ili   # créer la base
+java -jar ili2gpkg.jar --import --dbfile d.gpkg donnees.xtf              # importer
+java -jar ili2gpkg.jar --export --dbfile d.gpkg --models Modele_V1 sortie.xtf   # exporter
+java -jar ilivalidator.jar --log controle.log sortie.xtf                 # contrôler des données
+# option commune : --modeldir ".;https://models.interlis.ch"
+```
+
+### Vocabulaire français · allemand
+
+| Français | Deutsch | Français | Deutsch |
+|---|---|---|---|
+| modèle de données | Datenmodell | fichier de transfert | Transferdatei |
+| thème | Thema | dépôt de modèles | Modellablage |
+| classe | Klasse | contrôle, validation | Prüfung, Validierung |
+| attribut | Attribut | mensuration officielle (MO) | amtliche Vermessung (AV) |
+| énumération | Aufzählung | géodonnées de base | Geobasisdaten |
+| domaine de valeurs | Wertebereich | modèle de géodonnées minimal | minimales Geodatenmodell |
+| association | Beziehung | couverture du sol | Bodenbedeckung |
+| héritage | Vererbung | bien-fonds | Liegenschaft, Grundstück |
+| obligatoire | obligatorisch (Pflicht-) | LGéo | GeoIG |
 </script>
 
 </main>

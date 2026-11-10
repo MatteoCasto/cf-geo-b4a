@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Contrôler les données</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+/* trois filtres */
+.sieve{display:grid;gap:8px;margin:0}
+.sieve > div{display:grid;grid-template-columns:3rem minmax(0,1fr);gap:4px 14px;align-items:center;border:1.5px solid var(--ink);border-radius:6px;padding:12px 16px;background:var(--sheet)}
+.sieve > div:nth-child(2){margin-inline:4%}
+.sieve > div:nth-child(3){margin-inline:8%}
+.sieve .n{grid-row:span 2;font:800 1.8rem/1 var(--f-display);color:var(--accent);text-align:center}
+.sieve b{font:700 1rem var(--f-display)}
+.sieve p{margin:0;font-size:.88rem;color:var(--ink-2)}
+.lvl td{vertical-align:middle}
+.lvl td:first-child code{white-space:pre;font-size:.8rem}
+.lvl select{width:100%}
+.lvl tr.good td{background:var(--ok-soft)} .lvl tr.bad td{background:var(--err-soft)}
+.lvl .fb{font-size:.84rem;color:var(--ink-2)}
+/* banc de contrôle */
+.bench{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.hunt{list-style:none;margin:0;padding:8px 0;background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;font:400 .78rem/1.55 var(--f-mono);counter-reset:l;overflow:auto;max-height:560px}
+.hunt li{margin:0}
+.hunt button{all:unset;display:block;box-sizing:border-box;width:100%;padding:0 10px 0 0;white-space:pre;cursor:pointer;color:var(--code-fg);border-left:4px solid transparent}
+.hunt button::before{counter-increment:l;content:counter(l);display:inline-block;width:2.6em;padding-right:.8em;text-align:right;color:var(--code-com)}
+.hunt button:hover{background:var(--grid)}
+.hunt button[aria-pressed="true"]{background:var(--hl);border-left-color:var(--warn)}
+.hunt button.found{background:var(--ok-soft);border-left-color:var(--ok)}
+.hunt button.missed{background:var(--err-soft);border-left-color:var(--err)}
+.hunt button.fp{background:var(--warn-soft);border-left-color:var(--warn);text-decoration:line-through;text-decoration-color:var(--warn)}
+.hunt button.flash{outline:2px solid var(--accent);outline-offset:-2px}
+.hunt button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.side{display:flex;flex-direction:column;gap:12px}
+.console{background:#10181d;color:#dbe4e6;border-radius:6px;padding:10px 12px;font:400 .76rem/1.55 var(--f-mono);max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.console .i{color:#8b9aa1}
+.console .e{color:#ff8a95;cursor:pointer}
+.console .e:hover{text-decoration:underline}
+.console .ok{color:#5fd07e}
+.score{border:1.5px solid var(--ink);border-radius:6px;padding:10px 14px;background:var(--sheet);font-size:.92rem}
+.score b.big{font:800 1.6rem var(--f-display);margin-right:6px}
+.expl{list-style:none;padding:0;margin:0;font-size:.86rem}
+.expl li{border-bottom:1px solid var(--rule);padding:6px 0}
+.expl li .mono{font-size:.75rem;color:var(--muted)}
+#fixTa{width:100%;height:520px;font:400 .78rem/1.55 var(--f-mono);background:var(--code-bg);color:var(--code-fg);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;resize:vertical;white-space:pre;overflow:auto;tab-size:2}
+#fixTa:focus-visible{outline:2px solid var(--accent)}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Bien formé n'est pas valide
+
+Un contrôle de données passe par trois filtres, du plus grossier au plus fin. Un fichier doit passer les trois.
+</script>
+
+<!-- figure : trois filtres -->
+<figure class="fig">
+  <div class="sieve">
+    <div><span class="n">1</span><b>Bien formé</b><p>Le fichier est un XML correct : chaque balise ouverte est fermée, les guillemets sont en place. N'importe quel logiciel XML peut le lire. On ne sait encore rien de son contenu.</p></div>
+    <div><span class="n">2</span><b>Conforme au modèle</b><p>Chaque objet appartient à une classe du modèle. Les attributs obligatoires sont présents, les valeurs respectent leur type (plage, énumération, longueur, coordonnées) et les références pointent vers des objets qui existent.</p></div>
+    <div><span class="n">3</span><b>Contraintes respectées</b><p>Les règles qui portent sur plusieurs objets : unicité (<code>UNIQUE</code>), contraintes (<code>CONSTRAINT</code>), géométries sans chevauchement. S'y ajoutent souvent des contrôles propres au canton.</p></div>
+  </div>
+  <figcaption>Fig. 6.1 · Trois niveaux de contrôle. « Valide » signifie : passe les trois.</figcaption>
+</figure>
+
+<script type="text/markdown">
+Pour chaque extrait, à quel filtre le fichier est-il arrêté ?
+</script>
+
+<!-- composant interactif : à quel filtre ? -->
+<div class="tbl lvl" id="lvl"><table>
+  <thead><tr><th>Extrait</th><th style="width:12em">Arrêté au filtre…</th><th>Correction</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+
+<script type="text/markdown">
+## Chasse aux erreurs
+
+Le bureau Géo-Montavaux SA livre l'inventaire des arbres à la commune. Le fichier est **bien formé**, mais il contient <strong id="nErr">7</strong> erreurs. Cliquez sur les lignes qui vous semblent fausses, puis lancez le contrôle.
+</script>
+
+<!-- composant interactif : chasse aux erreurs dans un XTF -->
+<div class="bench" id="bench">
+  <ol class="hunt" id="hunt" aria-label="Fichier XTF à contrôler, une ligne par bouton"></ol>
+  <div class="side">
+    <div class="row">
+      <button class="btn primary" type="button" id="btRun">Lancer le contrôle</button>
+      <button class="btn" type="button" id="btClear">Effacer mes marques</button>
+    </div>
+    <div class="score" id="score" aria-live="polite"></div>
+    <div class="console" id="console" aria-label="Rapport de contrôle"><span class="i">Rapport de contrôle : pas encore lancé.</span></div>
+    <ul class="expl" id="expl"></ul>
+  </div>
+</div>
+
+<script type="text/markdown">
+:::retenir
+Un rapport de contrôle donne pour chaque erreur : **la ligne**, **la classe**, **l'identifiant de l'objet** (`tid`) et **l'attribut** en cause. Avec ces quatre informations, on retrouve l'erreur en quelques secondes, même dans un fichier de 500 000 lignes.
+:::
+
+## À vous de corriger
+
+Corrigez le fichier directement ci-dessous, puis relancez le contrôle jusqu'à obtenir zéro erreur. Pour les valeurs inconnues, supprimez la ligne si l'attribut est facultatif.
+</script>
+
+<!-- composant interactif : corriger et recontrôler -->
+<div class="bench">
+  <textarea id="fixTa" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Fichier XTF à corriger"></textarea>
+  <div class="side">
+    <div class="row">
+      <button class="btn primary" type="button" id="btFix">Contrôler</button>
+      <button class="btn" type="button" id="btOrig">Fichier d'origine</button>
+    </div>
+    <div class="console" id="console2"><span class="i">Modifiez le fichier, puis cliquez sur Contrôler.</span></div>
+  </div>
+</div>
+
+<script type="text/markdown">
+:::exo questions · 5 min
+1. L'arbre `a47` n'a pas d'état. Avez-vous le droit d'inventer « sain » pour que le fichier passe ?
+2. L'arbre `a50` a des coordonnées à 6 chiffres. Que s'est-il probablement passé ?
+
+??? Réponses
+1. **Non.** Le contrôle signale un manque, pas une valeur à deviner. On demande l'information à la personne qui a fait le relevé, ou on retourne sur le terrain. Un fichier « valide » avec des données inventées est pire qu'un fichier refusé.
+2. Les coordonnées sont en **MN03** (ancien cadre LV03) au lieu de **MN95**. Ajouter 2 000 000 et 1 000 000 donne une *approximation* au mètre près. La vraie transformation (REFRAME, ou l'outil de transformation de votre SIG) tient compte des distorsions de l'ancien réseau.
+???
+:::
+
+## Le vrai outil : ilivalidator
+
+Le banc de ce chapitre imite **ilivalidator**, l'outil de contrôle libre et gratuit utilisé en Suisse. Il lit le modèle, puis contrôle le fichier.
+
+```sh terminal
+# contrôler un fichier XTF (le modèle est cherché dans les dépôts de modèles)
+java -jar ilivalidator.jar arbres_montavaux.xtf
+
+# garder un rapport dans un fichier, et chercher aussi le modèle dans le dossier courant
+java -jar ilivalidator.jar --modeldir ".;https://models.interlis.ch" --log controle.log arbres_montavaux.xtf
+```
+
+En plus de ce que fait notre banc, ilivalidator contrôle les **géométries** : lignes qui se croisent elles-mêmes, surfaces non fermées, chevauchements dans une AREA, arcs impossibles. Il sait lire l'ITF comme le XTF.
+
+:::terrain
+Avant chaque livraison au canton, contrôlez vous-même votre fichier. Les cantons contrôlent tout ce qu'ils reçoivent, souvent avec des règles supplémentaires (par exemple pour la mensuration officielle). Un fichier refusé, c'est un aller-retour, du temps perdu et parfois une facture.
+:::
+
+:::prof
+La chasse aux erreurs se fait bien à deux : l'un lit le modèle (chapitre 4), l'autre le fichier. Laisser 10 minutes avant de lancer le contrôle. Les erreurs les plus souvent manquées : la date au format suisse (`12.05.2026` au lieu de `2026-05-12`) et le doublon de numéro d'inventaire.
+
+Insister sur la question 1 de l'exercice : ne jamais « réparer » une donnée manquante en inventant une valeur.
+:::
+</script>
+
+</main>
+<script>
+// ---- composants interactifs : niveaux de contrôle, banc de contrôle (validateur simplifié) ----
+// attend « cours:ready » : le compteur #nErr est dans le texte Markdown
+document.addEventListener('cours:ready', function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = GEO.esc;
+
+/* ---------- 6.1 niveaux ---------- */
+const LV = ['— choisir —','1 · bien formé','2 · modèle','3 · contraintes','aucun, c\'est valide'];
+const LQ = [
+  {x:'<Hauteur>12.5</Hauteur', ok:1, fb:"Filtre 1 : la balise fermante n'est pas terminée (> manquant). Le fichier n'est même pas un XML correct."},
+  {x:'<Hauteur>douze</Hauteur>', ok:2, fb:"Filtre 2 : le XML est correct, mais « douze » n'est pas un nombre. Le modèle attend 0.0 .. 60.0."},
+  {x:'<Etat>Malade</Etat>', ok:2, fb:"Filtre 2 : les énumérations respectent la casse. La valeur permise est « malade »."},
+  {x:'<Hauteur>60.0</Hauteur>', ok:4, fb:"Valide : 60.0 est la borne supérieure de la plage 0.0 .. 60.0, elle est incluse."},
+  {x:'deux arbres avec\n<NumeroInventaire>A-0043</NumeroInventaire>', ok:3, fb:"Filtre 3 : chaque objet est correct pris seul, mais la contrainte UNIQUE NumeroInventaire porte sur l'ensemble des objets."},
+];
+const lb = document.querySelector('#lvl tbody');
+lb.innerHTML = LQ.map((q,i)=>`<tr><td><code>${esc(q.x)}</code></td><td><select aria-label="Filtre pour l'extrait ${i+1}">${LV.map(o=>`<option>${esc(o)}</option>`).join('')}</select></td><td class="fb"></td></tr>`).join('');
+lb.querySelectorAll('tr').forEach((tr,i)=>{
+  const s = tr.querySelector('select');
+  s.onchange = ()=>{
+    tr.classList.remove('good','bad');
+    if(!s.selectedIndex){ tr.querySelector('.fb').textContent = ''; return; }
+    const ok = s.selectedIndex === LQ[i].ok;
+    tr.classList.add(ok ? 'good' : 'bad');
+    tr.querySelector('.fb').textContent = (ok ? 'Oui. ' : 'Non. ') + LQ[i].fb;
+  };
+});
+
+/* ---------- le fichier à contrôler ---------- */
+const P = 'Arbres_Communaux_V1.Inventaire';
+const tree = (tid, num, etat, extra, h, an, e, n, ref) => [
+  `      <${P}.Arbre TID="${tid}">`,
+  `        <NumeroInventaire>${num}</NumeroInventaire>`,
+  ...(etat === null ? [] : [`        <Etat>${etat}</Etat>`]),
+  ...extra,
+  ...(h === null ? [] : [`        <Hauteur>${h}</Hauteur>`]),
+  ...(an === null ? [] : [`        <AnneePlantation>${an}</AnneePlantation>`]),
+  `        <Position><COORD><C1>${e}</C1><C2>${n}</C2></COORD></Position>`,
+  `        <Espece REF="${ref}"/>`,
+  `      </${P}.Arbre>`,
+];
+const ORIG = [
+  '<?xml version="1.0" encoding="UTF-8"?>',
+  '<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">',
+  '  <HEADERSECTION SENDER="Bureau Geo-Montavaux SA" VERSION="2.3">',
+  '    <MODELS>',
+  '      <MODEL NAME="Arbres_Communaux_V1" VERSION="2026-09-30" URI="https://models.montavaux.ch"/>',
+  '    </MODELS>',
+  '  </HEADERSECTION>',
+  '  <DATASECTION>',
+  `    <${P} BID="b1">`,
+  `      <${P}.Espece TID="e1">`,
+  '        <NomLatin>Tilia cordata</NomLatin>',
+  '        <NomFrancais>Tilleul à petites feuilles</NomFrancais>',
+  `      </${P}.Espece>`,
+  `      <${P}.Espece TID="e2">`,
+  '        <NomLatin>Acer platanoides</NomLatin>',
+  '        <NomFrancais>Érable plane</NomFrancais>',
+  `      </${P}.Espece>`,
+  ...tree('a42','A-0042','affaibli',[
+    '        <Controles>',
+    `          <${P}.Controle>`,
+    '            <Date>12.05.2026</Date>',
+    '            <Remarque>Branche morte côté rue</Remarque>',
+    `          </${P}.Controle>`,
+    '        </Controles>'], '12.5','1987','2538214.250','1152388.100','e1'),
+  ...tree('a43','A-0043','sain',[], '14.0','1979','2538241.600','1152387.300','e1'),
+  ...tree('a44','A-0044','malade',[], null,null,'2538268.900','1152386.700','e2'),
+  ...tree('a45','A-0045','sain',[], '72.0','2019','2538301.450','1152412.800','e2'),
+  ...tree('a46','A-0046','malad',[], '8.5','2021','2538322.100','1152415.050','e1'),
+  ...tree('a47','A-0047',null,[], '6.0','2022','2538343.700','1152417.900','e2'),
+  ...tree('a48','A-0043','sain',[], '9.0',null,'2538365.200','1152420.400','e1'),
+  ...tree('a49','A-0049','sain',[], '11.0','2015','2538386.800','1152423.150','e9'),
+  ...tree('a50','A-0050','sain',[], '5.5','2023','538408.300','152425.600','e2'),
+  `    </${P}>`,
+  '  </DATASECTION>',
+  '</TRANSFER>',
+].join('\n');
+
+/* ---------- validateur (modèle Arbres_Communaux_V1, simplifié) ---------- */
+const CLS = {
+  [P+'.Espece']: {s:'Espece', attrs:[
+    {n:'NomLatin', t:'text', max:60, mand:true},
+    {n:'NomFrancais', t:'text', max:60}]},
+  [P+'.Arbre']: {s:'Arbre', attrs:[
+    {n:'NumeroInventaire', t:'text', max:10, mand:true},
+    {n:'Etat', t:'enum', vals:['sain','affaibli','malade','mort'], mand:true},
+    {n:'Controles', t:'bag', of:P+'.Controle'},
+    {n:'Hauteur', t:'num', min:0, max:60},
+    {n:'AnneePlantation', t:'int', min:1800, max:2100},
+    {n:'Position', t:'coord', mand:true},
+    {n:'Espece', t:'ref', to:P+'.Espece', min:1}]},
+};
+const STRUCT = {[P+'.Controle']: [{n:'Date', t:'date', mand:true}, {n:'Remarque', t:'text', max:200}]};
+const FR = {
+  range:"La valeur sort de la plage définie dans le modèle.",
+  enum:"Cette valeur ne fait pas partie de l'énumération. Attention à l'orthographe et à la casse.",
+  mand:"Attribut obligatoire (MANDATORY) absent.",
+  unique:"Deux objets ont la même valeur pour un attribut déclaré UNIQUE.",
+  ref:"La référence pointe vers un objet qui n'existe pas dans le fichier.",
+  coord:"Coordonnée hors du domaine MN95. Six chiffres avant la virgule : sans doute du MN03.",
+  date:"Une date XML s'écrit AAAA-MM-JJ, par exemple 2026-05-12.",
+  num:"Ce n'est pas un nombre. Le séparateur décimal est le point.",
+  len:"Le texte dépasse la longueur maximale du modèle.",
+  unknown:"Cette balise n'existe pas dans la classe. Faute de frappe, ou mauvaise classe ?",
+  order:"Les attributs doivent apparaître dans l'ordre du modèle.",
+  tid:"Deux objets ont le même identifiant TID.",
+  card:"Le rôle exige une référence (cardinalité {1}).",
+  model:"Le fichier annonce un autre modèle que celui attendu.",
+  xml:"Le fichier n'est pas un XML bien formé. Il faut corriger cela avant tout le reste.",
+  cls:"Cette classe n'existe pas dans le thème.",
+};
+function validate(text){
+  const E = [];
+  const add = (kind, line, obj, attr, msg) => E.push({kind, line, objLine:obj ? obj.line : line, key:(obj ? obj.tid : '') + '/' + (attr || kind), msg:(obj ? `${obj.cls}: tid ${obj.tid}: ` : '') + msg});
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  const pe = doc.getElementsByTagName('parsererror')[0];
+  if(pe){
+    const m = pe.textContent.match(/line (\d+)/i);
+    E.push({kind:'xml', line:m ? +m[1] : 1, key:'xml', msg:'XML not well-formed: ' + pe.textContent.replace(/\s+/g,' ').replace(/^.*?error on /i,'error on ').replace(/Below is a rendering.*$/i,'').trim().slice(0,140)});
+    return E;
+  }
+  // numéro de ligne de chaque élément : le i-ème élément du DOM = la i-ème balise ouvrante du texte
+  const clean = text.replace(/<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[[\s\S]*?\]\]>/g, m=>m.replace(/[^\n]/g, ' '));
+  const starts = []; const re = /<([A-Za-z_][\w.:-]*)/g; let m, ln = 1, pos = 0;
+  while((m = re.exec(clean))){ for(; pos < m.index; pos++) if(clean.charCodeAt(pos) === 10) ln++; starts.push(ln); }
+  const all = doc.getElementsByTagName('*'), LN = new Map();
+  for(let i = 0; i < all.length; i++) LN.set(all[i], starts[i] || 1);
+  const kids = el => [...el.children];
+  const root = doc.documentElement;
+  const hdr = root.getElementsByTagName('MODEL')[0];
+  if(!hdr || hdr.getAttribute('NAME') !== 'Arbres_Communaux_V1')
+    add('model', hdr ? LN.get(hdr) : 1, null, null, `model ${hdr ? hdr.getAttribute('NAME') : '?'} not found; expected Arbres_Communaux_V1`);
+  const ds = root.getElementsByTagName('DATASECTION')[0];
+  const objs = [], byTid = new Map();
+  (ds ? kids(ds) : []).forEach(b=>{
+    if(b.tagName !== P){ add('cls', LN.get(b), null, null, `unknown topic ${b.tagName}`); return; }
+    kids(b).forEach(o=>{
+      const def = CLS[o.tagName];
+      const obj = {el:o, tid:o.getAttribute('TID') || '?', line:LN.get(o), cls:o.tagName, def};
+      if(!def){ add('cls', obj.line, null, null, `unknown class ${o.tagName}`); return; }
+      if(byTid.has(obj.tid)) add('tid', obj.line, obj, 'TID', `OID ${obj.tid} already exists in line ${byTid.get(obj.tid).line}`);
+      else byTid.set(obj.tid, obj);
+      objs.push(obj);
+      checkProps(o, def.attrs, obj);
+    });
+  });
+  function checkProps(el, attrs, obj){
+    let last = -1;
+    kids(el).forEach(c=>{
+      const k = attrs.findIndex(a=>a.n === c.tagName);
+      if(k < 0) add('unknown', LN.get(c), obj, c.tagName, `unknown property <${c.tagName}>`);
+      else if(k < last) add('order', LN.get(c), obj, c.tagName, `wrong order of property <${c.tagName}>`);
+      else last = k;
+    });
+    attrs.forEach(a=>{
+      const c = kids(el).find(x=>x.tagName === a.n), L = c ? LN.get(c) : obj.line, v = c ? c.textContent.trim() : '';
+      if(!c || (v === '' && a.t !== 'bag' && a.t !== 'coord' && a.t !== 'ref')){
+        if(a.mand) add('mand', obj.line, obj, a.n, `Attribute ${a.n} requires a value`);
+        if(a.t === 'ref' && a.min) add('card', obj.line, obj, a.n, `${a.n} should associate 1 to 1 target objects (instead of 0)`);
+        return;
+      }
+      if(a.t === 'text' && v.length > a.max) add('len', L, obj, a.n, `Attribute ${a.n} is length restricted to ${a.max}`);
+      if(a.t === 'enum' && !a.vals.includes(v)) add('enum', L, obj, a.n, `value ${v} is not a member of the enumeration in attribute ${a.n}`);
+      if(a.t === 'num' || a.t === 'int'){
+        const ok = a.t === 'int' ? /^-?\d+$/.test(v) : /^-?\d+(\.\d+)?$/.test(v);
+        if(!ok) add('num', L, obj, a.n, `value ${v} is not a ${a.t === 'int' ? 'integer' : 'number'} in attribute ${a.n}`);
+        else if(+v < a.min || +v > a.max) add('range', L, obj, a.n, `value ${v} is out of range in attribute ${a.n}`);
+      }
+      if(a.t === 'date'){
+        const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v), dt = d && new Date(Date.UTC(+d[1], +d[2]-1, +d[3]));
+        if(!d || dt.getUTCMonth() !== +d[2]-1 || dt.getUTCDate() !== +d[3]) add('date', L, obj, a.n, `invalid format of date value <${v}> in attribute ${a.n}`);
+      }
+      if(a.t === 'coord'){
+        const co = c.getElementsByTagName('COORD')[0], c1 = co && co.getElementsByTagName('C1')[0], c2 = co && co.getElementsByTagName('C2')[0];
+        if(!c1 || !c2){ add('coord', L, obj, a.n, `invalid coordinate in attribute ${a.n}`); return; }
+        const x = +c1.textContent, y = +c2.textContent, bad = [];
+        if(!(x >= 2460000 && x <= 2870000)) bad.push(`C1=${c1.textContent.trim()}`);
+        if(!(y >= 1045000 && y <= 1310000)) bad.push(`C2=${c2.textContent.trim()}`);
+        if(bad.length) add('coord', L, obj, a.n, `value ${bad.join(', ')} is out of range in attribute ${a.n}`);
+      }
+      if(a.t === 'bag'){
+        kids(c).forEach(s=>{
+          if(s.tagName !== a.of){ add('unknown', LN.get(s), obj, a.n, `unexpected structure <${s.tagName}> in attribute ${a.n}`); return; }
+          checkProps(s, STRUCT[a.of], obj);
+        });
+      }
+      if(a.t === 'ref'){
+        const r = c.getAttribute('REF');
+        obj.refs = obj.refs || [];
+        obj.refs.push({a, r, line:L});
+      }
+    });
+  }
+  // deuxième passe : références et unicité
+  objs.forEach(o=>(o.refs || []).forEach(({a, r, line})=>{
+    const t = byTid.get(r);
+    if(!t) add('ref', line, o, a.n, `No object found with OID ${r}.`);
+    else if(t.cls !== a.to) add('ref', line, o, a.n, `Object ${r} is not of class ${a.to}`);
+  }));
+  const uniq = (cls, attr) => {
+    const seen = new Map();
+    objs.filter(o=>o.cls === cls).forEach(o=>{
+      const c = kids(o.el).find(x=>x.tagName === attr); if(!c) return;
+      const v = c.textContent.trim();
+      if(seen.has(v)) add('unique', LN.get(c), o, attr, `Unique is violated! Values ${v} already exist in Object: ${seen.get(v).tid}`);
+      else seen.set(v, o);
+    });
+  };
+  uniq(P+'.Arbre', 'NumeroInventaire');
+  uniq(P+'.Espece', 'NomLatin');
+  E.sort((a,b)=>a.line - b.line);
+  return E;
+}
+// une erreur « à trouver » = un couple objet/attribut
+const groups = E => { const g = new Map(); E.forEach(e=>{ if(!g.has(e.key)) g.set(e.key, []); g.get(e.key).push(e); }); return [...g.values()]; };
+
+function logHtml(E, target, onPick){
+  const L = ['<span class="i">Info: validate data...</span>', '<span class="i">Info: first validation pass...</span>', '<span class="i">Info: second validation pass...</span>'];
+  E.forEach((e,i)=>L.push(`<span class="e" data-i="${i}" data-line="${e.line}" role="button" tabindex="0">Error: line ${e.line}: ${esc(e.msg)}</span>`));
+  L.push(E.length ? `<span class="i">Info: ...validation failed</span>` : `<span class="ok">Info: ...validation done</span>`);
+  target.innerHTML = L.join('\n');
+  target.querySelectorAll('.e').forEach(s=>{
+    const go = ()=>onPick(+s.dataset.line);
+    s.onclick = go;
+    s.onkeydown = ev=>{ if(ev.key === 'Enter'){ ev.preventDefault(); go(); } };
+  });
+}
+
+/* ---------- 6.2 chasse ---------- */
+const lines = ORIG.split('\n');
+const REF = validate(ORIG), REFG = groups(REF);
+$('nErr').textContent = REFG.length;
+const hunt = $('hunt');
+hunt.innerHTML = lines.map((l,i)=>`<li><button type="button" aria-pressed="false" data-l="${i+1}">${GEO.hl(l,'xml')}</button></li>`).join('');
+const btns = [...hunt.querySelectorAll('button')];
+let checked = false;
+setTimeout(()=>idle());
+const marked = () => btns.filter(b=>b.getAttribute('aria-pressed') === 'true').map(b=>+b.dataset.l);
+function idle(){ const n = marked().length; $('score').textContent = `${n} ligne${n>1?'s':''} marquée${n>1?'s':''}. Quand vous pensez avoir tout trouvé, lancez le contrôle.`; }
+function clearResult(){
+  btns.forEach(b=>b.classList.remove('found','missed','fp'));
+  checked = false;
+}
+btns.forEach(b=>b.onclick = ()=>{
+  if(checked) clearResult();
+  b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+  idle();
+});
+hunt.addEventListener('keydown', e=>{
+  if(e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  const k = btns.indexOf(document.activeElement); if(k < 0) return;
+  e.preventDefault(); btns[Math.max(0, Math.min(btns.length-1, k + (e.key === 'ArrowDown' ? 1 : -1)))].focus();
+});
+function flashLine(n){
+  const b = btns[n-1]; if(!b) return;
+  b.scrollIntoView({block:'center', behavior:'smooth'});
+  b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'), 1400);
+}
+$('btRun').onclick = ()=>{
+  clearResult();
+  const mk = new Set(marked());
+  let found = 0; const used = new Set();
+  REFG.forEach(g=>{
+    const ok = g.some(e=>mk.has(e.line) || mk.has(e.objLine));
+    g.forEach(e=>{ if(mk.has(e.line)) used.add(e.line); if(mk.has(e.objLine)) used.add(e.objLine); });
+    if(ok) found++;
+    const L = g[0].line;
+    const b = btns[L-1];
+    if(ok){ [g[0].line, g[0].objLine].forEach(x=>{ if(mk.has(x)) btns[x-1].classList.add('found'); }); }
+    else b.classList.add('missed');
+  });
+  const fp = [...mk].filter(x=>!used.has(x));
+  fp.forEach(x=>btns[x-1].classList.add('fp'));
+  checked = true;
+  $('score').innerHTML = `<b class="big">${found} / ${REFG.length}</b> erreurs trouvées` + (fp.length ? `, ${fp.length} fausse${fp.length>1?'s':''} alerte${fp.length>1?'s':''} (barrée${fp.length>1?'s':''})` : ', aucune fausse alerte') +
+    `.<br><span class="small muted">Vert : trouvé · rouge : manqué · orange : ligne correcte marquée à tort. Cliquez sur une erreur du rapport pour la voir.</span>`;
+  logHtml(REF, $('console'), flashLine);
+  $('expl').innerHTML = REFG.map(g=>`<li><span class="mono">ligne ${g[0].line}</span> · ${FR[g[0].kind] || ''}</li>`).join('');
+  GEO.store.set('ctrl.best', Math.max(GEO.store.get('ctrl.best', 0), found));
+};
+$('btClear').onclick = ()=>{ clearResult(); btns.forEach(b=>b.setAttribute('aria-pressed','false')); idle();
+  $('console').innerHTML = '<span class="i">Rapport de contrôle : pas encore lancé.</span>'; $('expl').innerHTML = ''; };
+
+/* ---------- 6.3 correction ---------- */
+const ta = $('fixTa');
+ta.value = GEO.store.get('ctrl.fix', null) || ORIG;
+ta.addEventListener('input', ()=>GEO.store.set('ctrl.fix', ta.value));
+function toLine(n){
+  let p = 0; for(let i = 1; i < n; i++){ const k = ta.value.indexOf('\n', p); if(k < 0) break; p = k + 1; }
+  const e = ta.value.indexOf('\n', p);
+  ta.focus(); ta.setSelectionRange(p, e < 0 ? ta.value.length : e);
+  const lh = parseFloat(getComputedStyle(ta).lineHeight) || 19;
+  ta.scrollTop = Math.max(0, (n - 6) * lh);
+}
+$('btFix').onclick = ()=>{
+  const E = validate(ta.value);
+  logHtml(E, $('console2'), toLine);
+  if(!E.length) $('console2').insertAdjacentHTML('beforeend', '\n<span class="ok">Bravo : le fichier est valide.</span>');
+};
+$('btOrig').onclick = ()=>{
+  if(ta.value !== ORIG && !confirm('Revenir au fichier d\'origine et perdre vos corrections ?')) return;
+  ta.value = ORIG; GEO.store.set('ctrl.fix', ORIG);
+  $('console2').innerHTML = '<span class="i">Fichier d\'origine rétabli.</span>';
+};
+window.__validate = validate; window.__ORIG = ORIG;
+});
+</script>
+</body>
+</html>

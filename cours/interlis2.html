@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>INTERLIS 2</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.mx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+.mx .codeblock{margin:0}
+.mx pre{max-height:620px}
+@media (max-width:860px){.mx{grid-template-columns:minmax(0,1fr)}}
+/* banc des cardinalités */
+.card-ui{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.card-ui{grid-template-columns:minmax(0,1fr)}}
+.card-ui label{display:flex;flex-direction:column;gap:4px;font:600 .75rem var(--f-mono);color:var(--muted);letter-spacing:.04em}
+#bip{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#bip .nd rect{fill:var(--sheet);stroke:var(--ink);stroke-width:1.4;cursor:pointer}
+#bip .nd text{font:600 13px var(--f-mono);fill:var(--ink);pointer-events:none}
+#bip .nd.pick rect{stroke:var(--accent);stroke-width:2.6;fill:var(--accent-soft)}
+#bip .nd.bad rect{stroke:var(--err);fill:var(--err-soft)}
+#bip .lk{stroke:var(--ink-2);stroke-width:2;cursor:pointer}
+#bip .lk:hover{stroke:var(--accent);stroke-width:4}
+#bip .hd{font:600 11px var(--f-mono);fill:var(--muted);letter-spacing:.08em}
+.reading{font-size:.95rem;border-left:3px solid var(--accent);padding:2px 0 2px 14px;margin:14px 0}
+.viol{list-style:none;padding:0;margin:8px 0 0;font-size:.88rem}
+.viol li{padding:4px 0;border-bottom:1px solid var(--rule)}
+#cardUml text{font:600 12px var(--f-mono);fill:var(--ink)}
+#cardUml .c{fill:var(--accent);font-size:14px}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## De INTERLIS 1 à INTERLIS 2
+
+Les idées du chapitre 3 restent valables. Ce qui change, c'est surtout le vocabulaire et ce qu'on peut exprimer.
+
+| Notion | INTERLIS 1 | INTERLIS 2 |
+|---|---|---|
+| En-tête | `TRANSFER Arbres;` | `INTERLIS 2.3;` |
+| Modèle | `MODEL Nom` | `MODEL Nom (fr) AT "url" VERSION "date" =` |
+| Type d'objet | `TABLE` | `CLASS` |
+| Obligatoire | par défaut (`OPTIONAL` sinon) | `MANDATORY` (facultatif sinon) |
+| Nombre avec unité | `[0.0 .. 60.0]`, unité en commentaire | `0.0 .. 60.0 [INTERLIS.m]` |
+| Coordonnée | `COORD2 …` | `COORD … , … , ROTATION 2 -> 1` |
+| Lien entre objets | relation `-> Espece` | `ASSOCIATION` avec cardinalités |
+| Unicité | `IDENT` | `UNIQUE` |
+| Héritage, structures | non | `EXTENDS`, `STRUCTURE`, `BAG OF` |
+| Fichier de transfert | ITF, valeurs sans noms | XTF (XML), chaque valeur dans une balise nommée |
+
+## Le modèle de Montavaux en INTERLIS 2
+
+La commune veut maintenant inventorier aussi ses **haies**, et garder l'historique des **contrôles** de chaque arbre. Le modèle grandit. Voici d'abord son diagramme de classes.
+</script>
+
+<!-- figure : diagramme UML -->
+<figure class="fig gridbg">
+  <svg viewBox="0 0 830 320" role="img" aria-label="Diagramme UML : ObjetVegetal abstrait, dont héritent Arbre et Haie ; Arbre associé à Espece ; structure Controle">
+    <g class="uml-box">
+      <rect x="380" y="20" width="260" height="98"/><rect class="hd" x="380" y="20" width="260" height="34"/>
+      <text class="st" x="510" y="33" text-anchor="middle">«abstract»</text>
+      <text class="nm ab" x="510" y="48" text-anchor="middle">ObjetVegetal</text>
+      <text x="390" y="74">NumeroInventaire : TEXT*10 [1]</text>
+      <text x="390" y="92">Etat : EtatSanitaire [1]</text>
+      <text x="390" y="110">Controles : BAG OF Controle</text>
+    </g>
+    <g class="uml-box">
+      <rect x="660" y="20" width="160" height="80"/><rect class="hd" x="660" y="20" width="160" height="34"/>
+      <text class="st" x="740" y="33" text-anchor="middle">«structure»</text>
+      <text class="nm" x="740" y="48" text-anchor="middle">Controle</text>
+      <text x="670" y="74">Date : XMLDate [1]</text>
+      <text x="670" y="92">Remarque : TEXT*200</text>
+    </g>
+    <path class="uml-edge" d="M640 106H650V88H660" stroke-dasharray="4 3"/>
+    <g class="uml-box">
+      <rect x="260" y="200" width="224" height="88"/><rect class="hd" x="260" y="200" width="224" height="28"/>
+      <text class="nm" x="372" y="219" text-anchor="middle">Arbre</text>
+      <text x="270" y="246">Hauteur : 0.0..60.0 [m]</text>
+      <text x="270" y="264">AnneePlantation : 1800..2100</text>
+      <text x="270" y="282">Position : Coord2 [1]</text>
+    </g>
+    <g class="uml-box">
+      <rect x="560" y="200" width="200" height="52"/><rect class="hd" x="560" y="200" width="200" height="28"/>
+      <text class="nm" x="660" y="219" text-anchor="middle">Haie</text>
+      <text x="570" y="246">Trace : POLYLINE [1]</text>
+    </g>
+    <g class="uml-box">
+      <rect x="10" y="200" width="180" height="70"/><rect class="hd" x="10" y="200" width="180" height="28"/>
+      <text class="nm" x="100" y="219" text-anchor="middle">Espece</text>
+      <text x="20" y="246">NomLatin : TEXT*60 [1]</text>
+      <text x="20" y="264">NomFrancais : TEXT*60</text>
+    </g>
+    <path class="uml-edge" d="M372 200V165H510V120" marker-end="url(#tri)"/>
+    <path class="uml-edge" d="M660 200V165H510"/>
+    <path class="uml-edge" d="M190 244H260"/>
+    <text class="uml-card" x="196" y="238">1</text>
+    <text class="uml-card" x="254" y="238" text-anchor="end">0..*</text>
+    <text class="uml-role" x="196" y="260">Espece</text>
+    <text class="uml-role" x="254" y="282" text-anchor="end">Arbre</text>
+    <text class="uml-role" x="520" y="160">hérite de</text>
+  </svg>
+  <figcaption>Fig. 4.1 · Arbre et Haie héritent de ObjetVegetal (triangle creux). Arbre est associé à Espece. Controle est une structure, utilisée par l'attribut Controles.</figcaption>
+</figure>
+
+<script type="text/markdown">
+Et le modèle correspondant. Survolez les noms en surbrillance.
+</script>
+
+<script type="text/x-code" data-lang="ili" data-file="Arbres_Communaux_V1.ili · INTERLIS 2.3" data-links="Coord2,EtatSanitaire,Controle,Espece,ObjetVegetal,Arbre,Haie" data-group="m2">
+  INTERLIS 2.3;
+
+  MODEL Arbres_Communaux_V1 (fr)
+    AT "https://models.montavaux.ch"
+    VERSION "2026-09-30" =
+
+    DOMAIN
+      Coord2 = COORD 2460000.000 .. 2870000.000 [INTERLIS.m],
+                     1045000.000 .. 1310000.000 [INTERLIS.m],
+                     ROTATION 2 -> 1;
+      EtatSanitaire = (sain, affaibli, malade, mort);
+
+    TOPIC Inventaire =
+
+      STRUCTURE Controle =
+        Date : MANDATORY INTERLIS.XMLDate;
+        Remarque : TEXT*200;
+      END Controle;
+
+      CLASS Espece =
+        NomLatin : MANDATORY TEXT*60;
+        NomFrancais : TEXT*60;
+      UNIQUE NomLatin;
+      END Espece;
+
+      CLASS ObjetVegetal (ABSTRACT) =
+        NumeroInventaire : MANDATORY TEXT*10;
+        Etat : MANDATORY EtatSanitaire;
+        Controles : BAG {0..*} OF Controle;
+      UNIQUE NumeroInventaire;
+      END ObjetVegetal;
+
+      CLASS Arbre EXTENDS ObjetVegetal =
+        Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+        AnneePlantation : 1800 .. 2100;
+        Position : MANDATORY Coord2;
+      END Arbre;
+
+      CLASS Haie EXTENDS ObjetVegetal =
+        Trace : MANDATORY POLYLINE WITH (STRAIGHTS) VERTEX Coord2;
+      END Haie;
+
+      ASSOCIATION ArbreEspece =
+        Arbre -- {0..*} Arbre;
+        Espece -- {1} Espece;
+      END ArbreEspece;
+
+    END Inventaire;
+
+  END Arbres_Communaux_V1.
+</script>
+
+<script type="text/markdown">
+## Héritage : ABSTRACT et EXTENDS
+
+Un arbre et une haie ont des choses en commun : un numéro d'inventaire, un état, des contrôles. Plutôt que de répéter ces attributs, on les place dans une classe générale, `ObjetVegetal`. `Arbre` et `Haie` l'**étendent** (`EXTENDS`) : ils reçoivent ses attributs, et ajoutent les leurs.
+
+`ObjetVegetal` est **abstraite** (`ABSTRACT`) : il n'existe aucun objet qui soit « juste » un objet végétal. Chaque objet du fichier est soit un arbre, soit une haie.
+
+:::retenir
+Une sous-classe **est une sorte de** sa classe de base. On peut dire « un arbre est un objet végétal ». On ne peut pas dire « un arbre est une espèce » : l'espèce n'est donc pas une classe de base, c'est une association.
+:::
+
+## Structures : STRUCTURE et BAG OF
+
+Un contrôle (date, remarque) n'a pas d'existence propre : il appartient à un arbre et disparaît avec lui. On le décrit comme une `STRUCTURE`. Une structure n'a pas d'identifiant et vit à l'intérieur d'un attribut.
+
+`Controles : BAG {0..*} OF Controle;` signifie « un sac de zéro, un ou plusieurs contrôles ». `LIST OF` ferait la même chose, mais en gardant l'ordre.
+
+<div class="two">
+  <div class="box"><span class="lab">Classe</span><p>A une identité (TID), peut être référencée par d'autres objets, existe seule. <em>Ex. : Espece.</em></p></div>
+  <div class="box"><span class="lab">Structure</span><p>N'a pas d'identité, vit à l'intérieur d'un objet, disparaît avec lui. <em>Ex. : Controle.</em></p></div>
+</div>
+
+## Associations et cardinalités
+
+Une association relie deux classes. Chaque extrémité porte un **nom de rôle** et une **cardinalité** : le nombre d'objets qu'on peut trouver *de ce côté*.
+
+```ili association
+ASSOCIATION ArbreEspece =
+  Arbre -- {0..*} Arbre;     !! une espèce concerne 0, 1 ou plusieurs arbres
+  Espece -- {1} Espece;      !! un arbre a exactement 1 espèce
+END ArbreEspece;
+```
+
+:::attention
+La cardinalité se lit **depuis l'autre bout**. `Espece -- {1} Espece;` se lit : « depuis un arbre, on trouve exactement 1 espèce ». C'est le piège le plus fréquent. Testez-le ci-dessous.
+:::
+
+Choisissez les cardinalités, puis modifiez les liens. **Cliquez sur un arbre puis sur une espèce** pour créer un lien, et cliquez sur un lien pour le supprimer. Les objets qui violent les cardinalités s'affichent en rouge.
+</script>
+
+<!-- composant interactif : banc d'essai des cardinalités -->
+<figure class="fig">
+  <div class="card-ui">
+    <div>
+      <div class="row" style="gap:14px;margin-bottom:10px">
+        <label>Côté Espece (espèces par arbre)
+          <select id="cE"><option>{1}</option><option>{0..1}</option><option>{1..*}</option><option>{0..*}</option></select></label>
+        <label>Côté Arbre (arbres par espèce)
+          <select id="cA"><option>{0..*}</option><option>{1..*}</option><option>{0..1}</option><option>{1}</option></select></label>
+      </div>
+      <svg id="bip" viewBox="0 0 440 300" role="img" aria-label="Quatre arbres à gauche, trois espèces à droite, reliés par des liens modifiables"></svg>
+      <div class="row"><button class="btn sm" type="button" id="bipReset">Liens de départ</button></div>
+    </div>
+    <div>
+      <svg id="cardUml" viewBox="0 0 320 70" aria-hidden="true">
+        <g class="uml-box"><rect x="2" y="16" width="80" height="34"/><text class="nm" x="42" y="38" text-anchor="middle">Arbre</text></g>
+        <g class="uml-box"><rect x="238" y="16" width="80" height="34"/><text class="nm" x="278" y="38" text-anchor="middle">Espece</text></g>
+        <path class="uml-edge" d="M82 33H238"/>
+        <text class="c" id="uA" x="90" y="26"></text>
+        <text class="c" id="uE" x="230" y="26" text-anchor="end"></text>
+      </svg>
+      <p class="reading" id="reading"></p>
+      <div id="cardCode"></div>
+      <ul class="viol" id="viol" aria-live="polite"></ul>
+    </div>
+  </div>
+  <figcaption>Fig. 4.2 · Banc d'essai des cardinalités.</figcaption>
+</figure>
+
+<script type="text/markdown">
+| Cardinalité | Se lit |
+|---|---|
+| `{1}` | exactement un (obligatoire) |
+| `{0..1}` | au plus un (facultatif) |
+| `{1..*}` | au moins un |
+| `{0..*}` | autant qu'on veut, y compris aucun |
+
+Il existe aussi des associations plus fortes. `-<>` est une **agrégation** : le tout est formé de parties qui peuvent exister seules. `-<#>` est une **composition** : les parties disparaissent avec le tout, par exemple les bâtiments d'un bien-fonds dans certains modèles. La simple association `--` suffit dans la plupart des cas.
+
+## Le fichier XTF
+
+Le fichier de transfert d'INTERLIS 2 est un fichier XML. Chaque objet est un élément dont le nom est `Modèle.Thème.Classe`, avec un identifiant `TID`. Chaque attribut est une balise qui porte son nom. Survolez un nom pour le retrouver des deux côtés.
+</script>
+
+<!-- deux blocs de code côte à côte, mots reliés (même data-group) -->
+<div class="mx">
+  <script type="text/x-code" data-lang="ili" data-file="modèle (extrait)" data-links="NumeroInventaire,Etat,Controles,Controle,Hauteur,AnneePlantation,Position,Espece,Arbre,NomLatin,NomFrancais,Inventaire,Date,Remarque" data-group="x">
+    TOPIC Inventaire =
+      STRUCTURE Controle =
+        Date : MANDATORY INTERLIS.XMLDate;
+        Remarque : TEXT*200;
+      END Controle;
+      CLASS Espece =
+        NomLatin : MANDATORY TEXT*60;
+        NomFrancais : TEXT*60;
+      END Espece;
+      CLASS ObjetVegetal (ABSTRACT) =
+        NumeroInventaire : MANDATORY TEXT*10;
+        Etat : MANDATORY EtatSanitaire;
+        Controles : BAG {0..*} OF Controle;
+      END ObjetVegetal;
+      CLASS Arbre EXTENDS ObjetVegetal =
+        Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+        AnneePlantation : 1800 .. 2100;
+        Position : MANDATORY Coord2;
+      END Arbre;
+      ASSOCIATION ArbreEspece =
+        Arbre -- {0..*} Arbre;
+        Espece -- {1} Espece;
+      END ArbreEspece;
+    END Inventaire;
+  </script>
+  <script type="text/x-code" data-lang="xtf" data-file="arbres_montavaux.xtf" data-links="NumeroInventaire,Etat,Controles,Controle,Hauteur,AnneePlantation,Position,Espece,Arbre,NomLatin,NomFrancais,Inventaire,Date,Remarque" data-group="x">
+    <?xml version="1.0" encoding="UTF-8"?>
+    <TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+      <HEADERSECTION SENDER="Commune de Montavaux" VERSION="2.3">
+        <MODELS>
+          <MODEL NAME="Arbres_Communaux_V1" VERSION="2026-09-30"
+                 URI="https://models.montavaux.ch"/>
+        </MODELS>
+      </HEADERSECTION>
+      <DATASECTION>
+        <Arbres_Communaux_V1.Inventaire BID="b1">
+          <Arbres_Communaux_V1.Inventaire.Espece TID="e1">
+            <NomLatin>Tilia cordata</NomLatin>
+            <NomFrancais>Tilleul à petites feuilles</NomFrancais>
+          </Arbres_Communaux_V1.Inventaire.Espece>
+          <Arbres_Communaux_V1.Inventaire.Arbre TID="a42">
+            <NumeroInventaire>A-0042</NumeroInventaire>
+            <Etat>affaibli</Etat>
+            <Controles>
+              <Arbres_Communaux_V1.Inventaire.Controle>
+                <Date>2026-05-12</Date>
+                <Remarque>Branche morte côté rue</Remarque>
+              </Arbres_Communaux_V1.Inventaire.Controle>
+            </Controles>
+            <Hauteur>12.5</Hauteur>
+            <AnneePlantation>1987</AnneePlantation>
+            <Position>
+              <COORD><C1>2538214.250</C1><C2>1152388.100</C2></COORD>
+            </Position>
+            <Espece REF="e1"/>
+          </Arbres_Communaux_V1.Inventaire.Arbre>
+        </Arbres_Communaux_V1.Inventaire>
+      </DATASECTION>
+    </TRANSFER>
+  </script>
+</div>
+
+<script type="text/markdown">
+:::retenir
+- Le **HEADERSECTION** dit quel modèle (et quelle version) décrit les données.
+- Le **DATASECTION** contient des **paniers** (*baskets*, identifiés par `BID`), un par thème livré.
+- Les attributs hérités viennent **en premier**, dans l'ordre du modèle : `NumeroInventaire`, `Etat`, `Controles`, puis ceux d'`Arbre`.
+- L'énumération est écrite **en toutes lettres** (`affaibli`), pas codée par un numéro comme en ITF.
+- L'association devient une **référence** `<Espece REF="e1"/>` dans l'objet du côté où la cardinalité vaut au plus 1.
+:::
+
+:::terrain
+Un vrai modèle n'écrit pas lui-même le domaine `Coord2`. Il l'importe d'un modèle de base de la Confédération : `IMPORTS GeometryCHLV95_V1;` puis `Position : MANDATORY GeometryCHLV95_V1.Coord2;`. Ces modèles de base (unités, géométries, textes multilingues…) sont disponibles dans le dépôt de modèles de la Confédération.
+
+La version **INTERLIS 2.4** garde la même logique de modélisation. Son format XTF est différent (espaces de noms XML, balises d'en-tête en minuscules). Le nouveau modèle de la mensuration officielle (DMAV) utilise la version 2.4.
+:::
+
+:::exo 10 min
+Écrivez l'élément XTF de l'arbre `A-0043` : TID `a43`, sain, tilleul (`e1`), 14.0 m, planté en 1979, position 2538241.600 / 1152387.300, aucun contrôle.
+
+??? Solution
+```xtf extrait.xtf
+<Arbres_Communaux_V1.Inventaire.Arbre TID="a43">
+  <NumeroInventaire>A-0043</NumeroInventaire>
+  <Etat>sain</Etat>
+  <Hauteur>14.0</Hauteur>
+  <AnneePlantation>1979</AnneePlantation>
+  <Position>
+    <COORD><C1>2538241.600</C1><C2>1152387.300</C2></COORD>
+  </Position>
+  <Espece REF="e1"/>
+</Arbres_Communaux_V1.Inventaire.Arbre>
+```
+
+Sans contrôle, l'élément `<Controles>` est simplement absent.
+???
+:::
+
+:::exo 5 min
+Une commune veut rattacher chaque arbre à **un** quartier au plus. Un quartier contient au moins un arbre. Écrivez l'association `ArbreQuartier`.
+
+??? Solution
+```ili association
+ASSOCIATION ArbreQuartier =
+  Arbre -- {1..*} Arbre;        !! depuis un quartier : au moins 1 arbre
+  Quartier -- {0..1} Quartier;  !! depuis un arbre : au plus 1 quartier
+END ArbreQuartier;
+```
+???
+:::
+
+:::prof
+Pour le banc des cardinalités, suggestion de déroulement : 1) départ valide ; 2) supprimer le lien de A-0044 → rouge, lire le message ; 3) passer le côté Espece à `{0..1}` → redevient valide ; 4) ajouter un 2<sup>e</sup> lien à A-0041 → rouge. Faire verbaliser la phrase de lecture à chaque fois.
+
+Signaler que l'ordre des éléments dans le XTF est imposé : un XTF avec `<Hauteur>` avant `<Etat>` est refusé par le contrôle.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : banc d'essai des cardinalités ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const TREES = ['A-0041','A-0042','A-0043','A-0044'];
+  const SPEC  = ['Tilleul','Érable','Chêne'];
+  const START = [[0,0],[1,0],[2,1],[3,1]];
+  let links, pick = null;
+  const reset = () => { links = START.map(l => l.slice()); pick = null; draw(); };
+  const range = c => { const m = c.match(/\{(\d+)(?:\.\.(\d+|\*))?\}/); const lo = +m[1]; const hi = m[2] === undefined ? lo : m[2] === '*' ? Infinity : +m[2]; return [lo, hi]; };
+  const TX = 40, SX = 300, W = 110, H = 34;
+  const ty = i => 40 + i*62, sy = i => 70 + i*72;
+  const say  = c => ({'{1}':'exactement une','{0..1}':'au plus une','{1..*}':'au moins une','{0..*}':'zéro, une ou plusieurs'}[c]);
+  const sayM = c => ({'{1}':'exactement un','{0..1}':'au plus un','{1..*}':'au moins un','{0..*}':'zéro, un ou plusieurs'}[c]);
+  function draw(){
+    const cE = $('cE').value, cA = $('cA').value, [eLo,eHi] = range(cE), [aLo,aHi] = range(cA);
+    const svg = $('bip'); svg.innerHTML = '';
+    const mk = (t, a) => { const e = document.createElementNS(NS, t); for(const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+    mk('text', {x:TX, y:22, class:'hd'}).textContent = 'ARBRES';
+    mk('text', {x:SX, y:22, class:'hd'}).textContent = 'ESPÈCES';
+    const viol = [];
+    links.forEach(([t, s], i) => {
+      const l = mk('line', {x1:TX+W, y1:ty(t)+H/2, x2:SX, y2:sy(s)+H/2, class:'lk'});
+      l.addEventListener('click', () => { links.splice(i, 1); draw(); });
+      const tt = document.createElementNS(NS, 'title'); tt.textContent = 'Cliquer pour supprimer ce lien'; l.appendChild(tt);
+    });
+    TREES.forEach((n, i) => {
+      const k = links.filter(l => l[0]===i).length, bad = k < eLo || k > eHi;
+      if(bad) viol.push(`<strong>${n}</strong> a ${k} espèce${k>1?'s':''}, mais <code>Espece -- ${cE}</code> en exige ${say(cE)}.`);
+      node(TX, ty(i), n, bad, pick === i, () => { pick = pick === i ? null : i; draw(); });
+    });
+    SPEC.forEach((n, j) => {
+      const k = links.filter(l => l[1]===j).length, bad = k < aLo || k > aHi;
+      if(bad) viol.push(`<strong>${n}</strong> concerne ${k} arbre${k>1?'s':''}, mais <code>Arbre -- ${cA}</code> en exige ${sayM(cA)}.`);
+      node(SX, sy(j), n, bad, false, () => {
+        if(pick === null) return;
+        const ex = links.findIndex(l => l[0]===pick && l[1]===j);
+        if(ex >= 0) links.splice(ex, 1); else links.push([pick, j]);
+        pick = null; draw();
+      });
+    });
+    $('uA').textContent = cA; $('uE').textContent = cE;
+    $('reading').innerHTML = `Depuis un arbre, on trouve <strong>${say(cE)}</strong> espèce. Depuis une espèce, on trouve <strong>${sayM(cA)}</strong> arbre${cA==='{1}'||cA==='{0..1}'?'':'s'}.`;
+    $('cardCode').replaceChildren(GEO.makeCodeBlock(`ASSOCIATION ArbreEspece =\n  Arbre -- ${cA} Arbre;\n  Espece -- ${cE} Espece;\nEND ArbreEspece;`, 'ili', 'association'));
+    $('viol').innerHTML = viol.length
+      ? viol.map(v => `<li><span class="chip err">erreur</span> ${v}</li>`).join('')
+      : '<li><span class="chip ok">valide</span> Tous les objets respectent les cardinalités.</li>';
+    if(pick !== null) $('viol').insertAdjacentHTML('afterbegin', `<li class="muted">Arbre ${TREES[pick]} sélectionné : cliquez sur une espèce.</li>`);
+  }
+  function node(x, y, label, bad, picked, onClick){
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'nd' + (bad ? ' bad' : '') + (picked ? ' pick' : ''));
+    g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button'); g.setAttribute('aria-label', label);
+    g.innerHTML = `<rect x="${x}" y="${y}" width="${W}" height="${H}" rx="4"/><text x="${x+W/2}" y="${y+H/2+4.5}" text-anchor="middle">${label}</text>`;
+    g.addEventListener('click', onClick);
+    g.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); onClick(); } });
+    $('bip').appendChild(g);
+  }
+  $('cE').onchange = $('cA').onchange = draw;
+  $('bipReset').onclick = reset;
+  reset();
+})();
+</script>
+</body>
+</html>

@@ -8,102 +8,140 @@
    Le TEXTE de chaque chapitre est dans sa page, en Markdown (voir guide.html).
    ========================================================================= */
 var COURSE = {
-  title:    'Géomatique',                       // nom court (menu, onglet)
-  subtitle: 'CF-geo · gabarit B4a',             // sous le nom, dans le menu
-  appName:  'Cours de géomatique · CF-geo',     // nom de l'appli installée
-  version:  '0.0',
+  title:    'INTERLIS',                           // nom court (menu, onglet)
+  subtitle: '1 & 2 · CF-geo B4a',                 // sous le nom, dans le menu
+  appName:  'Cours INTERLIS · CF-geo',            // nom de l'appli installée
+  version:  '0.2',
   date:     '10.11.2026',
   author:   'CF-geo',
-  colophon: 'Support de cours géomatique · gabarit de démonstration',
+  colophon: 'Cours INTERLIS 1 & 2 · techniciennes et techniciens en géomatique',
 
-  // Libellés des encadrés Markdown  :::retenir  :::attention  :::terrain  :::exo
+  // Libellés des encadrés Markdown  :::retenir  :::attention  :::terrain  :::exo  :::prof
   labels: {
     retenir:   'À retenir',
     attention: 'Attention',
     terrain:   'Sur le terrain',
     exo:       'Exercice',
+    prof:      'Formateur',
     solution:  'Solution',
     goals:     'Objectifs du chapitre',
   },
 
   /* Chapitres, dans l'ordre du menu.
      num  : '1', '2'… (chapitre numéroté) · 'A', 'B'… (annexe) · '' (accueil)
+     info : cases supplémentaires de l'en-tête, ex. {'Fichiers': '.ili, .itf'}
+     hidden : true → page hors menu, accessible seulement par son adresse (guide.html)
      Les champs absents ne s'affichent simplement pas. */
   chapters: [
     { file: 'index.html', num: '', title: 'Accueil' },
 
-    { file: 'referentiels.html', num: '1', title: 'Systèmes de référence',
-      duration: '30 min', prereq: 'aucun', activity: 'carte, calculateur',
-      question: 'Comment savoir dans quel cadre est une coordonnée ?',
-      lead: "Un même point de Suisse possède deux jeux de coordonnées planes : celles du cadre MN03 et celles du cadre MN95. Savoir les reconnaître évite des décalages de plusieurs kilomètres.",
-      summary: 'MN03 et MN95 : deux cadres, deux jeux de coordonnées. Cliquer sur la carte, convertir.',
-      tags: ['carte cliquable', 'calculateur'],
+    { file: 'pourquoi.html', num: '1', title: 'Pourquoi INTERLIS ?',
+      duration: '30 min', prereq: 'aucun', activity: 'animation, frise',
+      question: "Qu'est-ce qui se perd entre deux logiciels ?",
+      lead: "Quand des données passent d'un logiciel à l'autre, elles s'abîment un peu à chaque étape. INTERLIS supprime ce problème : on décrit les données une fois, puis tout le monde échange selon cette description.",
+      summary: "Le jeu du téléphone entre logiciels, l'approche basée sur les modèles, la LGéo.",
+      tags: ['animation', 'frise'],
       goals: [
-        "Distinguer une coordonnée MN03 d'une coordonnée MN95 au premier coup d'œil.",
-        "Passer approximativement de l'une à l'autre et connaître la limite de cette approximation.",
-        "Nommer l'outil officiel pour une transformation rigoureuse.",
+        "Expliquer pourquoi une conversion de format fait perdre de l'information.",
+        'Définir INTERLIS en une phrase : langage de description et format de transfert.',
+        "Décrire l'approche basée sur les modèles : le modèle d'abord, le fichier ensuite.",
+        'Citer la base légale (LGéo, OGéo) qui rend INTERLIS obligatoire.',
       ] },
 
-    { file: 'gnss.html', num: '2', title: 'Positionnement GNSS',
-      duration: '30 min', prereq: 'chapitre 1', activity: 'simulation',
-      question: "Pourquoi la mesure est-elle moins bonne au pied d'un bâtiment ?",
-      lead: "Un récepteur GNSS calcule sa position à partir des signaux de plusieurs satellites. Le nombre de satellites compte, mais leur répartition dans le ciel compte tout autant.",
-      summary: "Ciel de satellites, masque d'élévation, obstacles et PDOP en direct.",
-      tags: ['simulation'],
+    { file: 'modeliser.html', num: '2', title: 'Modéliser le territoire',
+      duration: '45 min', prereq: 'chapitre 1', activity: 'croquis, exercice papier',
+      question: "Qu'est-ce qu'un arbre, pour une base de données ?",
+      lead: "Avant d'écrire une seule ligne d'INTERLIS, il faut décider ce qu'on garde de la réalité et comment on le décrit. C'est le travail de modélisation, et il se fait avec un crayon.",
+      summary: 'Du terrain au fichier : choisir, abstraire, décrire. Classe, objet, attribut.',
+      tags: ['croquis animé', 'exercice'],
       goals: [
-        'Expliquer pourquoi il faut au moins quatre satellites.',
-        'Lire un ciel de satellites (skyplot) : azimut, élévation.',
-        "Relier masque d'élévation, obstacles et PDOP.",
+        'Décrire les trois gestes de la modélisation : choisir, abstraire, décrire.',
+        'Distinguer classe, objet et attribut sur un exemple concret.',
+        'Choisir un type adapté pour un attribut (texte, nombre, énumération, coordonnée…).',
+        'Modéliser sur papier une petite thématique communale.',
       ] },
 
-    { file: 'nivellement.html', num: '3', title: 'Nivellement',
-      duration: '45 min', prereq: 'aucun', activity: 'carnet calculé, exercice',
-      question: 'Comment savoir si un cheminement est juste ?',
-      lead: "Le niveau ne mesure pas d'altitude : il mesure des différences de hauteur entre deux mires. En enchaînant les stations depuis un repère connu, on transporte l'altitude de proche en proche.",
-      summary: "Lectures arrière, lectures avant, altitudes et fermeture d'un cheminement.",
-      tags: ['carnet calculé', 'exercice'],
+    { file: 'interlis1.html', num: '3', title: 'INTERLIS 1',
+      duration: '60 min', prereq: 'chapitre 2', activity: 'éditeur de surfaces, ITF annoté',
+      info: { 'Fichiers': '.ili, .itf' },
+      question: 'Comment une ligne de chiffres devient-elle un arbre ?',
+      lead: "La première version du langage : des tables, des types simples, des géométries, et un fichier de transfert en lignes de texte, l'ITF. C'est toujours le format de la mensuration officielle dans la plupart des cantons.",
+      summary: 'TABLE, types de base, SURFACE ou AREA, et le fichier ITF ligne par ligne.',
+      tags: ['éditeur de surfaces', 'ITF annoté'],
       goals: [
-        "Calculer une dénivelée à partir d'une lecture arrière et d'une lecture avant.",
-        'Tenir un carnet de nivellement et calculer les altitudes.',
-        "Calculer l'écart de fermeture et le répartir simplement.",
+        "Lire la structure d'un modèle INTERLIS 1 : TRANSFER, MODEL, DOMAIN, TOPIC, TABLE.",
+        'Utiliser les types de base : texte, énumération, plage numérique, coordonnée, relation.',
+        'Expliquer la différence entre SURFACE et AREA.',
+        "Lire un fichier ITF ligne par ligne, à l'aide du modèle.",
       ] },
 
-    { file: 'lidar.html', num: '4', title: 'LiDAR et modèles de terrain',
-      duration: '30 min', prereq: 'chapitre 1', activity: 'graphique filtrable',
-      question: 'Comment connaître le terrain sous une forêt ?',
-      lead: "Un scanner laser aéroporté produit des millions de points. Une fois classés, ils donnent deux surfaces très différentes : le terrain nu (MNT) et la surface avec tout ce qui la recouvre (MNS).",
-      summary: 'Un profil de nuage de points, ses classes, le MNT, le MNS et la hauteur de végétation.',
-      tags: ['graphique filtrable'],
+    { file: 'interlis2.html', num: '4', title: 'INTERLIS 2',
+      duration: '60 min', prereq: 'chapitre 3', activity: 'banc des cardinalités',
+      info: { 'Fichiers': '.ili, .xtf' },
+      question: 'Comment dire « chaque arbre a exactement une espèce » ?',
+      lead: "INTERLIS 2 passe des tables aux classes. On gagne l'héritage, les structures, les associations avec des cardinalités précises, et un fichier de transfert en XML, le XTF, qui porte le nom de chaque attribut.",
+      summary: 'Classes, héritage, structures, associations et cardinalités, fichier XTF.',
+      tags: ['modèle ↔ XTF', 'cardinalités'],
       goals: [
-        "Citer les principales classes d'un nuage de points.",
-        'Distinguer MNT, MNS et MNS normalisé.',
-        'Expliquer pourquoi le MNT est interpolé sous un bâtiment.',
+        'Traduire une table INTERLIS 1 en classe INTERLIS 2.',
+        "Utiliser l'héritage (`ABSTRACT`, `EXTENDS`) et les structures (`STRUCTURE`, `BAG OF`).",
+        'Lire et écrire une association avec ses cardinalités.',
+        'Retrouver chaque élément du modèle dans un fichier XTF.',
       ] },
 
-    { file: 'analyse.html', num: '5', title: 'Analyse spatiale',
-      duration: '45 min', prereq: 'bases de SIG', activity: 'outil SIG, code lié',
-      question: 'Comment traduire une question en opération spatiale ?',
-      lead: "Une question simple, « quels bâtiments sont à moins de 30 m du ruisseau ? », se traduit en une opération SIG, une requête SQL ou quelques lignes de Python.",
-      summary: 'Une zone tampon autour d\'un ruisseau, et la même requête en SQL et en Python.',
-      tags: ['outil SIG', 'code lié'],
+    { file: 'atelier.html', num: '5', title: 'Atelier .ili',
+      duration: '45 min', prereq: 'chapitre 4', activity: 'éditeur en direct',
+      info: { 'Travail': 'seul ou à deux' },
+      question: 'Livrable : un modèle sans erreur, téléchargé en .ili.',
+      lead: "À vous d'écrire. L'éditeur ci-dessous comprend une partie d'INTERLIS 2.3. À chaque frappe, il vérifie votre modèle et redessine le diagramme de classes.",
+      summary: 'Écrire un modèle et voir le diagramme UML se dessiner en direct. Quatre défis.',
+      tags: ['éditeur en direct'],
       goals: [
-        'Définir une zone tampon et une sélection par distance.',
-        'Lire une requête PostGIS simple avec ST_DWithin.',
-        'Reconnaître la même opération en Python (GeoPandas).',
+        'Écrire des classes, des attributs et des types en INTERLIS 2.',
+        "Corriger un modèle à partir d'un message d'erreur.",
+        'Relier un texte .ili à son diagramme UML.',
       ] },
 
-    { file: 'quiz.html', num: '6', title: 'Quiz final',
-      duration: '15 min', activity: 'auto-évaluation',
-      question: 'Une question par thème, correction immédiate.',
-      lead: "Six questions, une par thème. La correction s'affiche dès que vous répondez, avec un lien vers le chapitre à revoir.",
-      summary: 'Six questions sur les cinq thèmes, avec correction immédiate.',
+    { file: 'controler.html', num: '6', title: 'Contrôler les données',
+      duration: '45 min', prereq: 'chapitre 4', activity: 'chasse aux erreurs',
+      info: { 'Outil réel': 'ilivalidator' },
+      question: 'Pourquoi le canton refuse-t-il ma livraison ?',
+      lead: "Un fichier XTF peut s'ouvrir sans problème et être faux quand même. Le modèle permet de le vérifier automatiquement, avant que les erreurs n'arrivent dans la base du canton.",
+      summary: 'Bien formé n\'est pas valide. Un banc de contrôle façon ilivalidator.',
+      tags: ['chasse aux erreurs'],
+      goals: [
+        "Distinguer un fichier bien formé d'un fichier valide.",
+        'Reconnaître les erreurs typiques : valeur hors plage, énumération, obligatoire, unicité, référence, coordonnées.',
+        'Lire un rapport de contrôle et corriger un fichier XTF.',
+      ] },
+
+    { file: 'outils.html', num: '7', title: 'Outils et pratique',
+      duration: '30 min', prereq: 'chapitres 4 à 6', activity: 'chaîne animée',
+      info: { 'Logiciels': 'Java, QGIS' },
+      question: 'Quel outil pour quelle tâche ?',
+      lead: "INTERLIS n'est utile que si des outils savent le lire. En Suisse, une petite famille d'outils libres couvre toute la chaîne : du modèle à la base de données, puis de la base au fichier contrôlé et livré.",
+      summary: 'ili2c, ili2db, QGIS Model Baker, ilivalidator, dépôts de modèles, MO et DMAV.',
+      tags: ['chaîne animée'],
+      goals: [
+        'Placer ili2c, ili2db, Model Baker et ilivalidator dans la chaîne de travail.',
+        'Lancer les commandes de base (compiler, importer, exporter, contrôler).',
+        'Expliquer le rôle des dépôts de modèles.',
+        'Situer DM.01-AV-CH, DMAV et les modèles de géodonnées minimaux.',
+      ] },
+
+    { file: 'quiz.html', num: '8', title: 'Quiz final',
+      duration: '20 min', activity: 'auto-évaluation',
+      question: 'Dix questions, correction immédiate.',
+      lead: "Dix questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",
+      summary: "Dix questions pour vérifier l'essentiel, avec correction immédiate.",
       tags: ['auto-évaluation'] },
 
     { file: 'aide-memoire.html', num: 'A', title: 'Aide-mémoire',
       activity: 'fiche à imprimer',
-      lead: "L'essentiel de chaque chapitre sur une page. Imprimez avec Ctrl+P : le menu et les boutons disparaissent." },
+      lead: "L'essentiel du cours sur deux pages : syntaxe, fichiers de transfert, cardinalités, commandes et vocabulaire français-allemand. Imprimez avec Ctrl+P : le menu et les boutons disparaissent." },
 
-    { file: 'guide.html', num: 'B', title: 'Guide de rédaction',
+    // page non référencée : accessible uniquement par son adresse …/guide.html
+    { file: 'guide.html', num: 'B', title: 'Guide de rédaction', hidden: true,
       activity: 'pour les auteurs',
       lead: "Comment écrire et modifier ce support : où est quoi, la syntaxe Markdown des pages, et les composants disponibles avec leur rendu." },
   ],

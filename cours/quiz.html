@@ -12,33 +12,54 @@
 
 <!--
   Quiz : une question par objet.
-    q  : la question          o : les réponses proposées (2 à 6)
-    a  : numéro de la bonne réponse, en partant de 0
-    w  : explication affichée après la réponse
-    ch : page du chapitre à revoir (le titre est pris dans config.js)
+    q    : la question          o : les réponses proposées (2 à 6)
+    a    : numéro de la bonne réponse, en partant de 0
+    w    : explication affichée après la réponse
+    ch   : page du chapitre à revoir (le titre est pris dans config.js)
+    code : (facultatif) extrait affiché sous la question : ["langage", "texte"]
   Le score est mémorisé dans le navigateur de l'élève uniquement.
 -->
 <script type="application/json" data-quiz>
 [
-  {"q": "La coordonnée 2 538 214 / 1 152 387 est donnée…",
-   "o": ["en MN03", "en MN95", "en WGS84", "on ne peut pas savoir"], "a": 1,
-   "w": "Sept chiffres, l'est commence par 2 et le nord par 1 : c'est du MN95.", "ch": "referentiels.html"},
-  {"q": "Pourquoi un récepteur GNSS a-t-il besoin d'au moins quatre satellites ?",
-   "o": ["Pour avoir une marge de sécurité", "Trois inconnues de position et une inconnue de temps", "Un par point cardinal", "C'est une exigence légale"], "a": 1,
-   "w": "E, N, h et le décalage de l'horloge du récepteur : quatre inconnues, donc quatre mesures au minimum.", "ch": "gnss.html"},
-  {"q": "Un PDOP de 8 signifie…",
-   "o": ["8 satellites sont utilisés", "une très bonne géométrie", "une mauvaise géométrie des satellites", "une précision de 8 mm"], "a": 2,
-   "w": "Plus le PDOP est grand, plus la géométrie est mauvaise.", "ch": "gnss.html"},
-  {"q": "Lecture arrière 1.520, lecture avant 0.870. La dénivelée vaut…",
-   "o": ["−0.650 m", "+0.650 m", "+2.390 m", "−2.390 m"], "a": 1,
-   "w": "Δh = AR − AV = 1.520 − 0.870 = +0.650 m : le point avant est plus haut.", "ch": "nivellement.html"},
-  {"q": "Sous un bâtiment, le MNT LiDAR est…",
-   "o": ["mesuré à travers le toit", "interpolé entre les points sol voisins", "égal à la hauteur du toit", "laissé vide dans tous les produits"], "a": 1,
-   "w": "Le laser ne touche pas le sol sous un toit : le MNT y est interpolé.", "ch": "lidar.html"},
-  {"q": "`ST_DWithin(b.geom, r.geom, 30)` en MN95 sélectionne…",
-   "o": ["les objets à moins de 30 m", "les objets à moins de 30 km", "les 30 objets les plus proches", "les objets à moins de 30 degrés"], "a": 0,
-   "w": "En MN95 (EPSG:2056), l'unité est le mètre.", "ch": "analyse.html"}
+  {"q": "INTERLIS, c'est…",
+   "o": ["un langage pour décrire des modèles de données, et des règles pour transférer les données", "un logiciel SIG développé par la Confédération", "un format de fichier, comme le Shapefile ou le DXF", "une base de données nationale des géodonnées"], "a": 0,
+   "w": "INTERLIS est un langage de description (le modèle .ili) accompagné de règles de transfert (.itf, .xtf). Ce n'est pas un logiciel.", "ch": "pourquoi.html"},
+  {"q": "Quelle loi impose des modèles INTERLIS pour les géodonnées de base relevant du droit fédéral ?",
+   "o": ["La loi sur l'aménagement du territoire (LAT)", "Le Code civil (CC)", "La loi sur la géoinformation (LGéo) et son ordonnance (OGéo)", "La loi sur la protection des données (LPD)"], "a": 2,
+   "w": "La LGéo (2008) et l'OGéo imposent des modèles de géodonnées minimaux, écrits en INTERLIS.", "ch": "pourquoi.html"},
+  {"q": "En INTERLIS 1, un attribut écrit sans mot-clé particulier est…",
+   "o": ["interdit", "obligatoire", "facultatif", "ignoré à l'export"], "a": 1,
+   "w": "En INTERLIS 1, tout est obligatoire sauf ce qui est marqué OPTIONAL. En INTERLIS 2, c'est l'inverse : il faut écrire MANDATORY.", "ch": "interlis1.html"},
+  {"q": "Dans cette ligne ITF, que signifie le caractère @ ?",
+   "code": ["itf", "OBJE 103 A-0044 2 @ @ 2 2538268.900 1152386.700"],
+   "o": ["une erreur de transfert", "un séparateur de coordonnées", "une référence vers un autre objet", "une valeur non définie (vide)"], "a": 3,
+   "w": "@ est la valeur « non définie ». Elle n'est permise que pour un attribut OPTIONAL.", "ch": "interlis1.html"},
+  {"q": "La couverture du sol découpe tout le territoire, sans trou ni chevauchement. Quel type de géométrie INTERLIS 1 convient ?",
+   "o": ["SURFACE", "AREA", "COORD2", "POLYLINE"], "a": 1,
+   "w": "AREA décrit une partition : chaque limite est stockée une seule fois, et les surfaces voisines partagent leurs limites.", "ch": "interlis1.html"},
+  {"q": "Que signifie cette association ?",
+   "code": ["ili", "ASSOCIATION ArbreEspece =\n  Arbre -- {0..*} Arbre;\n  Espece -- {1} Espece;\nEND ArbreEspece;"],
+   "o": ["Chaque arbre a zéro, une ou plusieurs espèces", "Chaque espèce concerne exactement un arbre", "Chaque arbre a exactement une espèce", "Il doit exister exactement une espèce dans le fichier"], "a": 2,
+   "w": "La cardinalité se lit depuis l'autre bout : depuis un arbre, on trouve {1} espèce, exactement une.", "ch": "interlis2.html"},
+  {"q": "Quelle est la différence entre une STRUCTURE et une CLASS en INTERLIS 2 ?",
+   "o": ["Une structure n'a pas d'identifiant et vit à l'intérieur d'un attribut d'un objet", "Il n'y a aucune différence, ce sont des synonymes", "Une structure ne peut contenir que du texte", "Une structure est une classe abstraite"], "a": 0,
+   "w": "Une structure n'a pas de TID et n'existe pas seule. Elle est utilisée dans un attribut, par exemple Controles : BAG {0..*} OF Controle.", "ch": "interlis2.html"},
+  {"q": "Un fichier XTF contient <C1>538214.250</C1> pour un modèle en MN95. Le fichier est…",
+   "o": ["valide : seul l'ordre de grandeur compte", "valide, mais la carte sera décalée", "bien formé, mais pas valide", "mal formé : le XML est incorrect"], "a": 2,
+   "w": "Le XML est correct (bien formé), mais la valeur sort du domaine des coordonnées MN95. Le contrôle la refuse. C'est une coordonnée MN03.", "ch": "controler.html"},
+  {"q": "Quel outil contrôle un fichier de données XTF par rapport à son modèle ?",
+   "o": ["ili2c", "un éditeur XML", "ilivalidator", "ili2pg --schemaimport"], "a": 2,
+   "w": "ilivalidator contrôle des données. ili2c contrôle le modèle lui-même.", "ch": "outils.html"},
+  {"q": "Comment l'état « affaibli » est-il écrit dans un fichier XTF ?",
+   "o": ["<Etat code=\"1\"/>", "Il n'apparaît pas : il est défini dans le modèle", "<Etat>1</Etat>", "<Etat>affaibli</Etat>"], "a": 3,
+   "w": "En XTF, une énumération est écrite en toutes lettres. C'est l'ITF (INTERLIS 1) qui la code par un numéro.", "ch": "interlis2.html"}
 ]
+</script>
+
+<script type="text/markdown">
+:::prof
+Le quiz peut se faire au beamer en mode projection (++P++), la classe votant à main levée avant chaque clic. Les questions 6 (cardinalités) et 8 (bien formé ou valide) sont les meilleures pour lancer une discussion.
+:::
 </script>
 
 </main>

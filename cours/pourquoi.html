@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pourquoi INTERLIS ?</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+/* jeu du téléphone */
+.tel .stations{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 6px}
+.tel .st{border:1px solid var(--rule);border-radius:6px;padding:10px 12px;background:var(--sheet);position:relative;transition:border-color .25s,background .25s}
+.tel .st b{display:block;font:700 .95rem/1.2 var(--f-display)}
+.tel .st small{display:block;font:500 .72rem var(--f-mono);color:var(--muted);margin-top:2px}
+.tel .st .via{position:absolute;left:-10px;top:50%;transform:translate(-50%,-50%);font:600 .62rem var(--f-mono);background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:0 4px;color:var(--muted);white-space:nowrap;z-index:1}
+.tel .st.on{border-color:var(--accent);background:var(--accent-soft)}
+.tel .st.done{opacity:.6}
+.tel .fiche{margin-top:14px}
+.tel .fiche td{font-family:var(--f-mono);font-size:.84rem}
+.tel .fiche td:first-child{color:var(--ink-2)}
+.tel .fiche tr.chg td{background:var(--warn-soft)}
+.tel .fiche tr.lost td{background:var(--err-soft)}
+.tel .fiche tr.lost td:nth-child(2){text-decoration:line-through;color:var(--muted)}
+.tel .fiche tr.flash td{animation:fl .6s}
+@keyframes fl{from{background:var(--hl)}}
+.tel .msg{min-height:3.2em;font-size:.92rem;margin:10px 0 0}
+.tel .score{font:600 .8rem var(--f-mono)}
+@media (max-width:700px){
+  .tel .stations{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tel .st .via{display:none}
+}
+/* frise */
+.frise{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin:22px 0 0;padding-top:8px}
+.frise::before{content:"";position:absolute;left:0;right:0;top:27px;height:2px;background:var(--ink)}
+.frise button{position:relative;background:none;border:0;padding:0 6px 6px;cursor:pointer;text-align:center;color:var(--ink);font:inherit}
+.frise .y{display:block;font:700 .82rem var(--f-mono);color:var(--muted);height:16px}
+.frise .dot{display:block;width:14px;height:14px;border-radius:50%;margin:3px auto 8px;background:var(--sheet);border:2px solid var(--ink);transition:background .2s,transform .2s}
+.frise .t{display:block;font-size:.8rem;line-height:1.3;color:var(--ink-2)}
+.frise button[aria-pressed="true"] .dot{background:var(--accent);border-color:var(--accent);transform:scale(1.3)}
+.frise button[aria-pressed="true"] .y{color:var(--accent)}
+.frise-detail{border-left:3px solid var(--accent);padding:4px 0 4px 16px;margin-top:10px;min-height:5.5em}
+.frise-detail h4{font:700 1.05rem var(--f-display);margin-bottom:.2rem}
+@media (max-width:700px){.frise{grid-template-columns:repeat(6,120px);overflow-x:auto;padding-bottom:6px}}
+/* approche modèle */
+#mbd .bx rect{fill:var(--sheet);stroke:var(--ink);stroke-width:1.4}
+#mbd .bx.main rect{stroke-width:2.2}
+#mbd .bx text{font-family:var(--f-body);fill:var(--ink)}
+#mbd .bx .s{font:500 11px var(--f-mono);fill:var(--muted)}
+#mbd .ed{fill:none;stroke:var(--ink-2);stroke-width:1.4;marker-end:url(#arr)}
+#mbd .bx.out{cursor:pointer}
+#mbd .bx.out:hover rect,#mbd .bx.out.sel rect{stroke:var(--accent);fill:var(--accent-soft)}
+.mbd-note{min-height:3.4em}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Le jeu du téléphone entre logiciels
+
+Suivons l'arbre **A-0042** de Montavaux. La commune le saisit dans son SIG. Elle l'envoie au bureau de géomètre, qui le transmet au canton, qui le transmet au service des parcs. À chaque étape, on exporte dans le format que le destinataire sait lire.
+
+Cliquez sur *Transmettre* et regardez ce qui arrive à la fiche de l'arbre.
+</script>
+
+<!-- composant interactif : jeu du téléphone -->
+<figure class="fig tel" id="tel">
+  <div class="row" style="justify-content:space-between">
+    <div class="seg" role="group" aria-label="Mode d'échange">
+      <button type="button" data-mode="formats" aria-pressed="true">Formats au fil de l'eau</button>
+      <button type="button" data-mode="ili" aria-pressed="false">Avec un modèle INTERLIS</button>
+    </div>
+    <div class="row">
+      <button class="btn sm" type="button" id="telReset">Recommencer</button>
+      <button class="btn sm primary" type="button" id="telNext">Transmettre →</button>
+    </div>
+  </div>
+  <div class="stations" id="telSt"></div>
+  <p class="msg" id="telMsg" aria-live="polite"></p>
+  <div class="tbl fiche"><table>
+    <thead><tr><th>Attribut</th><th>Valeur reçue</th><th style="width:7.5em">État</th></tr></thead>
+    <tbody id="telBody"></tbody>
+  </table></div>
+  <figcaption>Fig. 1.1 · <span id="telScore" class="score"></span></figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+Un format de fichier (Shapefile, DXF, CSV) transporte des **valeurs**. Il ne dit presque rien de leur **sens** : unité, liste de valeurs permises, caractère obligatoire, lien avec d'autres objets. Chaque conversion oblige à deviner ce sens, et chaque devinette peut se tromper.
+:::
+
+:::prof
+Faire deviner à la classe, avant chaque clic, ce qui va se perdre. Demander : « Qui a déjà ouvert un CSV de coordonnées dans Excel ? » Presque tous ont vu le `2.54E+06`.
+
+Les pertes montrées sont typiques, pas systématiques : un Shapefile avec un fichier `.cpg` correct garde les accents. Le message est que *rien ne garantit* que l'information survive.
+:::
+
+## L'approche basée sur les modèles
+
+INTERLIS inverse la logique. Au lieu de discuter du format de fichier, on se met d'abord d'accord sur **ce que sont les données** : quelles classes d'objets, quels attributs, quels types, quelles règles. Cette description s'appelle un **modèle de données**. Elle s'écrit dans un fichier texte `.ili`, lisible par un humain et par une machine.
+
+Tout le reste se **déduit automatiquement** du modèle. Cliquez sur les boîtes du bas.
+</script>
+
+<!-- composant interactif : un modèle, quatre produits -->
+<figure class="fig gridbg">
+  <svg id="mbd" viewBox="0 0 720 300" role="img" aria-label="Un modèle INTERLIS au centre, dont on déduit le format de transfert, le schéma de base de données, les contrôles et la documentation">
+    <g class="bx main">
+      <rect x="250" y="20" width="220" height="70" rx="4"/>
+      <text x="360" y="50" text-anchor="middle" font-size="16" font-weight="700">Modèle INTERLIS</text>
+      <text class="s" x="360" y="72" text-anchor="middle">Arbres_Communaux_V1.ili</text>
+    </g>
+    <path class="ed" d="M300 90 C 250 150, 110 150, 95 196"/>
+    <path class="ed" d="M340 90 C 330 150, 280 160, 275 196"/>
+    <path class="ed" d="M380 90 C 390 150, 440 160, 445 196"/>
+    <path class="ed" d="M420 90 C 470 150, 610 150, 625 196"/>
+    <g class="bx out" data-k="0" tabindex="0" role="button"><rect x="12" y="200" width="166" height="72" rx="4"/><text x="95" y="230" text-anchor="middle" font-size="14" font-weight="600">Format de transfert</text><text class="s" x="95" y="252" text-anchor="middle">fichier .xtf / .itf</text></g>
+    <g class="bx out" data-k="1" tabindex="0" role="button"><rect x="192" y="200" width="166" height="72" rx="4"/><text x="275" y="230" text-anchor="middle" font-size="14" font-weight="600">Base de données</text><text class="s" x="275" y="252" text-anchor="middle">tables, clés, types</text></g>
+    <g class="bx out" data-k="2" tabindex="0" role="button"><rect x="362" y="200" width="166" height="72" rx="4"/><text x="445" y="230" text-anchor="middle" font-size="14" font-weight="600">Contrôles</text><text class="s" x="445" y="252" text-anchor="middle">règles vérifiables</text></g>
+    <g class="bx out" data-k="3" tabindex="0" role="button"><rect x="542" y="200" width="166" height="72" rx="4"/><text x="625" y="230" text-anchor="middle" font-size="14" font-weight="600">Documentation</text><text class="s" x="625" y="252" text-anchor="middle">diagramme UML, catalogue</text></g>
+  </svg>
+  <p class="mbd-note" id="mbdNote" aria-live="polite">Le modèle est la seule chose que les partenaires doivent négocier. Choisissez une boîte pour voir ce qui en découle.</p>
+  <figcaption>Fig. 1.2 · Un seul modèle, quatre produits dérivés automatiquement.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::retenir
+**INTERLIS, c'est deux choses :**
+
+- un **langage de description** de données, pour écrire des modèles (`.ili`) ;
+- des **règles de transfert**, qui disent comment écrire dans un fichier les données conformes à un modèle (`.itf` pour INTERLIS 1, `.xtf` pour INTERLIS 2).
+
+Le modèle est indépendant de tout logiciel. Un SIG, une DAO ou une base de données peuvent tous lire et écrire selon le même modèle.
+:::
+
+Voici à quoi ressemble le début du modèle de Montavaux. Pas besoin de tout comprendre maintenant : on le construira pas à pas aux chapitres 3 et 4.
+
+```ili Arbres_Communaux_V1.ili (extrait)
+CLASS Arbre =
+  NumeroInventaire : MANDATORY TEXT*10;
+  Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+  Etat : MANDATORY EtatSanitaire;
+  Position : MANDATORY Coord2;
+END Arbre;
+```
+
+Même sans connaître la syntaxe, on lit que la hauteur est en mètres, entre 0 et 60, et que l'état est obligatoire. C'est exactement l'information qui se perdait dans le jeu du téléphone.
+
+:::attention
+INTERLIS n'est **pas un logiciel** et pas seulement un format de fichier. On entend souvent « envoie-moi l'INTERLIS » : il s'agit en fait d'un fichier de transfert (`.itf` ou `.xtf`). Ce fichier n'a de sens qu'accompagné de son modèle `.ili`.
+:::
+
+## Une obligation légale
+
+En Suisse, INTERLIS n'est pas un simple choix technique. La **loi fédérale sur la géoinformation** (LGéo, RS 510.62) et son ordonnance (OGéo, RS 510.620) imposent que les **géodonnées de base relevant du droit fédéral** soient décrites par des **modèles de géodonnées minimaux** (MGDM). Ces modèles sont écrits en INTERLIS.
+
+Concrètement : la mensuration officielle, le cadastre RDPPF, les zones d'affectation, les cartes de dangers ou les inventaires de protection de la nature sont échangés selon des modèles INTERLIS publiés.
+</script>
+
+<!-- composant interactif : frise chronologique -->
+<figure class="fig">
+  <div class="frise" id="frise" role="group" aria-label="Frise chronologique"></div>
+  <div class="frise-detail" id="friseD" aria-live="polite"></div>
+  <figcaption>Fig. 1.3 · Quelques jalons. Cliquez sur une date.</figcaption>
+</figure>
+
+<script type="text/markdown">
+:::terrain
+Comme géomaticienne ou géomaticien, vous livrerez des mises à jour de la mensuration officielle au canton sous forme de fichier INTERLIS. Vous téléchargerez des données cantonales (zones à bâtir, cadastre des sites pollués…) au format XTF. Vous importerez aussi des modèles dans QGIS avec Model Baker (chapitre 7).
+:::
+
+:::exo 5 min, à deux
+Citez trois informations sur un arbre qui risquent de se perdre si la commune l'envoie par e-mail sous forme de tableau Excel. Pour chacune, dites comment un modèle de données éviterait la perte.
+
+??? Pistes de solution
+- **L'unité de la hauteur** (m ? cm ?) : le modèle fixe `[INTERLIS.m]`.
+- **Les valeurs permises de l'état** (« malade », « Malade », « mal. ») : le modèle définit une énumération fermée.
+- **Le système de coordonnées** (MN95 ou MN03 ?) : le modèle fixe le domaine des coordonnées. Une coordonnée MN03 (6 chiffres) sera refusée.
+- **Le lien vers l'espèce** : le modèle définit une relation vers une liste d'espèces, au lieu d'un texte libre avec des fautes de frappe.
+???
+:::
+
+:::prof
+Les dates de la frise sont données à titre d'orientation. Vérifier les dates exactes des versions sur *interlis.ch* et, pour le DMAV, le calendrier d'introduction sur *cadastre.ch* avant le cours, car ils évoluent.
+:::
+</script>
+
+</main>
+<script>
+// ---- composants interactifs de la page ----
+(function(){
+  const $ = id => document.getElementById(id);
+
+  /* ---------- jeu du téléphone ---------- */
+  const ORIG = [
+    ['NumeroInventaire','A-0042'],
+    ['Espece','Tilia cordata'],
+    ['NomFrancais','Tilleul à petites feuilles'],
+    ['Hauteur','12.5 m'],
+    ['AnneePlantation','1987'],
+    ['Etat','affaibli'],
+    ['Position','2538214.250 / 1152388.100'],
+  ];
+  const STATIONS = [
+    {n:'Commune',           s:'SIG · GeoPackage', via:''},
+    {n:'Bureau géomètre',   s:'DAO',              via:'.shp'},
+    {n:'Canton',            s:'base PostGIS',     via:'.dxf'},
+    {n:'Service des parcs', s:'tableur',          via:'.csv'},
+  ];
+  // à chaque étape : [indice, nouveau nom, nouvelle valeur, statut]  (statut : chg | lost)
+  const HOPS = [
+    { msg:"Export en <strong>Shapefile</strong> : les noms d'attributs sont coupés à 10 caractères, et sans fichier <code>.cpg</code> les accents deviennent illisibles. L'unité « m » n'existe pas dans le format.",
+      ch:[[0,'NumeroInve',null,'chg'],[2,null,'Tilleul Ã  petites feuilles','chg'],[3,null,'12.5','chg'],[4,'AnneePlant',null,'chg']] },
+    { msg:"Conversion en <strong>DXF</strong> pour la DAO : l'arbre devient un bloc avec une étiquette. L'état n'était montré que par une couleur de calque et l'année n'était pas affichée : les deux disparaissent. Le nom français est abandonné faute de place.",
+      ch:[[2,null,'—','lost'],[4,null,'—','lost'],[5,null,'—','lost']] },
+    { msg:"Export en <strong>CSV</strong> ouvert dans un tableur : les grandes coordonnées passent en notation scientifique et la décimale devient une virgule. La hauteur n'est plus un nombre mais du texte.",
+      ch:[[3,null,'12,5 (texte)','chg'],[6,null,'2.54E+06 / 1.15E+06','lost']] },
+  ];
+  const ILI_MSG = [
+    "La commune exporte un fichier <strong>XTF</strong> conforme au modèle <code>Arbres_Communaux_V1</code>. Le bureau l'importe dans sa DAO avec le même modèle. Rien ne change.",
+    "Le bureau réexporte en XTF. Le canton contrôle le fichier avant de l'importer dans PostGIS : <span class=\"chip ok\">0 erreur</span>",
+    "Le service des parcs importe le XTF dans son SIG. Les champs, les types et les unités viennent du modèle, pas du fichier de la personne précédente.",
+  ];
+  let mode = 'formats', step = 0, rows;
+  function reset(){
+    step = 0;
+    rows = ORIG.map(([k, v]) => ({k, v, st:'ok'}));
+    render([]);
+    $('telMsg').innerHTML = mode === 'formats'
+      ? "La fiche d'origine, telle que la commune l'a saisie. Sept attributs, tous corrects."
+      : "Même point de départ. Cette fois, tous les partenaires ont adopté le modèle <code>Arbres_Communaux_V1</code>.";
+  }
+  function render(flash){
+    $('telSt').innerHTML = STATIONS.map((s, i) => `<div class="st${i===step?' on':''}${i<step?' done':''}">
+      ${s.via ? `<span class="via">${mode==='ili' ? '.xtf' : s.via}</span>` : ''}<b>${s.n}</b><small>${s.s}</small></div>`).join('');
+    $('telBody').innerHTML = rows.map((r, i) => `<tr class="${r.st==='ok'?'':r.st}${flash.includes(i)?' flash':''}">
+      <td>${r.k}</td><td>${GEO.esc(r.v)}</td>
+      <td>${r.st==='ok' ? '<span class="chip ok">intact</span>' : r.st==='chg' ? '<span class="chip warn">altéré</span>' : '<span class="chip err">perdu</span>'}</td></tr>`).join('');
+    const ok = rows.filter(r => r.st==='ok').length;
+    $('telScore').textContent = `${STATIONS[step].n} · ${ok} attribut${ok>1?'s':''} sur 7 intact${ok>1?'s':''}`;
+    $('telNext').disabled = step >= STATIONS.length-1;
+  }
+  function next(){
+    if(step >= STATIONS.length-1) return;
+    const flash = [];
+    if(mode === 'formats'){
+      HOPS[step].ch.forEach(([i, k, v, st]) => {
+        if(k) rows[i].k = k;
+        if(v) rows[i].v = v;
+        rows[i].st = rows[i].st === 'lost' ? 'lost' : st;
+        flash.push(i);
+      });
+      $('telMsg').innerHTML = HOPS[step].msg;
+    } else {
+      $('telMsg').innerHTML = ILI_MSG[step];
+    }
+    step++;
+    render(flash);
+    if(step === STATIONS.length-1 && mode === 'formats'){
+      const ok = rows.filter(r => r.st==='ok').length, lost = rows.filter(r => r.st==='lost').length;
+      $('telMsg').innerHTML += ` <strong>Bilan : ${ok} attribut${ok>1?'s':''} intact${ok>1?'s':''} sur 7, ${lost} perdus.</strong>`;
+    }
+  }
+  document.querySelectorAll('#tel .seg button').forEach(b => b.onclick = () => {
+    mode = b.dataset.mode;
+    document.querySelectorAll('#tel .seg button').forEach(x => x.setAttribute('aria-pressed', x===b));
+    reset();
+  });
+  $('telNext').onclick = next;
+  $('telReset').onclick = reset;
+  reset();
+
+  /* ---------- un modèle, quatre produits ---------- */
+  const NOTES = [
+    "<strong>Format de transfert.</strong> Les règles d'encodage d'INTERLIS disent comment écrire chaque classe et chaque attribut dans un fichier XTF (ou ITF en INTERLIS 1). Personne n'a à inventer un format.",
+    "<strong>Base de données.</strong> L'outil ili2db lit le modèle et crée les tables, les colonnes, les types et les clés étrangères, par exemple dans PostGIS ou un GeoPackage.",
+    "<strong>Contrôles.</strong> Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (chapitre 6).",
+    "<strong>Documentation.</strong> Le modèle se traduit en diagramme de classes UML et en catalogue d'objets. C'est la même source que pour le reste : la documentation ne peut pas être « en retard » sur les données.",
+  ];
+  const outs = document.querySelectorAll('#mbd .bx.out');
+  outs.forEach(g => {
+    const pick = () => { outs.forEach(x => x.classList.toggle('sel', x===g)); $('mbdNote').innerHTML = NOTES[+g.dataset.k]; };
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); pick(); } });
+  });
+
+  /* ---------- frise ---------- */
+  const EV = [
+    {y:'dès 1985', t:'Naissance', h:"Un langage pour la mensuration", d:"INTERLIS est développé pour la réforme de la mensuration officielle (REMO). Il faut un moyen d'échanger les données entre des systèmes de fabricants différents, sans dépendre de l'un d'eux."},
+    {y:'1991', t:'INTERLIS 1', h:"INTERLIS 1", d:"Première version publiée. Elle décrit des tables (<code>TABLE</code>) et un format de transfert en lignes de texte, le fichier ITF. Le modèle de la mensuration officielle DM.01-AV-CH est écrit en INTERLIS 1 et il est encore largement utilisé."},
+    {y:'1998', t:'Norme SN', h:"Norme suisse SN 612030", d:"INTERLIS 1 devient une norme suisse. Un langage public et normalisé, sans licence, que tout éditeur de logiciel peut implémenter."},
+    {y:'2006', t:'INTERLIS 2.3', h:"INTERLIS 2 (norme SN 612031)", d:"INTERLIS 2 apporte l'orienté objet : classes, héritage, structures, associations. Le transfert se fait en XML (fichier XTF). La version 2.3 est la plus répandue aujourd'hui."},
+    {y:'2008', t:'LGéo', h:"Loi sur la géoinformation", d:"La LGéo et l'OGéo entrent en vigueur le 1<sup>er</sup> juillet 2008. Les géodonnées de base relevant du droit fédéral doivent être décrites par des modèles de géodonnées minimaux en INTERLIS."},
+    {y:'2020 →', t:'2.4 et DMAV', h:"INTERLIS 2.4 et le nouveau modèle de la MO", d:"La version 2.4 modernise le langage et le format XTF. Le nouveau modèle de la mensuration officielle, le DMAV, est écrit en INTERLIS 2.4. Il remplace progressivement DM.01-AV-CH dans les cantons."},
+  ];
+  const fr = $('frise');
+  fr.innerHTML = EV.map((e, i) => `<button type="button" aria-pressed="false" data-i="${i}"><span class="y">${e.y}</span><span class="dot"></span><span class="t">${e.t}</span></button>`).join('');
+  const show = i => {
+    fr.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', i===j));
+    $('friseD').innerHTML = `<h4>${EV[i].h}</h4><p style="margin:.2rem 0 0">${EV[i].d}</p>`;
+  };
+  fr.querySelectorAll('button').forEach(b => b.onclick = () => show(+b.dataset.i));
+  show(0);
+})();
+</script>
+</body>
+</html>

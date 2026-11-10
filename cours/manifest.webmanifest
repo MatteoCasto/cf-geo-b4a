@@ -1,7 +1,7 @@
 {
-  "name": "Cours de géomatique · CF-geo",
-  "short_name": "Géomatique",
-  "description": "Support de cours de géomatique (gabarit B4a), utilisable hors ligne.",
+  "name": "Cours INTERLIS · CF-geo",
+  "short_name": "INTERLIS",
+  "description": "Support de cours INTERLIS 1 & 2 (CF-geo B4a), utilisable hors ligne.",
   "lang": "fr-CH",
   "start_url": "./index.html",
   "scope": "./",
