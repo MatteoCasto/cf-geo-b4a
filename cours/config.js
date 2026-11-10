@@ -86,7 +86,7 @@ var COURSE = {
         'Traduire une table INTERLIS 1 en classe INTERLIS 2.',
         "Utiliser l'héritage (`ABSTRACT`, `EXTENDS`) et les structures (`STRUCTURE`, `BAG OF`).",
         'Lire et écrire une association avec ses cardinalités.',
-        'Retrouver chaque élément du modèle dans un fichier XTF.',
+        'Retrouver chaque élément du modèle dans un fichier XTF, en version 2.3 comme en 2.4.',
       ] },
 
     { file: 'importer.html', num: '5', title: 'Importer et étendre',

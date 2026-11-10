@@ -9,7 +9,11 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 - Chapitre 5 **Importer et étendre** : modèles de base de la Confédération (`IMPORTS`), extension d'un modèle cantonal par une commune (`TOPIC … EXTENDS`, `CLASS … (EXTENDED)`), lecture polymorphique (composant « Un fichier, deux lectures »).
 - Chapitre 6 **Le modèle qui dit non** : `UNIQUE` sur plusieurs attributs, `MANDATORY CONSTRAINT` (traduire « si… alors… »), `EXISTENCE CONSTRAINT`, banc des contraintes interactif.
 
+- Chapitre INTERLIS 2 : section « Le même arbre en XTF 2.4 » (XTF 2.3 et 2.4 côte à côte, tableau des différences).
+- Aide-mémoire : cartes « XTF 2.4 », « Importer et étendre », « Contraintes ».
+
 ### Modifié
+- Mise à jour 2025-2026 : frise (INTERLIS 2.4 / eCH-0031 en 2017, révision 2024 ; DMAV en vigueur au 1.1.2024, délai transitoire au 31.12.2027), tableau des modèles du chapitre Outils, notes formateur.
 - Renumérotation : Atelier devient le chapitre 7, Contrôler le 8, Outils le 9, Quiz le 10 (renvois et numéros de figures mis à jour).
 
 ## [0.1.0] – 2026-11-10

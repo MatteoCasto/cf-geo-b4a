@@ -133,7 +133,28 @@ END Modele_V1.
 ```
 :::
 
-:::carte G · Cardinalités
+:::carte G · XTF 2.4 : ce qui change
+```xtf donnees.xtf · INTERLIS 2.4
+<ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS"
+    xmlns:geom="http://www.interlis.ch/geometry/1.0"
+    xmlns="http://www.interlis.ch/xtf/2.4/Modele_V1">
+  <ili:headersection>
+    <ili:models><ili:model>Modele_V1</ili:model></ili:models>
+  </ili:headersection>
+  <ili:datasection>
+    <Theme ili:bid="b1">
+      <Arbre ili:tid="a42">
+        <Numero>A-0042</Numero>
+        <Position><geom:coord><geom:c1>2538214.250</geom:c1><geom:c2>1152388.100</geom:c2></geom:coord></Position>
+        <Espece ili:ref="e1"/>
+      </Arbre>
+    </Theme>
+  </ili:datasection>
+</ili:transfer>
+```
+:::
+
+:::carte H · Cardinalités
 | `{1}` | exactement un |
 | `{0..1}` | au plus un |
 | `{1..*}` | au moins un |
@@ -144,12 +165,37 @@ END Modele_V1.
 `--` association · `-<>` agrégation · `-<#>` composition
 :::
 
-:::carte H · Contrôle : trois filtres
+:::carte I · Contrôle : trois filtres
 1. **Bien formé** : XML correct.
 2. **Modèle** : types, plages, énumérations, obligatoires, références, coordonnées.
 3. **Contraintes** : UNIQUE, CONSTRAINT, géométries, règles cantonales.
 
 **Pièges classiques** : date `12.05.2026` au lieu de `2026-05-12` · casse d'une énumération (`Malade`) · coordonnées MN03 · virgule décimale · doublon d'identifiant · ordre des balises.
+:::
+
+:::carte J · Importer et étendre
+```ili extension communale
+INTERLIS 2.3;
+MODEL Arbres_Montavaux_V1 (fr) AT "https://…" VERSION "…" =
+  IMPORTS Arbres_Cantonaux_V1;
+  TOPIC Arbres EXTENDS Arbres_Cantonaux_V1.Arbres =
+    CLASS Arbre (EXTENDED) =
+      Hauteur : 0.0 .. 60.0 [INTERLIS.m];
+    END Arbre;
+  END Arbres;
+END Arbres_Montavaux_V1.
+```
+Modèles de base : `GeometryCHLV95_V1` · `Units` · `CHAdminCodes_V1` · `LocalisationCH_V1`. Une extension **ajoute** ou **resserre**, jamais ne retire ni n'élargit.
+:::
+
+:::carte K · Contraintes
+```ili contraintes
+UNIQUE Commune, NumeroInventaire;
+!! si mort, alors date d'abattage prévue
+MANDATORY CONSTRAINT Etat != #mort OR DEFINED(AbattagePrevu);
+EXISTENCE CONSTRAINT CodeEspece REQUIRED IN EspeceCantonale : Code;
+```
+**Si A alors B** = `NOT (A) OR B` · `#valeur` = énumération · `DEFINED(x)` = renseigné. Rapport : `…Constraint1 is not true` = 1<sup>re</sup> contrainte de la classe.
 :::
 
 ### Commandes

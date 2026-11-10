@@ -322,9 +322,74 @@ Le fichier de transfert d'INTERLIS 2 est un fichier XML. Chaque objet est un él
 :::
 
 :::terrain
-Un vrai modèle n'écrit pas lui-même le domaine `Coord2`. Il l'importe d'un modèle de base de la Confédération : `IMPORTS GeometryCHLV95_V1;` puis `Position : MANDATORY GeometryCHLV95_V1.Coord2;`. Ces modèles de base (unités, géométries, textes multilingues…) sont disponibles dans le dépôt de modèles de la Confédération.
+Un vrai modèle n'écrit pas lui-même le domaine `Coord2` : il l'importe d'un modèle de base de la Confédération. C'est l'objet du chapitre suivant, [Importer et étendre](importer.html).
+:::
 
-La version **INTERLIS 2.4** garde la même logique de modélisation. Son format XTF est différent (espaces de noms XML, balises d'en-tête en minuscules). Le nouveau modèle de la mensuration officielle (DMAV) utilise la version 2.4.
+## Le même arbre en XTF 2.4
+
+La version **INTERLIS 2.4** (norme eCH-0031) garde la même façon de modéliser : classes, héritage, associations s'écrivent comme en 2.3. C'est surtout le **fichier XTF** qui change. Le nouveau modèle de la mensuration officielle, le **DMAV**, est écrit en 2.4 : c'est ce format que vous recevrez et livrerez pour la MO. Survolez les noms pour comparer.
+</script>
+
+<div class="mx">
+  <script type="text/x-code" data-lang="xtf" data-file="XTF 2.3" data-links="TRANSFER,transfer,HEADERSECTION,headersection,MODEL,model,Inventaire,Arbre,TID,tid,COORD,coord,REF,ref" data-group="v24">
+    <TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+      <HEADERSECTION SENDER="Commune de Montavaux" VERSION="2.3">
+        <MODELS>
+          <MODEL NAME="Arbres_Communaux_V1" VERSION="2026-09-30"
+                 URI="https://models.montavaux.ch"/>
+        </MODELS>
+      </HEADERSECTION>
+      <DATASECTION>
+        <Arbres_Communaux_V1.Inventaire BID="b1">
+          <Arbres_Communaux_V1.Inventaire.Arbre TID="a42">
+            <NumeroInventaire>A-0042</NumeroInventaire>
+            <Etat>affaibli</Etat>
+            <Position>
+              <COORD><C1>2538214.250</C1><C2>1152388.100</C2></COORD>
+            </Position>
+            <Espece REF="e1"/>
+          </Arbres_Communaux_V1.Inventaire.Arbre>
+        </Arbres_Communaux_V1.Inventaire>
+      </DATASECTION>
+    </TRANSFER>
+  </script>
+  <script type="text/x-code" data-lang="xtf" data-file="XTF 2.4" data-links="TRANSFER,transfer,HEADERSECTION,headersection,MODEL,model,Inventaire,Arbre,TID,tid,COORD,coord,REF,ref" data-group="v24">
+    <ili:transfer xmlns:ili="http://www.interlis.ch/xtf/2.4/INTERLIS"
+        xmlns:geom="http://www.interlis.ch/geometry/1.0"
+        xmlns="http://www.interlis.ch/xtf/2.4/Arbres_Communaux_V1">
+      <ili:headersection>
+        <ili:models>
+          <ili:model>Arbres_Communaux_V1</ili:model>
+        </ili:models>
+        <ili:sender>Commune de Montavaux</ili:sender>
+      </ili:headersection>
+      <ili:datasection>
+        <Inventaire ili:bid="b1">
+          <Arbre ili:tid="a42">
+            <NumeroInventaire>A-0042</NumeroInventaire>
+            <Etat>affaibli</Etat>
+            <Position>
+              <geom:coord><geom:c1>2538214.250</geom:c1><geom:c2>1152388.100</geom:c2></geom:coord>
+            </Position>
+            <Espece ili:ref="e1"/>
+          </Arbre>
+        </Inventaire>
+      </ili:datasection>
+    </ili:transfer>
+  </script>
+</div>
+
+<script type="text/markdown">
+| | XTF 2.3 | XTF 2.4 |
+|---|---|---|
+| Balises d'INTERLIS | majuscules : `TRANSFER`, `DATASECTION` | minuscules, préfixe `ili:` : `ili:transfer`, `ili:datasection` |
+| Nom d'un objet | complet : `Modele.Theme.Classe` | court : `Classe`, le modèle est donné par l'espace de noms (`xmlns`) |
+| Identifiants, références | `TID`, `BID`, `REF` | `ili:tid`, `ili:bid`, `ili:ref` |
+| Coordonnées | `COORD`, `C1`, `C2` | `geom:coord`, `geom:c1`, `geom:c2` |
+| Attributs | inchangés : `<NumeroInventaire>`, `<Etat>`, valeurs identiques | |
+
+:::retenir
+Le **modèle** dit lequel des deux formats s'applique : `INTERLIS 2.3;` ou `INTERLIS 2.4;` sur sa première ligne. Vous n'écrivez presque jamais un XTF à la main : les outils produisent le bon format. Mais vous devez savoir **lire** les deux, notamment dans un rapport d'erreurs.
 :::
 
 :::exo 10 min
