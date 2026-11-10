@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Positionnement GNSS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+#sky .ring{fill:none;stroke:var(--rule);stroke-width:1}
+#sky .axis{stroke:var(--rule);stroke-width:1}
+#sky .lab{font:500 10px var(--f-mono);fill:var(--muted)}
+#sky .card{font:700 12px var(--f-display);fill:var(--ink-2)}
+#sky .mask{fill:var(--err-soft);stroke:none;opacity:.9}
+#sky .obst{fill:var(--c-bat);stroke:var(--c-bat-line);stroke-width:1.2;opacity:.85}
+#sky .sat circle{stroke:var(--sheet);stroke-width:1.5}
+#sky .sat text{font:600 9px var(--f-mono);fill:var(--sheet);pointer-events:none}
+#sky .sat.off circle{fill:none!important;stroke:var(--muted);stroke-dasharray:2 2}
+#sky .sat.off text{fill:var(--muted)}
+.c-G{fill:var(--code-tag)} .c-E{fill:var(--ok)} .c-R{fill:var(--warn)}
+.qual{margin-top:.6rem}
+</style>
+</head>
+<body>
+<div class="site">
+<aside class="toc" id="toc"></aside>
+<main class="doc">
+
+<header class="chap wide">
+  <div>
+    <div class="kicker">Chapitre 2 · 30 min</div>
+    <h1>Positionnement GNSS</h1>
+    <p class="lead">Un récepteur GNSS calcule sa position à partir des signaux de plusieurs satellites. Le nombre de satellites compte, mais leur répartition dans le ciel compte tout autant.</p>
+  </div>
+  <div class="cartouche">
+    <div><i>Chapitre</i><b>2 / 6</b></div>
+    <div><i>Durée</i><b>30 min</b></div>
+    <div><i>Prérequis</i><b>chapitre 1</b></div>
+    <div><i>Activité</i><b>simulation</b></div>
+    <div class="full last"><i>Question clé</i><b>Pourquoi la mesure est-elle moins bonne au pied d'un bâtiment ?</b></div>
+  </div>
+</header>
+
+<section class="goals">
+  <h4>Objectifs du chapitre</h4>
+  <ul>
+    <li><label><input type="checkbox"><span>Expliquer pourquoi il faut au moins quatre satellites.</span></label></li>
+    <li><label><input type="checkbox"><span>Lire un ciel de satellites (skyplot) : azimut, élévation.</span></label></li>
+    <li><label><input type="checkbox"><span>Relier masque d'élévation, obstacles et PDOP.</span></label></li>
+  </ul>
+</section>
+
+<h2><span class="sn">2.1</span>Le ciel vu par le récepteur</h2>
+<p>Le cercle extérieur est l'horizon, le centre est le zénith. Faites varier le masque d'élévation, ajoutez un bâtiment, et observez le nombre de satellites utilisés et le <strong>PDOP</strong>.</p>
+<div class="tool-panel wide">
+  <figure class="fig gridbg" style="margin:0">
+    <svg id="sky" viewBox="-170 -170 340 340" role="img" aria-label="Ciel de satellites : cercles d'élévation 0, 30 et 60 degrés, satellites colorés par constellation">
+      <g id="sMask"></g><g id="sObst"></g><g id="sGrid"></g><g id="sSats"></g>
+    </svg>
+    <figcaption>Fig. 2.1 · Skyplot simulé (orbites fictives). <span style="color:var(--code-tag)">G</span> GPS · <span style="color:var(--ok)">E</span> Galileo · <span style="color:var(--warn)">R</span> GLONASS.</figcaption>
+  </figure>
+  <div>
+    <div class="ctrl"><label for="mask">Masque d'élévation <output id="maskV">10°</output></label><input id="mask" type="range" min="0" max="40" value="10"></div>
+    <label class="check"><input type="checkbox" id="obst"> Bâtiment au sud-ouest (azimut 190°–260°, jusqu'à 50°)</label>
+    <label class="check"><input type="checkbox" id="anim" checked> Faire tourner les satellites</label>
+    <div class="row" style="margin-top:14px;gap:28px">
+      <div><div class="small muted">Satellites utilisés</div><div class="big" id="nSat">–</div></div>
+      <div><div class="small muted">PDOP</div><div class="big" id="pdop">–</div></div>
+    </div>
+    <p class="qual" id="qual"></p>
+  </div>
+</div>
+
+<div class="box retenir"><span class="lab">À retenir</span>
+  <p>Il faut <strong>au moins 4 satellites</strong> : trois inconnues de position (E, N, h) et une inconnue de temps (l'horloge du récepteur).</p>
+  <p>Le <strong>PDOP</strong> mesure la qualité de la géométrie : plus il est petit, mieux c'est. Des satellites tous du même côté donnent un mauvais PDOP, même s'ils sont nombreux.</p>
+</div>
+
+<div class="box attention"><span class="lab">Attention</span>
+  <p>Baisser le masque ajoute des satellites, mais ceux proches de l'horizon traversent plus d'atmosphère et sont plus sensibles aux réflexions (multitrajet). Plus de satellites n'est pas toujours mieux.</p>
+</div>
+
+<div class="box terrain"><span class="lab">Sur le terrain</span>
+  <p>En mensuration, on travaille le plus souvent en <strong>RTK</strong> avec un service de corrections (en Suisse, par exemple swipos de swisstopo). Le récepteur affiche en permanence le nombre de satellites et le PDOP : on les note dans le carnet avant chaque point critique.</p>
+</div>
+
+<h2><span class="sn">2.2</span>À vous</h2>
+<div class="box exo"><span class="lab">Question de discussion · 5 min, à deux</span>
+  <p>Activez le bâtiment et réglez le masque à 25°. Le PDOP augmente nettement. Proposez deux manières de mieux mesurer ce point.</p>
+  <details><summary>Pistes de réponse</summary>
+    <ul>
+      <li>Attendre une meilleure constellation (planification de mission).</li>
+      <li>S'éloigner de l'obstacle et mesurer un point excentré, puis rattacher le point visé au tachéomètre.</li>
+      <li>Utiliser davantage de constellations si le récepteur le permet.</li>
+    </ul>
+  </details>
+</div>
+
+<div class="box prof"><span class="lab">Formateur</span>
+  <p>Les orbites sont fictives et tournent beaucoup trop vite : le dire. Le calcul du PDOP, en revanche, est le vrai (matrice des cosinus directeurs, inverse de AᵀA).</p>
+</div>
+
+</main>
+</div>
+<script src="app.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+  const R = 150, rad = d => d*Math.PI/180;
+  const xy = (az, el) => { const r = R*(90 - el)/90; return [r*Math.sin(rad(az)), -r*Math.cos(rad(az))]; };
+  // grille
+  let g = '';
+  [0, 30, 60].forEach(el => { g += `<circle class="ring" r="${R*(90-el)/90}"/><text class="lab" x="3" y="${-R*(90-el)/90 + 11}">${el}°</text>`; });
+  for(let a = 0; a < 360; a += 30){ const [x, y] = xy(a, 0); g += `<line class="axis" x1="0" y1="0" x2="${x}" y2="${y}"/>`; }
+  [['N',0],['E',90],['S',180],['O',270]].forEach(([t,a]) => { const [x, y] = xy(a, -9); g += `<text class="card" x="${x}" y="${y+4}" text-anchor="middle">${t}</text>`; });
+  $('sGrid').innerHTML = g;
+  // satellites fictifs : azimut initial, élévation de base, amplitude, vitesse
+  let seed = 11; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+  const SATS = Array.from({length:16}, (_, i) => ({
+    id: ['G','E','R'][i%3] + String(3 + ((i*7) % 29)).padStart(2,'0'),
+    sys: ['G','E','R'][i%3], az0: rnd()*360, el0: 5 + rnd()*70, amp: 10 + rnd()*15, w: (rnd() - .5)*0.012, ph: rnd()*6.28
+  }));
+  const els = SATS.map(s => {
+    const e = document.createElementNS(NS, 'g'); e.setAttribute('class', 'sat');
+    e.innerHTML = `<circle r="9" class="c-${s.sys}"/><text text-anchor="middle" y="3">${s.id}</text>`;
+    $('sSats').appendChild(e); return e;
+  });
+  const OB = {a0:190, a1:260, el:50};
+  function drawMask(m){
+    $('sMask').innerHTML = m > 0 ? `<path class="mask" fill-rule="evenodd" d="M${-R} 0a${R} ${R} 0 1 0 ${2*R} 0a${R} ${R} 0 1 0 ${-2*R} 0Z M${-R*(90-m)/90} 0a${R*(90-m)/90} ${R*(90-m)/90} 0 1 0 ${2*R*(90-m)/90} 0a${R*(90-m)/90} ${R*(90-m)/90} 0 1 0 ${-2*R*(90-m)/90} 0Z"/>` : '';
+    if($('obst').checked){
+      const [x0, y0] = xy(OB.a0, 0), [x1, y1] = xy(OB.a1, 0), [x2, y2] = xy(OB.a1, OB.el), [x3, y3] = xy(OB.a0, OB.el), r2 = R*(90-OB.el)/90;
+      $('sObst').innerHTML = `<path class="obst" d="M${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r2} ${r2} 0 0 0 ${x3} ${y3}Z"/>`;
+    } else $('sObst').innerHTML = '';
+  }
+  // PDOP : A = [-cos(el)sin(az), -cos(el)cos(az), -sin(el), 1] ; Q = (AᵀA)⁻¹
+  function pdop(list){
+    if(list.length < 4) return Infinity;
+    const N = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+    list.forEach(([az, el]) => {
+      const a = [-Math.cos(rad(el))*Math.sin(rad(az)), -Math.cos(rad(el))*Math.cos(rad(az)), -Math.sin(rad(el)), 1];
+      for(let i = 0; i < 4; i++) for(let j = 0; j < 4; j++) N[i][j] += a[i]*a[j];
+    });
+    const M = N.map((r, i) => [...r, ...[0,1,2,3].map(j => +(i === j))]);   // Gauss-Jordan
+    for(let c = 0; c < 4; c++){
+      let p = c; for(let r = c+1; r < 4; r++) if(Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+      if(Math.abs(M[p][c]) < 1e-12) return Infinity;
+      [M[c], M[p]] = [M[p], M[c]];
+      const d = M[c][c]; for(let j = 0; j < 8; j++) M[c][j] /= d;
+      for(let r = 0; r < 4; r++) if(r !== c){ const k = M[r][c]; for(let j = 0; j < 8; j++) M[r][j] -= k*M[c][j]; }
+    }
+    return Math.sqrt(M[0][4] + M[1][5] + M[2][6]);
+  }
+  let t = 0, last = null;
+  function update(){
+    const m = +$('mask').value, ob = $('obst').checked, used = [];
+    $('maskV').textContent = m + '°';
+    SATS.forEach((s, i) => {
+      const az = ((s.az0 + t*s.w*0.3) % 360 + 360) % 360, el = s.el0 + s.amp*Math.sin(t*0.0004 + s.ph) - 8;
+      const e = els[i];
+      if(el < -2){ e.style.display = 'none'; return; }
+      e.style.display = '';
+      const [x, y] = xy(az, Math.max(el, 0));
+      e.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      const blocked = el < m || (ob && az >= OB.a0 && az <= OB.a1 && el < OB.el);
+      e.classList.toggle('off', blocked);
+      if(!blocked) used.push([az, el]);
+    });
+    const p = pdop(used);
+    $('nSat').textContent = used.length;
+    $('pdop').textContent = isFinite(p) ? p.toFixed(1) : '∞';
+    $('qual').innerHTML = used.length < 4 ? '<span class="chip err">pas de position</span> moins de 4 satellites.'
+      : p < 2 ? '<span class="chip ok">très bonne géométrie</span>'
+      : p < 4 ? '<span class="chip ok">géométrie correcte</span>'
+      : p < 6 ? '<span class="chip warn">géométrie médiocre</span> prudence pour un point de précision.'
+      : '<span class="chip err">géométrie mauvaise</span> ne pas lever de point de précision.';
+  }
+  function frame(now){
+    if(last !== null && $('anim').checked) t += (now - last);
+    last = now; update(); requestAnimationFrame(frame);
+  }
+  $('mask').oninput = () => { drawMask(+$('mask').value); update(); };
+  $('obst').onchange = () => { drawMask(+$('mask').value); update(); };
+  drawMask(10);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ $('anim').checked = false; }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

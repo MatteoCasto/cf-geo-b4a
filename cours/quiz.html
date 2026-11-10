@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quiz final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+.qbar{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--paper);padding:10px 0;border-bottom:1px solid var(--rule);margin-bottom:18px}
+@media (max-width:920px){.qbar{top:56px}}
+.res{border:2px solid var(--ink);border-radius:6px;padding:16px 18px;background:var(--sheet)}
+</style>
+</head>
+<body>
+<div class="site">
+<aside class="toc" id="toc"></aside>
+<main class="doc">
+
+<header class="chap wide">
+  <div>
+    <div class="kicker">Chapitre 6 · 15 min</div>
+    <h1>Quiz final</h1>
+    <p class="lead">Six questions, une par thème. La correction s'affiche dès que vous répondez, avec un lien vers le chapitre à revoir.</p>
+  </div>
+  <div class="cartouche">
+    <div><i>Chapitre</i><b>6 / 6</b></div>
+    <div><i>Durée</i><b>15 min</b></div>
+    <div><i>Meilleur score</i><b id="best">–</b></div>
+    <div><i>Seuil</i><b>5 / 6</b></div>
+    <div class="full last"><i>Consigne</i><b>Seul, sans le support. Une seule réponse par question.</b></div>
+  </div>
+</header>
+
+<div class="qbar">
+  <div class="dots" id="dots"></div>
+  <div class="row"><span class="mono small" id="qscore"></span><button class="btn sm" type="button" id="qreset">Recommencer</button></div>
+</div>
+<ol class="quiz" id="qs"></ol>
+
+<div class="res" id="res" hidden>
+  <div class="big" id="rBig"></div>
+  <p id="rTxt"></p>
+  <ul id="rList"></ul>
+</div>
+
+<div class="box prof"><span class="lab">Formateur</span>
+  <p>Les questions sont dans un tableau JavaScript en bas de la page : en ajouter une = ajouter une ligne. Le score est mémorisé dans le navigateur de l'apprenant uniquement (rien n'est envoyé).</p>
+</div>
+
+</main>
+</div>
+<script src="app.js"></script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+// q : question · o : options · a : index de la bonne réponse · w : explication · ch : [page, titre]
+const Q = [
+  {q:"La coordonnée 2 538 214 / 1 152 387 est donnée…", o:["en MN03","en MN95","en WGS84","on ne peut pas savoir"], a:1,
+   w:"Sept chiffres, l'est commence par 2 et le nord par 1 : c'est du MN95.", ch:['referentiels.html','1. Systèmes de référence']},
+  {q:"Pourquoi un récepteur GNSS a-t-il besoin d'au moins quatre satellites ?", o:["Pour avoir une marge de sécurité","Trois inconnues de position et une inconnue de temps","Un par point cardinal","C'est une exigence légale"], a:1,
+   w:"E, N, h et le décalage de l'horloge du récepteur : quatre inconnues, donc quatre mesures au minimum.", ch:['gnss.html','2. Positionnement GNSS']},
+  {q:"Un PDOP de 8 signifie…", o:["8 satellites sont utilisés","une très bonne géométrie","une mauvaise géométrie des satellites","une précision de 8 mm"], a:2,
+   w:"Plus le PDOP est grand, plus la géométrie est mauvaise. Ce n'est ni un nombre de satellites ni une précision en mm.", ch:['gnss.html','2. Positionnement GNSS']},
+  {q:"Lecture arrière 1.520, lecture avant 0.870. La dénivelée vaut…", o:["−0.650 m","+0.650 m","+2.390 m","−2.390 m"], a:1,
+   w:"Δh = AR − AV = 1.520 − 0.870 = +0.650 m : le point avant est plus haut.", ch:['nivellement.html','3. Nivellement']},
+  {q:"Sous un bâtiment, le MNT LiDAR est…", o:["mesuré à travers le toit","interpolé entre les points sol voisins","égal à la hauteur du toit","laissé vide dans tous les produits"], a:1,
+   w:"Le laser ne touche pas le sol sous un toit : le MNT y est interpolé.", ch:['lidar.html','4. LiDAR et modèles de terrain']},
+  {q:"ST_DWithin(b.geom, r.geom, 30) en MN95 sélectionne…", o:["les objets à moins de 30 m","les objets à moins de 30 km","les 30 objets les plus proches","les objets à moins de 30 degrés"], a:0,
+   w:"En MN95 (EPSG:2056), l'unité est le mètre.", ch:['analyse.html','5. Analyse spatiale']},
+];
+const L = 'ABCD';
+let ans = GEO.store.get('quiz.ans', {});
+const qs = $('qs');
+qs.innerHTML = Q.map((q,i)=>`<li class="q" data-i="${i}"><h3>${GEO.esc(q.q)}</h3>
+  <div class="opts" role="group" aria-label="Réponses à la question ${i+1}">${q.o.map((o,k)=>`<button type="button" data-k="${k}"><span class="l">${L[k]}</span><span>${GEO.esc(o)}</span></button>`).join('')}</div>
+  <p class="why"></p></li>`).join('');
+qs.querySelectorAll('.q').forEach(li=>{
+  li.querySelectorAll('.opts button').forEach(b=>b.onclick = ()=>{ ans[li.dataset.i] = +b.dataset.k; GEO.store.set('quiz.ans', ans); paint(); });
+});
+$('dots').innerHTML = Q.map(()=>'<span></span>').join('');
+function paint(){
+  let ok = 0, n = 0;
+  qs.querySelectorAll('.q').forEach(li=>{
+    const i = +li.dataset.i, q = Q[i], a = ans[i], done = a !== undefined;
+    li.querySelectorAll('.opts button').forEach(b=>{
+      const k = +b.dataset.k;
+      b.disabled = done;
+      b.classList.toggle('right', done && k === q.a);
+      b.classList.toggle('wrong', done && k === a && a !== q.a);
+      b.classList.toggle('dim', done && k !== q.a && k !== a);
+    });
+    li.querySelector('.why').innerHTML = done ? `<strong>${a === q.a ? 'Juste.' : 'Faux.'}</strong> ${GEO.esc(q.w)} <a href="${q.ch[0]}">Revoir : ${q.ch[1]}</a>` : '';
+    if(done){ n++; if(a === q.a) ok++; }
+    $('dots').children[i].className = done ? (a === q.a ? 'ok' : 'ko') : '';
+  });
+  $('qscore').textContent = `${ok} / ${Q.length}` + (n < Q.length ? ` · ${Q.length - n} restante${Q.length-n>1?'s':''}` : '');
+  $('res').hidden = n < Q.length;
+  if(n === Q.length){
+    GEO.store.set('quiz.best', Math.max(GEO.store.get('quiz.best', 0), ok));
+    $('rBig').textContent = `${ok} / ${Q.length}`;
+    $('rTxt').textContent = ok === Q.length ? "Parfait." : ok >= 5 ? "Objectif atteint. Revoyez le point ci-dessous pour consolider." : "Pas encore. Revoyez les chapitres ci-dessous, puis recommencez.";
+    const bad = [...new Set(Q.filter((q,i)=>ans[i] !== q.a).map(q=>q.ch.join('|')))];
+    $('rList').innerHTML = bad.map(s=>{ const [h,t] = s.split('|'); return `<li><a href="${h}">${t}</a></li>`; }).join('');
+  }
+  const best = GEO.store.get('quiz.best', null);
+  $('best').textContent = best === null ? '–' : `${best} / ${Q.length}`;
+}
+$('qreset').onclick = ()=>{ ans = {}; GEO.store.set('quiz.ans', ans); paint(); window.scrollTo({top:0, behavior:'smooth'}); };
+paint();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Systèmes de référence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+#ch .ctry{fill:var(--c-tree-soft);stroke:var(--c-line);stroke-width:1.6;stroke-linejoin:round}
+#ch .grid line{stroke:var(--rule);stroke-width:1}
+#ch .grid text{font:500 10px var(--f-mono);fill:var(--muted)}
+#ch .city circle{fill:var(--ink)}
+#ch .city text{font:500 12px var(--f-body);fill:var(--ink-2);paint-order:stroke;stroke:var(--sheet);stroke-width:3px}
+#ch .bern circle{fill:var(--accent)}
+#ch .pick circle{fill:none;stroke:var(--accent);stroke-width:2.2}
+#ch .pick path{stroke:var(--accent);stroke-width:1.4}
+#ch{cursor:crosshair;touch-action:manipulation}
+.conv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.conv input{width:100%;font-family:var(--f-mono)}
+.conv label{font:600 .72rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+</style>
+</head>
+<body>
+<div class="site">
+<aside class="toc" id="toc"></aside>
+<main class="doc">
+
+<header class="chap wide">
+  <div>
+    <div class="kicker">Chapitre 1 · 30 min</div>
+    <h1>Systèmes de référence</h1>
+    <p class="lead">Un même point de Suisse possède deux jeux de coordonnées planes : celles du cadre MN03, hérité de la triangulation, et celles du cadre MN95, mesuré par GNSS. Savoir les reconnaître évite des décalages de plusieurs kilomètres.</p>
+  </div>
+  <div class="cartouche">
+    <div><i>Chapitre</i><b>1 / 6</b></div>
+    <div><i>Durée</i><b>30 min</b></div>
+    <div><i>Prérequis</i><b>aucun</b></div>
+    <div><i>Activité</i><b>carte, calculateur</b></div>
+    <div class="full last"><i>Question clé</i><b>Comment savoir dans quel cadre est une coordonnée ?</b></div>
+  </div>
+</header>
+
+<section class="goals">
+  <h4>Objectifs du chapitre</h4>
+  <ul>
+    <li><label><input type="checkbox"><span>Distinguer une coordonnée MN03 d'une coordonnée MN95 au premier coup d'œil.</span></label></li>
+    <li><label><input type="checkbox"><span>Passer approximativement de l'une à l'autre et connaître la limite de cette approximation.</span></label></li>
+    <li><label><input type="checkbox"><span>Nommer l'outil officiel pour une transformation rigoureuse.</span></label></li>
+  </ul>
+</section>
+
+<h2><span class="sn">1.1</span>Cliquer sur la carte</h2>
+<p>Cliquez n'importe où en Suisse. Le point s'affiche dans les deux cadres. Remarquez que seul le <strong>premier chiffre</strong> change en apparence.</p>
+<div class="tool-panel wide">
+  <figure class="fig gridbg" style="margin:0">
+    <svg id="ch" viewBox="0 0 720 460" role="img" aria-label="Carte schématique de la Suisse avec quadrillage MN95 tous les 50 km ; cliquer pour lire les coordonnées">
+      <g class="grid" id="grid"></g>
+      <g class="crayon"><path class="ctry" id="ctry"/></g>
+      <g id="cities"></g>
+      <g class="pick" id="pick" style="display:none"><circle r="9"/><path d="M-15 0h8M7 0h8M0 -15v8M0 7v8"/></g>
+    </svg>
+    <figcaption>Fig. 1.1 · Contour très simplifié, quadrillage MN95 tous les 50 km. Le point rouge est l'origine (ancien observatoire de Berne).</figcaption>
+  </figure>
+  <div>
+    <dl class="readout" id="ro">
+      <dt>MN95 E</dt><dd id="e95">–</dd>
+      <dt>MN95 N</dt><dd id="n95">–</dd>
+      <dt>MN03 Y</dt><dd id="y03">–</dd>
+      <dt>MN03 X</dt><dd id="x03">–</dd>
+      <dt>Proche de</dt><dd id="near">–</dd>
+    </dl>
+    <div class="box retenir"><span class="lab">À retenir</span>
+      <p>En <strong>MN95</strong>, l'est commence par <strong>2</strong> et le nord par <strong>1</strong> (7 chiffres avant la virgule). En <strong>MN03</strong>, ils ont 6 chiffres.</p>
+      <p>L'origine vaut <code>2 600 000 / 1 200 000</code> en MN95 et <code>600 000 / 200 000</code> en MN03.</p>
+    </div>
+  </div>
+</div>
+
+<h2><span class="sn">1.2</span>Convertir</h2>
+<p>Tapez une coordonnée dans l'un ou l'autre cadre : l'autre se met à jour. Le calcul est une simple translation.</p>
+<div class="fig">
+  <div class="conv">
+    <div><label for="iE">MN95 E</label><input id="iE" type="text" inputmode="decimal" value="2538214.25"></div>
+    <div><label for="iN">MN95 N</label><input id="iN" type="text" inputmode="decimal" value="1152386.70"></div>
+    <div><label for="iY">MN03 Y</label><input id="iY" type="text" inputmode="decimal"></div>
+    <div><label for="iX">MN03 X</label><input id="iX" type="text" inputmode="decimal"></div>
+  </div>
+  <p class="cap" id="convMsg"></p>
+</div>
+<script type="text/x-code" data-lang="py" data-file="mn03_vers_mn95.py">
+  # Approximation : translation pure (écart réel jusqu'à ~1,6 m)
+  def mn03_vers_mn95(y, x):
+      return y + 2_000_000, x + 1_000_000
+
+  print(mn03_vers_mn95(538214.25, 152386.70))   # (2538214.25, 1152386.7)
+</script>
+
+<div class="box attention"><span class="lab">Attention</span>
+  <p>MN03 contient des déformations locales héritées de la triangulation. La translation donne donc une valeur <strong>approchée</strong> : l'écart avec la transformation officielle peut dépasser le mètre. Pour la mensuration, cette approximation est inacceptable.</p>
+</div>
+<div class="box terrain"><span class="lab">Sur le terrain</span>
+  <p>Pour une transformation rigoureuse, swisstopo met à disposition <strong>REFRAME</strong> (en ligne, en logiciel et en bibliothèque). Il tient compte du maillage de distorsions entre les deux cadres et des altitudes.</p>
+</div>
+
+<h2><span class="sn">1.3</span>Deux cadres côte à côte</h2>
+<div class="tbl">
+<table>
+  <thead><tr><th></th><th>MN03</th><th>MN95</th></tr></thead>
+  <tbody>
+    <tr><td>Cadre géodésique</td><td>CH1903</td><td>CH1903+</td></tr>
+    <tr><td>Origine</td><td class="num">600 000 / 200 000</td><td class="num">2 600 000 / 1 200 000</td></tr>
+    <tr><td>Noms des axes</td><td>Y (est), X (nord)</td><td>E (est), N (nord)</td></tr>
+    <tr><td>Origine des mesures</td><td>Triangulation classique</td><td>Mesures GNSS</td></tr>
+    <tr><td>Usage aujourd'hui</td><td>Anciennes données, archives</td><td>Cadre de référence officiel</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="sn">1.4</span>À vous</h2>
+<div class="box exo"><span class="lab">Exercice · 5 min, seul</span>
+  <p>Un bureau vous transmet trois points. Pour chacun, dites dans quel cadre il est donné et s'il peut être en Suisse.</p>
+  <ol>
+    <li><code>2 683 250 / 1 247 900</code></li>
+    <li><code>717 100 / 96 200</code></li>
+    <li><code>1 200 000 / 2 600 000</code></li>
+  </ol>
+  <details><summary>Solution</summary>
+    <ol>
+      <li>MN95 (7 chiffres, commence par 2 / 1). Région de Zurich.</li>
+      <li>MN03 (6 chiffres ; le nord a même 5 chiffres car il est inférieur à 100 000). Région de Lugano. En MN95 : <code>2 717 100 / 1 096 200</code>.</li>
+      <li>Est et nord sont <strong>inversés</strong>. Erreur classique lors d'un import CSV : vérifier l'ordre des colonnes.</li>
+    </ol>
+  </details>
+</div>
+
+<div class="box prof"><span class="lab">Formateur</span>
+  <p>Démarrer en projetant la carte : demander à un apprenant de cliquer sur sa commune, puis faire lire les deux coordonnées à voix haute. La question « qu'est-ce qui change ? » amène naturellement la règle du premier chiffre.</p>
+</div>
+
+</main>
+</div>
+<script src="app.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id), f = GEO.fmtCH;
+  const E0 = 2480000, N1 = 1300000, K = 500;                 // 1 px = 500 m
+  const px = (e, n) => [(e - E0)/K, (N1 - n)/K];
+  const toEN = (x, y) => [E0 + x*K, N1 - y*K];
+  // contour simplifié en km MN95 (schématique)
+  const C = [[2485,1112],[2497,1128],[2515,1173],[2533,1193],[2548,1212],[2567,1232],[2565,1253],[2585,1262],[2611,1268],[2640,1266],[2668,1272],
+    [2688,1296],[2706,1283],[2732,1279],[2756,1263],[2764,1236],[2758,1222],[2782,1208],[2806,1198],[2831,1196],[2832,1168],[2812,1152],[2805,1124],
+    [2783,1133],[2755,1130],[2737,1112],[2722,1078],[2707,1086],[2698,1108],[2672,1112],[2662,1133],[2647,1110],[2630,1084],[2615,1090],[2581,1081],
+    [2567,1093],[2554,1135],[2525,1140],[2505,1124]];
+  $('ctry').setAttribute('d', 'M' + C.map(([e,n]) => px(e*1000, n*1000).map(v=>v.toFixed(1)).join(' ')).join('L') + 'Z');
+  let g = '';
+  for(let e = 2500000; e <= 2800000; e += 50000){ const [x] = px(e, 0); g += `<line x1="${x}" y1="0" x2="${x}" y2="460"/><text x="${x+3}" y="454">${e/1000}</text>`; }
+  for(let n = 1100000; n <= 1300000; n += 50000){ const [, y] = px(0, n); g += `<line x1="0" y1="${y}" x2="720" y2="${y}"/><text x="3" y="${y-3}">${n/1000}</text>`; }
+  $('grid').innerHTML = g;
+  const CITIES = [['Berne',2600000,1200000],['Genève',2500100,1117900],['Lausanne',2538200,1152400],['Sion',2593900,1120000],['Neuchâtel',2561300,1205200],
+    ['Bâle',2611300,1267200],['Lucerne',2666200,1211400],['Zurich',2683200,1247900],['Saint-Gall',2746100,1254400],['Coire',2759300,1190700],['Lugano',2717100,1096200]];
+  $('cities').innerHTML = CITIES.map(([t,e,n]) => { const [x,y] = px(e,n); return `<g class="city${t==='Berne'?' bern':''}"><circle cx="${x}" cy="${y}" r="${t==='Berne'?5:3.2}"/><text x="${x+7}" y="${y+4}">${t}</text></g>`; }).join('');
+
+  function show(e, n){
+    $('e95').textContent = f(e, 1); $('n95').textContent = f(n, 1);
+    $('y03').textContent = f(e - 2e6, 1); $('x03').textContent = f(n - 1e6, 1);
+    const near = CITIES.map(([t,ce,cn]) => [t, Math.hypot(e-ce, n-cn)]).sort((a,b)=>a[1]-b[1])[0];
+    $('near').textContent = `${near[0]} (${(near[1]/1000).toFixed(1)} km)`;
+    const [x, y] = px(e, n), pk = $('pick');
+    pk.style.display = ''; pk.setAttribute('transform', `translate(${x} ${y})`);
+  }
+  const svg = $('ch');
+  svg.addEventListener('click', ev => {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const [e, n] = toEN(p.x, p.y);
+    show(e, n);
+  });
+  show(2600000, 1200000);
+
+  // calculateur
+  const num = s => parseFloat(String(s).replace(/['\s’]/g, '').replace(',', '.'));
+  const I = {E:$('iE'), N:$('iN'), Y:$('iY'), X:$('iX')};
+  function check(e, n){
+    const ok = e > 2480000 && e < 2840000 && n > 1070000 && n < 1300000;
+    $('convMsg').innerHTML = ok ? '<span class="chip ok">en Suisse</span> point plausible, il est affiché sur la carte ci-dessus.'
+                                : '<span class="chip warn">hors Suisse</span> vérifier le cadre et l\'ordre est / nord.';
+    if(ok) show(e, n);
+  }
+  function from95(){ const e = num(I.E.value), n = num(I.N.value); if(isFinite(e)) I.Y.value = (e - 2e6).toFixed(2); if(isFinite(n)) I.X.value = (n - 1e6).toFixed(2); check(e, n); }
+  function from03(){ const y = num(I.Y.value), x = num(I.X.value); if(isFinite(y)) I.E.value = (y + 2e6).toFixed(2); if(isFinite(x)) I.N.value = (x + 1e6).toFixed(2); check(y + 2e6, x + 1e6); }
+  I.E.oninput = I.N.oninput = from95;
+  I.Y.oninput = I.X.oninput = from03;
+  I.Y.value = ''; I.X.value = '';
+  from95();
+})();
+</script>
+</body>
+</html>

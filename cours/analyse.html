@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Analyse spatiale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="style.css">
+<style>
+#map{touch-action:manipulation}
+#map .bg{fill:var(--c-tree-soft);opacity:.45}
+#map .road{fill:none;stroke:var(--c-road);stroke-width:12;stroke-linecap:round}
+#map .buf{fill:none;stroke:var(--accent);opacity:.16;stroke-linecap:round;stroke-linejoin:round}
+#map .bufl{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:4 3;opacity:.7}
+#map .riv{fill:none;stroke:var(--c-water);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+#map .b{fill:var(--c-bat);stroke:var(--c-bat-line);stroke-width:1}
+#map .b.in{fill:var(--accent);stroke:var(--accent)}
+#map .lbl{font:600 11px var(--f-mono);fill:var(--c-water)}
+#map .scale path{stroke:var(--ink);stroke-width:2;fill:none}
+#map .scale text{font:500 10px var(--f-mono);fill:var(--ink)}
+.ids{font:500 .8rem var(--f-mono);color:var(--ink-2);max-height:7.5em;overflow:auto}
+</style>
+</head>
+<body>
+<div class="site">
+<aside class="toc" id="toc"></aside>
+<main class="doc">
+
+<header class="chap wide">
+  <div>
+    <div class="kicker">Chapitre 5 · 45 min</div>
+    <h1>Analyse spatiale</h1>
+    <p class="lead">Une question simple, « quels bâtiments sont à moins de 30 m du ruisseau ? », se traduit en une opération SIG, une requête SQL ou quelques lignes de Python. Trois écritures, un même résultat.</p>
+  </div>
+  <div class="cartouche">
+    <div><i>Chapitre</i><b>5 / 6</b></div>
+    <div><i>Durée</i><b>45 min</b></div>
+    <div><i>Prérequis</i><b>bases de SIG</b></div>
+    <div><i>Activité</i><b>outil SIG, code lié</b></div>
+    <div class="full last"><i>Question clé</i><b>Comment traduire une question en opération spatiale ?</b></div>
+  </div>
+</header>
+
+<section class="goals">
+  <h4>Objectifs du chapitre</h4>
+  <ul>
+    <li><label><input type="checkbox"><span>Définir une zone tampon et une sélection par distance.</span></label></li>
+    <li><label><input type="checkbox"><span>Lire une requête PostGIS simple avec <code>ST_DWithin</code>.</span></label></li>
+    <li><label><input type="checkbox"><span>Reconnaître la même opération en Python (GeoPandas).</span></label></li>
+  </ul>
+</section>
+
+<h2><span class="sn">5.1</span>La zone tampon</h2>
+<p>Réglez la distance. La bande rouge est la zone tampon autour du ruisseau du Moulin ; les bâtiments qui la touchent sont sélectionnés. Le code plus bas suit votre réglage.</p>
+<div class="tool-panel wide">
+  <figure class="fig" style="margin:0">
+    <svg id="map" viewBox="0 0 600 400" role="img" aria-label="Plan de la commune fictive : un ruisseau sinueux, des bâtiments ; ceux proches du ruisseau sont colorés">
+      <rect class="bg" x="0" y="0" width="600" height="400"/>
+      <path class="road" d="M0 330 C160 300 300 350 600 300 M420 0 C400 140 450 260 430 400"/>
+      <path class="buf" id="buf"/><g id="bld"></g>
+      <path class="riv" id="riv"/>
+      <text class="lbl" x="76" y="84" transform="rotate(37 76 84)" style="paint-order:stroke;stroke:var(--sheet);stroke-width:3px">Ruisseau du Moulin</text>
+      <g class="scale" transform="translate(470 380)"><path d="M0 -5V0H100V-5M50 0V-3"/><text x="0" y="-9">0</text><text x="88" y="-9">100 m</text></g>
+    </svg>
+    <figcaption>Fig. 5.1 · Montavaux (fictif), 600 × 400 m. Un pixel de la figure vaut 1 m.</figcaption>
+  </figure>
+  <div>
+    <div class="ctrl"><label for="d">Distance <output id="dV"></output></label><input id="d" type="range" min="5" max="120" step="5" value="30"></div>
+    <div class="row" style="gap:28px">
+      <div><div class="small muted">Bâtiments sélectionnés</div><div class="big" id="nb">–</div></div>
+      <div><div class="small muted">sur</div><div class="big muted" id="nt">–</div></div>
+    </div>
+    <p class="small muted" style="margin-bottom:2px">Identifiants (EGID fictifs) :</p>
+    <div class="ids" id="ids"></div>
+  </div>
+</div>
+
+<h2><span class="sn">5.2</span>La même chose en code</h2>
+<div class="row"><div class="seg" role="group" aria-label="Langage" id="tabs">
+  <button type="button" data-t="sql" aria-pressed="true">SQL (PostGIS)</button>
+  <button type="button" data-t="py" aria-pressed="false">Python (GeoPandas)</button></div>
+</div>
+<div id="code"></div>
+
+<div class="box retenir"><span class="lab">À retenir</span>
+  <p>Pour une sélection par distance, inutile de calculer le tampon : <code>ST_DWithin(a, b, d)</code> répond directement « a est-il à moins de d de b ? » et profite de l'index spatial.</p>
+</div>
+<div class="box attention"><span class="lab">Attention</span>
+  <p>Une distance en mètres n'a de sens que dans un système projeté. En MN95 (EPSG:2056), l'unité est le mètre. En coordonnées géographiques (WGS84, EPSG:4326), l'unité est le degré : 30 « degrés » couvrent la moitié de l'Europe.</p>
+</div>
+<div class="box terrain"><span class="lab">Sur le terrain</span>
+  <p>Ce type de question revient sans cesse : parcelles touchées par un projet, bâtiments dans un périmètre de danger, distances aux limites. Le même raisonnement s'applique dans QGIS (outil <em>Tampon</em> puis <em>Extraire par localisation</em>).</p>
+</div>
+
+<h2><span class="sn">5.3</span>À vous</h2>
+<div class="box exo"><span class="lab">Exercice · 10 min, à deux</span>
+  <p>Modifiez la requête SQL pour obtenir les bâtiments situés <strong>entre</strong> 30 et 60 m du ruisseau.</p>
+  <details><summary>Une solution possible</summary>
+    <script type="text/x-code" data-lang="sql" data-file="entre_30_et_60m.sql">
+      SELECT b.egid
+      FROM batiments AS b
+      JOIN cours_eau AS r ON r.nom = 'Ruisseau du Moulin'
+      WHERE ST_DWithin(b.geom, r.geom, 60)
+        AND NOT ST_DWithin(b.geom, r.geom, 30);
+    </script>
+    <p>Vérifiez avec l'outil : 60 m, puis 30 m, et faites la différence.</p>
+  </details>
+</div>
+
+<div class="box prof"><span class="lab">Formateur</span>
+  <p>Le passage carte → code est le moment clé : projeter les deux côte à côte et faire bouger le curseur pendant qu'on lit la requête.</p>
+</div>
+
+</main>
+</div>
+<script src="app.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id), NS = 'http://www.w3.org/2000/svg';
+  const RIV = [[0,80],[70,95],[130,140],[170,210],[240,235],[300,205],[350,150],[410,130],[470,160],[520,215],[560,240],[600,250]];
+  const dRiv = 'M' + RIV.map(p => p.join(' ')).join('L');
+  $('riv').setAttribute('d', dRiv); $('buf').setAttribute('d', dRiv);
+  const segDist = (px, py, [ax, ay], [bx, by]) => {
+    const dx = bx-ax, dy = by-ay, t = Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / (dx*dx + dy*dy)));
+    return Math.hypot(px - ax - t*dx, py - ay - t*dy);
+  };
+  const ptRiv = (x, y) => { let m = Infinity; for(let i = 1; i < RIV.length; i++) m = Math.min(m, segDist(x, y, RIV[i-1], RIV[i])); return m; };
+  // distance rectangle ↔ polyligne (coins du rectangle et sommets du ruisseau)
+  const rectRiv = b => {
+    let m = Math.min(...[[b.x,b.y],[b.x+b.w,b.y],[b.x,b.y+b.h],[b.x+b.w,b.y+b.h]].map(([x,y]) => ptRiv(x, y)));
+    RIV.forEach(([x, y]) => { const dx = Math.max(b.x - x, 0, x - b.x - b.w), dy = Math.max(b.y - y, 0, y - b.y - b.h); m = Math.min(m, Math.hypot(dx, dy)); });
+    return m;
+  };
+  // bâtiments pseudo-aléatoires, hors du lit du ruisseau et des routes
+  let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+  const B = [];
+  for(let k = 0; B.length < 46 && k < 4000; k++){
+    const w = 12 + rnd()*14, h = 10 + rnd()*12, x = 10 + rnd()*(570 - w), y = 10 + rnd()*(350 - h);
+    const b = {x, y, w, h};
+    if(rectRiv(b) < 6) continue;
+    if(B.some(o => x < o.x + o.w + 8 && x + w + 8 > o.x && y < o.y + o.h + 8 && y + h + 8 > o.y)) continue;
+    if(Math.abs(x + w/2 - (415 + 20*Math.sin(y/60))) < 22) continue;
+    if(y + h > 290 && y < 345) continue;
+    b.d = rectRiv(b); b.id = 190000000 + Math.floor(rnd()*900000);
+    B.push(b);
+  }
+  $('bld').innerHTML = B.map((b, i) => `<rect class="b" data-i="${i}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}"><title>EGID ${b.id} · ${b.d.toFixed(1)} m</title></rect>`).join('');
+  $('nt').textContent = B.length;
+  // code lié au réglage
+  const CODE = {
+    sql: d => `-- Bâtiments à moins de ${d} m du ruisseau (MN95, EPSG:2056)
+SELECT b.egid, b.adresse
+FROM batiments AS b
+JOIN cours_eau AS r ON r.nom = 'Ruisseau du Moulin'
+WHERE ST_DWithin(b.geom, r.geom, ${d});`,
+    py: d => `import geopandas as gpd
+
+bat = gpd.read_file("montavaux.gpkg", layer="batiments")
+eau = gpd.read_file("montavaux.gpkg", layer="cours_eau")
+
+ruisseau = eau[eau.nom == "Ruisseau du Moulin"].geometry.union_all()
+proches = bat[bat.distance(ruisseau) <= ${d}]   # mètres, car MN95
+print(len(proches), "bâtiments")`
+  };
+  let tab = 'sql';
+  const files = {sql:'selection_distance.sql', py:'selection_distance.py'};
+  function code(d){
+    const host = $('code');
+    host.replaceChildren(GEO.makeCodeBlock(CODE[tab](d), tab, files[tab]));
+  }
+  function update(){
+    const d = +$('d').value;
+    $('dV').textContent = d + ' m';
+    $('buf').setAttribute('stroke-width', 2*d);
+    const sel = [];
+    $('bld').querySelectorAll('rect').forEach(r => { const b = B[+r.dataset.i], inn = b.d <= d; r.classList.toggle('in', inn); if(inn) sel.push(b.id); });
+    $('nb').textContent = sel.length;
+    $('ids').textContent = sel.length ? sel.sort().join(' · ') : 'aucun';
+    code(d);
+  }
+  $('tabs').onclick = e => {
+    const b = e.target.closest('button'); if(!b) return;
+    tab = b.dataset.t;
+    $('tabs').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    update();
+  };
+  $('d').oninput = update;
+  update();
+})();
+</script>
+</body>
+</html>

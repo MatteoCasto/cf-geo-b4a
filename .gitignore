@@ -1,0 +1,69 @@
+# ===================================================================
+#  cf-geo-b4a : support de cours géomatique
+# ===================================================================
+
+# --- Système (Windows, macOS, OneDrive) -----------------------------
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+._*
+*.lnk
+.~lock.*
+
+# --- Office : fichiers de verrouillage et temporaires ---------------
+~$*
+~WRL*.tmp
+*.tmp
+*.bak
+
+# --- Éditeurs ------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# --- Claude Code : réglages personnels ------------------------------
+.claude/settings.local.json
+
+# --- Python (scripts de génération Word, figures) -------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+
+# --- Node (si on ajoute un outil de build plus tard) ----------------
+node_modules/
+npm-debug.log*
+
+# --- Sorties générées : se reconstruisent à partir des sources ------
+sortie/
+dist/
+build/
+*.zip
+# PDF d'aperçu générés (les PDF de référence vont dans docs/ ou ressources/)
+apercu*.pdf
+apercu*.png
+
+# --- SIG : fichiers annexes et sauvegardes --------------------------
+*.qgs~
+*.qgz~
+*.aux.xml
+*.ovr
+*.gpkg-wal
+*.gpkg-shm
+*.sqlite-journal
+*.log
+
+# --- Données volumineuses : à partager hors git (OneDrive, NAS) -----
+donnees/brut/
+*.las
+*.laz
+*.tif
+*.tiff
+!cours/fig/**/*.tif

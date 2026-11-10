@@ -1,0 +1,43 @@
+# Publie le dossier cours/ sur GitHub Pages à chaque push sur main.
+# Prérequis (une seule fois) : Settings → Pages → Build and deployment → Source : « GitHub Actions ».
+name: Déployer le cours sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cours/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:        # lancement manuel depuis l'onglet Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# un seul déploiement à la fois ; on n'interrompt pas un déploiement en cours
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Pages
+        uses: actions/configure-pages@v5
+
+      - name: Préparer l'artefact (dossier cours/)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: cours
+
+      - name: Déployer
+        id: deployment
+        uses: actions/deploy-pages@v4
