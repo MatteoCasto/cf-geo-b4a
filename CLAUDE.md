@@ -7,3 +7,5 @@
 - avoir toujours à l'idée qu'il s'agit de techniciens en géomatique, il faut que ça soit compréhensible et le plus appréciable possible pour apprendre
 - tenir un changelog à jour (racine)
 - toujours lancer les tests (que l'on va mettre au point) après des modifs.
+- ne jamais mentionner le nombre de périodes ni le nombre d'étudiants (dans le cours comme dans les propositions/plans) : ce sont des données internes, sans valeur publique.
+- contenu toujours à jour (état 2025-2026) : versions INTERLIS, DMAV, outils ; l'ancien cours (ANCIEN_COURS/) n'est pas une référence, seulement une source d'idées.
