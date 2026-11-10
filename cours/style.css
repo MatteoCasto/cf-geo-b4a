@@ -352,3 +352,41 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 /* classes de points LiDAR (réutilisées : accueil + chapitre 4) */
 :root{--cl-sol:var(--warn);--cl-veg:var(--c-tree);--cl-bat:var(--code-tag);--cl-bruit:var(--accent)}
 .p-sol{fill:var(--cl-sol)} .p-veg{fill:var(--cl-veg)} .p-bat{fill:var(--cl-bat)} .p-bruit{fill:var(--cl-bruit)}
+
+/* ---------- remarques personnelles (notes.js) ---------- */
+.note-add{position:absolute;z-index:30;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--accent);background:var(--sheet);color:var(--accent);font:700 17px/1 var(--f-body);cursor:pointer;place-items:center;box-shadow:var(--shadow);padding:0}
+.note-add:hover{background:var(--accent);color:var(--accent-ink)}
+html:not(.annot) .note-add{display:none!important}
+html.annot .note-add{display:grid}
+html.annot .note-target{outline:1.5px dashed var(--accent);outline-offset:5px;border-radius:2px}
+.notes{display:flex;flex-direction:column;gap:8px;margin:.7rem 0 1rem}
+.notes:empty{display:none}
+.note{background:var(--hl);border-left:4px solid var(--code-tag);border-radius:4px;padding:8px 12px 9px;font-size:.9rem;line-height:1.5;box-shadow:var(--shadow);text-align:left}
+.note.t-q{border-left-color:var(--warn)} .note.t-cor{border-left-color:var(--err)} .note.t-idee{border-left-color:var(--ok)}
+.note.flash{animation:noteflash 1.6s}
+@keyframes noteflash{0%,40%{outline:3px solid var(--accent);outline-offset:3px}100%{outline:3px solid transparent}}
+.note-hd{display:flex;gap:4px 10px;align-items:baseline;flex-wrap:wrap;font:500 .72rem var(--f-mono);color:var(--ink-2)}
+.note-hd b{text-transform:uppercase;letter-spacing:.06em;color:var(--ink)}
+.note-hd .act{margin-left:auto;display:flex;gap:8px}
+.note-hd .act button{border:0;background:none;padding:0;color:var(--ink-2);font:600 .72rem var(--f-mono);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.note-hd .act button:hover{color:var(--accent)}
+.box .note-tx,.note-tx{white-space:pre-wrap;overflow-wrap:anywhere;margin:.25rem 0 0!important}
+.note-form{border:1.5px dashed var(--accent);background:var(--sheet);border-radius:6px;padding:10px 12px;display:grid;gap:8px;text-align:left}
+.note-form textarea{width:100%;min-height:5.5em;font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);resize:vertical}
+.notes-orph{border-top:2px dashed var(--rule);margin-top:3rem;padding-top:.5rem}
+.notes-panel{width:min(640px,calc(100% - 32px));max-height:min(80vh,760px);border:1.5px solid var(--ink);border-radius:8px;background:var(--sheet);color:var(--ink);padding:16px 18px;box-shadow:var(--shadow)}
+.notes-panel::backdrop{background:rgba(10,16,20,.45)}
+.notes-panel .row{margin:.6rem 0}
+.np-hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.np-hd b{font:750 1.3rem var(--f-display)}
+.np-list{border-top:1px solid var(--rule);margin-top:.4rem}
+.np-list h4{font:600 .75rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:1rem 0 .3rem}
+.np-list ul{list-style:none;padding:0;margin:0}
+.np-list li{display:flex;flex-direction:column;padding:6px 0;border-bottom:1px solid var(--rule);font-size:.9rem}
+.np-list a{text-decoration:none}
+.np-list .chip{margin-right:4px}
+@media print{
+  .note-add,.note-form,.note-hd .act,.notes-panel{display:none!important}
+  .note-target{outline:0!important}
+  .note{box-shadow:none;break-inside:avoid}
+}

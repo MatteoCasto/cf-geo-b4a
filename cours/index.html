@@ -96,6 +96,11 @@
 </div>
 <p class="small muted">Chaque chapitre commence par des objectifs à cocher ; le navigateur s'en souvient. Raccourcis : <kbd>←</kbd> <kbd>→</kbd> pour changer de chapitre, <kbd>P</kbd> pour agrandir le texte au beamer.</p>
 
+<div class="box terrain"><span class="lab">Vos remarques</span>
+  <p>Activez <strong>Mode annotation</strong> dans le menu (ou touche <kbd>N</kbd>), survolez n'importe quel bloc et cliquez sur <strong>+</strong> pour y attacher une remarque, une question ou une correction.</p>
+  <p>Les remarques restent dans votre navigateur. Le menu <strong>Remarques</strong> permet de les <strong>exporter</strong> dans un fichier JSON et de les <strong>réimporter</strong> plus tard, sur un autre poste, ou de recevoir celles du formateur.</p>
+</div>
+
 <div class="box prof"><span class="lab">Formateur</span>
   <p>Ces encadrés bleus en pointillé ne s'affichent qu'avec « Notes formateur » activé (menu de gauche). On y met le déroulement, les questions à poser à la classe, les pièges à anticiper.</p>
 </div>
@@ -116,6 +121,7 @@
 </main>
 </div>
 <script src="app.js"></script>
+<script src="notes.js" defer></script>
 <script>
 (function(){
   const NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('scan');
