@@ -1,7 +1,7 @@
 # Cours INTERLIS · CF-geo B4a
 
 Support de cours **INTERLIS 1 & 2** pour les futurs techniciens et techniciennes en géomatique.
-Huit chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres de Montavaux (commune fictive).
+Une suite de chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres de Montavaux (commune fictive).
 
 - **En ligne** : <https://matteocasto.github.io/cf-geo-b4a/>
 - **En local** : ouvrir [`cours/index.html`](cours/index.html) dans le navigateur
@@ -41,7 +41,7 @@ Code coloré : `ili`, `ili1`, `itf`, `xtf`, `sh`, `sql`, `json`…
 
 ## Publier
 
-1. Vérifier la page dans le navigateur.
+1. Vérifier la page dans le navigateur, puis lancer les tests : `node tests/check.mjs` (Node 18+, aucune installation).
 2. `git pull`, puis `git commit` et `git push` sur `main`.
 3. Le site se met à jour tout seul (GitHub Actions).
 
