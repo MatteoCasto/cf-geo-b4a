@@ -1,66 +1,75 @@
 # cf-geo-b4a
 
-Support de cours géomatique (module B4a). **État : gabarit de démonstration**, préparé pour la séance de brainstorming du 10.11.2026.
+Support de cours géomatique (module B4a). **État : gabarit de démonstration.** Le contenu des chapitres est indicatif et sera entièrement revu ; la structure, elle, est générique.
 
-Le contenu des chapitres est indicatif. Le but est de montrer les formes de pages possibles, pas de fixer le programme.
+- En ligne : <https://matteocasto.github.io/cf-geo-b4a/> (installable comme application, utilisable hors ligne)
+- En local : double-cliquer sur [`cours/index.html`](cours/index.html), sans serveur ni installation.
 
-## Ouvrir le cours
+## Où est quoi
 
-Double-cliquer sur [`cours/index.html`](cours/index.html). Pas de serveur ni d'installation : un navigateur récent suffit (les polices viennent de Google Fonts ; hors ligne, des polices système les remplacent).
-
-En ligne : <https://matteocasto.github.io/cf-geo-b4a/>
-
-## Publication (GitHub Pages)
-
-Le workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publie le dossier `cours/` à chaque push sur `main` qui modifie `cours/` (ou à la main depuis l'onglet *Actions* → *Run workflow*).
-
-Réglage à faire une seule fois sur GitHub : *Settings* → *Pages* → *Build and deployment* → *Source* : **GitHub Actions**.
-
-## Contenu
-
-| Page | Thème (exemple) | Forme démontrée |
+| Fichier | Contenu | Qui le modifie |
 |---|---|---|
-| `index.html` | Accueil | Animation, cartouche, plan, questions de brainstorming |
-| `referentiels.html` | MN03 / MN95 | Carte cliquable + calculateur |
-| `gnss.html` | GNSS | Simulation (skyplot, masque, PDOP calculé) |
-| `nivellement.html` | Nivellement | Carnet de terrain qui se calcule (fermeture, compensation) |
-| `lidar.html` | LiDAR, MNT / MNS | Graphique filtrable avec curseur |
-| `analyse.html` | Zone tampon | Outil SIG + code SQL / Python qui suit le réglage |
-| `quiz.html` | Tous | Quiz corrigé, score mémorisé |
-| `aide-memoire.html` | Tous | Fiche A4 imprimable |
-| `composants.html` | — | Catalogue des blocs avec leur HTML à copier |
+| [`cours/config.js`](cours/config.js) | Titre, version, **liste et ordre des chapitres**, en-têtes (chapeau, durée, objectifs…), libellés | Auteurs |
+| `cours/*.html` | Le **texte** de chaque chapitre, en **Markdown**, et ses éventuels composants interactifs | Auteurs |
+| [`cours/modele.html`](cours/modele.html) | Page vide à copier pour créer un chapitre | — |
+| [`cours/guide.html`](cours/guide.html) | Guide de rédaction : syntaxe, composants, conventions (avec rendu) | — |
+| [`cours/style.css`](cours/style.css) | Couleurs, polices, mise en page | Rarement |
+| [`cours/app.js`](cours/app.js) | Moteur : menu, en-têtes, Markdown, quiz, numérotation, thème, appli hors ligne | Rarement |
+| [`cours/annotations.js`](cours/annotations.js) | Annotations personnelles, export / import JSON | Rarement |
+| [`cours/sw.js`](cours/sw.js), [`manifest.webmanifest`](cours/manifest.webmanifest), `icons/` | Application installable / hors ligne | Jamais |
 
-Fonctions communes (dans `app.js`) : table des chapitres, thème clair / sombre, mode projection (touche `P`), notes formateur masquables, objectifs cochables, navigation au clavier (`←` `→`), blocs de code colorés avec bouton « Copier », mise en page d'impression.
+Tout ce qui est commun est **généré** à partir de `config.js` : menu, en-tête et objectifs de chaque chapitre, numérotation des sections (1.1, 1.2…), liens précédent / suivant, plan de l'accueil, liste des fichiers mis en cache hors ligne. Une page de chapitre ne contient que son texte.
 
-## Remarques personnelles
+## Créer ou modifier un chapitre
 
-[`cours/notes.js`](cours/notes.js), chargé par toutes les pages, permet à chacun (élève ou formateur) d'attacher des remarques à n'importe quel bloc :
+1. Copier `cours/modele.html` sous un nouveau nom.
+2. Ajouter le chapitre dans `chapters` de `cours/config.js` (l'ordre de la liste est l'ordre du menu).
+3. Écrire le texte en Markdown dans la page. Syntaxe complète, avec rendu : [`guide.html`](cours/guide.html).
 
-- **Annoter** : menu *Mode annotation* (ou touche `N`), survoler un bloc, cliquer sur **+**. Types : Remarque, Question, À corriger, Idée.
-- **Persistance** : enregistrement automatique dans le navigateur (`localStorage`). Rien n'est envoyé sur un serveur.
-- **Export / import** : menu *Remarques* → fichier JSON. L'import **fusionne** avec l'existant ; pour une même remarque, la version la plus récente gagne. Cas d'usage : sauvegarde, changement de poste, formateur qui distribue ses remarques à la classe.
-- **Rattachement** : chaque remarque est liée à une ancre calculée depuis le contenu stable du bloc (id, titre, légende ou texte). Si ce contenu change, la remarque n'est pas perdue : elle s'affiche en bas de page sous « Remarques non rattachées ».
+```markdown
+## Une section                 ← numérotée automatiquement
 
-Format du fichier :
+Un paragraphe avec du **gras** et du `code`.
 
-```json
-{
-  "format": "cf-geo-remarques", "version": 1, "exported": "2026-11-10T18:30:00.000Z", "author": "M. Casto", "count": 1,
-  "notes": [
-    { "id": "nmwat3gw6adg4", "page": "nivellement.html", "anchor": "m71b88", "section": "3.1",
-      "excerpt": "Le niveau est posé entre deux mires…", "type": "q", "text": "Pourquoi lit-on la mire arrière en premier ?",
-      "author": "Léa", "created": "2026-11-10T18:02:00.000Z", "updated": "2026-11-10T18:02:00.000Z" }
-  ]
-}
+:::retenir
+L'essentiel.
+:::
+
+:::exo 10 min
+La consigne.
+
+??? Solution
+La solution.
+???
+:::
 ```
 
-À noter : le stockage dépend de l'adresse. Les remarques prises sur le site en ligne ne se retrouvent pas dans la version ouverte depuis un fichier local, et inversement : l'export / import sert aussi à passer de l'une à l'autre.
+Encadrés disponibles : `:::retenir`, `:::attention`, `:::terrain`, `:::exo`, `:::info Titre libre`, `:::carte Titre`. Aussi : listes, tableaux `| … |`, formules `$$ … $$`, blocs de code avec bouton Copier, images.
 
-## Ajouter un chapitre
+Après modification : vérifier dans le navigateur, puis `git commit` et `git push`. Le site en ligne se met à jour automatiquement (GitHub Actions, [`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
 
-1. Copier une page existante (par ex. `nivellement.html`) et la renommer.
-2. Ajouter une ligne dans `CHAPTERS` en haut de [`cours/app.js`](cours/app.js).
-3. Assembler les blocs de [`composants.html`](cours/composants.html).
+## Annotations
+
+Chacun (élève ou formateur) peut annoter n'importe quel bloc : menu *Mode annotation* (ou touche `N`), survoler un bloc, cliquer sur **+**. Types : Note, Question, À corriger, Idée.
+
+- Enregistrement automatique dans le navigateur ; rien n'est envoyé sur un serveur.
+- Menu *Annotations* : liste de toutes les annotations, **export** en fichier JSON, **import** (fusion : la version la plus récente de chaque annotation gagne). Sert à sauvegarder, changer de poste, ou distribuer les annotations du formateur à la classe.
+- Si le passage annoté est réécrit, l'annotation n'est pas perdue : elle apparaît en bas de page sous « Annotations non rattachées ».
+- Le stockage dépend de l'adresse : site en ligne et fichier local ne partagent pas leurs annotations (l'export / import fait le pont).
+
+Format du fichier (`format: "cf-geo-annotations"`) :
+
+```json
+{ "format": "cf-geo-annotations", "version": 1, "exported": "2026-11-10T18:30:00.000Z", "author": "M. Casto",
+  "annotations": [
+    { "id": "amwavs3rm7y9i", "page": "nivellement.html", "anchor": "m71b88", "section": "3.1",
+      "excerpt": "Le niveau est posé entre deux mires…", "type": "q", "text": "Pourquoi lit-on la mire arrière en premier ?",
+      "author": "Léa", "created": "2026-11-10T18:02:00.000Z", "updated": "2026-11-10T18:02:00.000Z" } ] }
+```
+
+## Application hors ligne
+
+Le site en ligne s'installe comme une application (bouton « Installer l'appli » dans le menu sur Edge / Chrome ; menu du navigateur sur Android ; Partager → « Sur l'écran d'accueil » sur iPhone / iPad) et fonctionne ensuite sans connexion. Chaque déploiement porte un numéro de version : les applis installées se mettent à jour à la connexion suivante.
 
 ## Pistes
 

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Guide de rédaction</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Où est quoi
+
+| Fichier | Contenu | Qui le modifie |
+|---|---|---|
+| `config.js` | Titre, version, **liste des chapitres**, en-têtes (chapeau, durée, objectifs…), libellés des encadrés | Auteurs |
+| `xxx.html` | Le **texte** d'un chapitre, en Markdown, et ses éventuels composants interactifs | Auteurs |
+| `style.css` | Couleurs, polices, mise en page (une seule colonne centrée) | Rarement |
+| `app.js` | Moteur : menu, en-têtes, Markdown, quiz, numérotation, thème, appli hors ligne | Rarement |
+| `annotations.js` | Annotations personnelles, export / import JSON | Rarement |
+| `sw.js` | Cache hors ligne (la liste des pages vient de `config.js`) | Jamais |
+
+Le menu, les liens précédent / suivant, le plan de l'accueil, l'en-tête de chaque chapitre et la numérotation des sections (1.1, 1.2…) sont **générés automatiquement** : on ne les écrit jamais à la main.
+
+## Créer un chapitre
+
+1. Copier `modele.html` (page vide prête à remplir) sous un nouveau nom, par ex. `topographie.html`.
+2. Ajouter une entrée dans la liste `chapters` de `config.js` (titre, durée, chapeau, objectifs…). L'ordre de la liste est l'ordre du menu.
+3. Écrire le texte dans le bloc `script type="text/markdown"` de la page (il peut y en avoir plusieurs, entrecoupés de composants HTML).
+
+```js config.js (extrait)
+{ file: 'topographie.html', num: '7', title: 'Topographie',
+  duration: '45 min', prereq: 'chapitre 3', activity: 'exercice',
+  question: 'La question à laquelle le chapitre répond ?',
+  lead: "Le chapeau : deux ou trois phrases d'introduction.",
+  summary: "Le résumé affiché sur la page d'accueil.",
+  tags: ['exercice'],
+  goals: ['Premier objectif.', 'Deuxième objectif.'] },
+```
+
+:::attention
+Dans `config.js`, chaque texte est entre apostrophes `'…'` ou guillemets `"…"`. Si le texte contient une apostrophe (« l'altitude »), utiliser les guillemets. Ne pas oublier la virgule après chaque entrée.
+:::
+
+## Syntaxe du texte (Markdown)
+
+Chaque exemple montre le rendu, puis ce qu'il faut écrire. Les espaces insécables avant `: ; ? !` sont ajoutées automatiquement.
+</script>
+
+<script type="text/markdown" data-demo="Titres et texte">
+### Sous-section
+
+Un paragraphe avec du **gras**, de l'*italique*, du `code`, un [lien vers un chapitre](gnss.html) et une touche ++Ctrl++.
+
+Une ligne vide sépare deux paragraphes. Les sections s'écrivent avec `##` : elles sont numérotées automatiquement.
+</script>
+
+<script type="text/markdown" data-demo="Listes">
+- Une puce
+- Une autre puce
+
+1. Première étape
+2. Deuxième étape
+</script>
+
+<script type="text/markdown" data-demo="Encadrés">
+:::retenir
+L'essentiel du chapitre.
+:::
+
+:::attention
+Le piège classique.
+:::
+
+:::terrain
+Le lien avec le métier.
+:::
+
+:::info Titre libre
+Un encadré dont on choisit le titre.
+:::
+</script>
+
+<script type="text/markdown" data-demo="Exercice avec solution">
+:::exo 10 min, à deux
+La consigne de l'exercice.
+
+??? Solution
+La solution, cachée jusqu'au clic.
+???
+:::
+</script>
+
+<script type="text/markdown" data-demo="Tableau">
+| Code | Système | Unité |
+|---|---|---|
+| 2056 | MN95 | m |
+| 4326 | WGS84 | degré |
+</script>
+
+<script type="text/markdown" data-demo="Formule">
+$$ Δh = AR − AV $$
+$$ H<sub>avant</sub> = H<sub>arrière</sub> + Δh $$
+</script>
+
+<script type="text/markdown" data-demo="Code avec bouton Copier">
+```sql requete.sql
+SELECT nom FROM communes WHERE canton = 'VD';
+```
+</script>
+
+<script type="text/markdown" data-demo="Cartes (aide-mémoire)">
+:::carte Nivellement
+$$ Δh = AR − AV $$
+:::
+
+:::carte GNSS
+- ≥ 4 satellites
+:::
+</script>
+
+<script type="text/markdown">
+Pour une image : placer le fichier dans le dossier `cours/` (ou un sous-dossier) et écrire `![Légende de la figure](images/mon-image.png)` sur une ligne seule.
+
+## Quiz
+
+Le quiz est décrit en JSON dans la page (voir `quiz.html`) ; la correction, le score et les liens « Revoir » sont gérés automatiquement.
+
+```json quiz.html (extrait)
+{"q": "La question ?",
+ "o": ["Réponse A", "Réponse B", "Réponse C"],
+ "a": 1,
+ "w": "Explication affichée après la réponse.",
+ "ch": "gnss.html"}
+```
+
+## Composants interactifs
+
+Les pages interactives (carte, simulation, carnet…) mélangent du Markdown et du HTML. Les blocs ci-dessous sont les briques disponibles ; le code JavaScript de chaque composant se trouve en bas de sa page, avec un commentaire.
+</script>
+
+<div class="demo" data-html="Outil : figure + réglages + valeurs lues">
+<div class="demo-body">
+<div class="tool-panel">
+  <figure class="fig gridbg" style="margin:0"><svg viewBox="0 0 200 100" role="img" aria-label="Exemple de figure"><circle cx="100" cy="50" r="30" class="fillaccent"/></svg><figcaption>Fig. X · Légende.</figcaption></figure>
+  <div>
+    <div class="ctrl"><label for="demoR">Distance <output>30 m</output></label><input id="demoR" type="range" min="5" max="120" value="30" oninput="this.previousElementSibling.querySelector('output').textContent = this.value + ' m'"></div>
+    <dl class="readout"><dt>MN95 E</dt><dd>2'600'000.0</dd><dt>MN95 N</dt><dd>1'200'000.0</dd></dl>
+  </div>
+</div>
+</div></div>
+
+<div class="demo" data-html="Croquis au crayon">
+<div class="demo-body">
+<figure class="fig gridbg">
+  <svg class="sk" viewBox="0 0 300 120" role="img" aria-label="Croquis : une parcelle avec un bâtiment et un arbre au bord d'une route">
+    <g class="crayon">
+      <path class="road" d="M0 86h300v26H0z"/>
+      <path class="ln" d="M30 14h160v66H30z"/>
+      <path class="bat" d="M50 28h50v36H50z"/>
+      <circle class="tree" cx="150" cy="46" r="14"/>
+    </g>
+    <text class="lbl" x="200" y="40">parcelle 1287</text>
+    <text class="lbl-s" x="8" y="106">Rue du Tilleul</text>
+  </svg>
+  <figcaption>Fig. X · Légende de la figure.</figcaption>
+</figure>
+</div></div>
+
+<div class="demo" data-html="Boutons et étiquettes">
+<div class="demo-body">
+<div class="row">
+  <button class="btn primary" type="button">Action principale</button>
+  <button class="btn" type="button">Secondaire</button>
+  <div class="seg" role="group" aria-label="Exemple"><button type="button" aria-pressed="true">SQL</button><button type="button" aria-pressed="false">Python</button></div>
+</div>
+<p><span class="chip ok">juste</span> <span class="chip warn">à vérifier</span> <span class="chip err">faux</span></p>
+</div></div>
+
+<script type="text/markdown">
+## Conventions d'écriture
+
+- Phrases courtes, un fait par phrase. Vouvoiement.
+- Nombres suisses : `2'600'000` ou `2 600 000`. Toujours préciser le cadre (MN95) et l'unité.
+- Données fictives clairement signalées.
+- Après une modification : ouvrir la page dans le navigateur pour vérifier, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
+</script>
+
+</main>
+<script>
+// démos HTML : on affiche le code source sous le rendu
+document.querySelectorAll('.demo[data-html]').forEach(d => {
+  const src = GEO.dedent(d.querySelector('.demo-body').innerHTML);
+  d.insertAdjacentHTML('afterbegin', `<div class="demo-hd"><b>${GEO.esc(d.dataset.html)}</b><span>HTML</span></div>`);
+  d.append(GEO.makeCodeBlock(src, 'html', 'à copier dans la page'));
+});
+</script>
+</body>
+</html>

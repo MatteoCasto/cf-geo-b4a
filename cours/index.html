@@ -3,168 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cours géomatique</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
-<link rel="stylesheet" href="style.css">
+<title>Cours de géomatique</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
 <style>
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px;align-items:center;padding-bottom:34px;border-bottom:2px solid var(--ink)}
-.hero h1{font-size:clamp(2.4rem,4.6vw,4.1rem);font-stretch:108%;line-height:.95;overflow-wrap:anywhere}
-.hero h1 span{display:block;font-stretch:80%;font-weight:600;font-size:.42em;letter-spacing:.01em;color:var(--ink-2);margin-top:.35em;line-height:1.1}
+/* styles propres à l'accueil */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:center;padding-bottom:30px;border-bottom:2px solid var(--ink)}
+.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);font-stretch:108%;line-height:.98;overflow-wrap:anywhere}
+.hero h1 span{display:block;font-stretch:85%;font-weight:600;font-size:.45em;color:var(--ink-2);margin-top:.35em;line-height:1.15}
 .hero .fig{margin:0;padding:10px}
-@media (max-width:980px){.hero{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}}
 #scan .gnd{fill:var(--c-road);stroke:var(--c-line);stroke-width:1.5}
 #scan .bld{fill:var(--c-bat);stroke:var(--c-bat-line);stroke-width:1.4}
 #scan .crown{fill:var(--c-tree-soft);stroke:var(--c-tree);stroke-width:1.5}
 #scan .trunk{stroke:var(--c-bat-line);stroke-width:3}
 #scan .beam{stroke:var(--accent);stroke-width:1;opacity:.55}
 #scan .plane{fill:var(--ink)}
-#scan .lbl{font:500 11px var(--f-mono);fill:var(--muted)}
-.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 18px}
-.legend .box{margin:.6rem 0 0;font-size:.88rem;padding:14px 14px 10px}
-.qs li{margin:.4rem 0}
 </style>
 </head>
 <body>
-<div class="site">
-<aside class="toc" id="toc"></aside>
 <main class="doc">
 
-<header class="hero wide">
+<header class="hero">
   <div>
-    <div class="kicker">Gabarit de support de cours · géomatique</div>
+    <div class="kicker">Gabarit de support de cours</div>
     <h1>Géomatique<span>Un exemple de ce que le support peut devenir</span></h1>
-    <p class="lead">Cinq thèmes pris au hasard dans le métier, chacun traité avec un type de page différent : calculateur, simulation, carnet calculé, graphique filtrable, outil d'analyse. Le contenu est indicatif : c'est la forme qu'on discute.</p>
-    <div class="row" style="margin-top:22px">
-      <a class="btn primary" href="referentiels.html">Voir le chapitre 1 →</a>
-      <a class="btn" href="composants.html">Boîte à composants</a>
+    <p class="lead">Des thèmes pris au hasard, chacun traité avec un type de page différent. Le contenu est indicatif : c'est la forme qu'on discute.</p>
+    <div class="row" style="margin-top:20px">
+      <a class="btn primary" href="referentiels.html">Commencer →</a>
+      <a class="btn" href="guide.html">Guide de rédaction</a>
     </div>
   </div>
   <figure class="fig gridbg">
     <svg id="scan" viewBox="0 0 520 340" role="img" aria-label="Un avion survole un terrain avec des arbres et un bâtiment ; le laser dépose des points colorés selon ce qu'il touche">
-      <g id="terrain"></g>
-      <g id="beam"></g>
-      <g id="pts"></g>
+      <g id="terrain"></g><g id="beam"></g><g id="pts"></g>
       <g id="plane"><path class="plane" d="M-18 0h30l8-4h4l-4 6 4 6h-4l-8-4h-30z M-4 -2l-8 -10h5l12 10z"/></g>
     </svg>
-    <figcaption>Fig. 0.1 · Balayage LiDAR. Couleur des points : <span style="color:var(--cl-sol)">sol</span>, <span style="color:var(--cl-veg)">végétation</span>, <span style="color:var(--cl-bat)">bâtiment</span>.</figcaption>
+    <figcaption>Balayage LiDAR : <span style="color:var(--cl-sol)">sol</span>, <span style="color:var(--cl-veg)">végétation</span>, <span style="color:var(--cl-bat)">bâtiment</span>.</figcaption>
   </figure>
 </header>
 
-<div class="cartouche" style="margin-top:22px">
-  <div><i>Objet</i><b>Gabarit de démonstration</b></div>
-  <div><i>Public</i><b>à définir (techniciens en géomatique ?)</b></div>
-  <div><i>Durée</i><b>à définir</b></div>
-  <div><i>Version</i><b>0.0 · gabarit · 10.11.2026</b></div>
-  <div class="full last"><i>Fil rouge</i><b>Exemple : la commune fictive de Montavaux, coordonnées MN95</b></div>
-</div>
+<script type="text/markdown">
+## Le parcours
 
-<h2><span class="sn">0.1</span>Ce que montre ce gabarit</h2>
-<p>Chaque chapitre est un <strong>thème géomatique</strong> choisi au hasard et une <strong>forme de page</strong>. Les thèmes peuvent être remplacés ; les formes, elles, se réutilisent pour n'importe quel sujet.</p>
-<div class="tbl wide">
-<table>
-  <thead><tr><th>Chapitre</th><th>Thème</th><th>Forme démontrée</th><th>Réutilisable pour…</th></tr></thead>
-  <tbody>
-    <tr><td>1</td><td>Systèmes de référence</td><td>Carte cliquable + calculateur</td><td>Conversions, formules, exercices de calcul</td></tr>
-    <tr><td>2</td><td>GNSS</td><td>Simulation animée avec réglages</td><td>Tout phénomène qu'on veut « faire varier »</td></tr>
-    <tr><td>3</td><td>Nivellement</td><td>Carnet de terrain qui se calcule</td><td>Carnets, polygonales, compensations simples</td></tr>
-    <tr><td>4</td><td>LiDAR et MNT</td><td>Graphique filtrable avec curseur</td><td>Profils, séries de mesures, classifications</td></tr>
-    <tr><td>5</td><td>Analyse spatiale</td><td>Outil SIG + code SQL / Python qui suit les réglages</td><td>Requêtes, géotraitements, scripts</td></tr>
-    <tr><td>6</td><td>Quiz</td><td>Auto-évaluation corrigée, score mémorisé</td><td>Contrôle des acquis en fin de module</td></tr>
-    <tr><td>A / B</td><td>Aide-mémoire, composants</td><td>Fiche imprimable, catalogue pour les auteurs</td><td>Résumé d'examen, guide de rédaction</td></tr>
-  </tbody>
-</table>
-</div>
+Les chapitres se suivent, mais chacun peut être lu seul. Les durées sont des exemples.
 
-<h2><span class="sn">0.2</span>Le parcours</h2>
-<p>Les chapitres se suivent, mais chacun peut être lu seul. Les durées sont des exemples.</p>
-<ol class="plan wide">
-  <li><a href="referentiels.html"><span class="n">1</span><b>Systèmes de référence</b><p>MN03 et MN95 : deux cadres, deux jeux de coordonnées. Cliquer sur la carte, convertir.</p><div class="meta"><span>30 min</span><span>carte cliquable</span><span>calculateur</span></div></a></li>
-  <li><a href="gnss.html"><span class="n">2</span><b>Positionnement GNSS</b><p>Ciel de satellites, masque d'élévation, obstacles et PDOP en direct.</p><div class="meta"><span>30 min</span><span>simulation</span></div></a></li>
-  <li><a href="nivellement.html"><span class="n">3</span><b>Nivellement</b><p>Lectures arrière, lectures avant, altitudes et fermeture d'un cheminement.</p><div class="meta"><span>45 min</span><span>carnet calculé</span><span>exercice</span></div></a></li>
-  <li><a href="lidar.html"><span class="n">4</span><b>LiDAR et modèles de terrain</b><p>Un profil de nuage de points, ses classes, le MNT, le MNS et la hauteur de végétation.</p><div class="meta"><span>30 min</span><span>graphique filtrable</span></div></a></li>
-  <li><a href="analyse.html"><span class="n">5</span><b>Analyse spatiale</b><p>Une zone tampon autour d'un ruisseau, et la même requête en SQL et en Python.</p><div class="meta"><span>45 min</span><span>outil SIG</span><span>code lié</span></div></a></li>
-  <li><a href="quiz.html"><span class="n">6</span><b>Quiz final</b><p>Six questions sur les cinq thèmes, avec correction immédiate.</p><div class="meta"><span>15 min</span><span>auto-évaluation</span></div></a></li>
-</ol>
+<div data-plan></div>
 
-<h2><span class="sn">0.3</span>Comment lire ce support</h2>
-<div class="legend">
-  <div class="box retenir"><span class="lab">À retenir</span><p>L'essentiel du chapitre. C'est ce qui sera demandé.</p></div>
-  <div class="box attention"><span class="lab">Attention</span><p>Un piège fréquent, une erreur classique.</p></div>
-  <div class="box terrain"><span class="lab">Sur le terrain</span><p>Où vous rencontrerez cela dans votre métier.</p></div>
-  <div class="box exo"><span class="lab">Exercice</span><p>À faire seul ou à deux, avec solution à déplier.</p></div>
-</div>
-<p class="small muted">Chaque chapitre commence par des objectifs à cocher ; le navigateur s'en souvient. Raccourcis : <kbd>←</kbd> <kbd>→</kbd> pour changer de chapitre, <kbd>P</kbd> pour agrandir le texte au beamer.</p>
+## Ce que montre ce gabarit
 
-<div class="box terrain"><span class="lab">Vos remarques</span>
-  <p>Activez <strong>Mode annotation</strong> dans le menu (ou touche <kbd>N</kbd>), survolez n'importe quel bloc et cliquez sur <strong>+</strong> pour y attacher une remarque, une question ou une correction.</p>
-  <p>Les remarques restent dans votre navigateur. Le menu <strong>Remarques</strong> permet de les <strong>exporter</strong> dans un fichier JSON et de les <strong>réimporter</strong> plus tard, sur un autre poste, ou de recevoir celles du formateur.</p>
-</div>
+Chaque chapitre associe un **thème** à une **forme de page**. Les thèmes seront remplacés ; les formes se réutilisent pour n'importe quel sujet.
 
-<div class="box prof"><span class="lab">Formateur</span>
-  <p>Ces encadrés bleus en pointillé ne s'affichent qu'avec « Notes formateur » activé (menu de gauche). On y met le déroulement, les questions à poser à la classe, les pièges à anticiper.</p>
-</div>
+| Chapitre | Forme démontrée | Réutilisable pour… |
+|---|---|---|
+| 1 | Carte cliquable + calculateur | Conversions, formules, exercices de calcul |
+| 2 | Simulation animée avec réglages | Tout phénomène qu'on veut « faire varier » |
+| 3 | Carnet de terrain qui se calcule | Carnets, polygonales, compensations simples |
+| 4 | Graphique filtrable avec curseur | Profils, séries de mesures, classifications |
+| 5 | Outil SIG + code qui suit les réglages | Requêtes, géotraitements, scripts |
+| 6 | Quiz corrigé | Contrôle des acquis |
+| A, B | Fiche imprimable, guide de rédaction | Résumé d'examen, documentation des auteurs |
 
-<h2><span class="sn">0.4</span>Questions pour la séance de brainstorming</h2>
-<div class="box exo"><span class="lab">À trancher ensemble</span>
-  <ol class="qs">
-    <li><strong>Public et durée</strong> : quel module, combien de périodes, quel niveau de départ ?</li>
-    <li><strong>Fil rouge</strong> : un seul jeu de données pour tout le cours (une commune fictive, un chantier) ou un exemple par chapitre ?</li>
-    <li><strong>Part d'interactif</strong> : quelles notions gagnent vraiment à être manipulées (simulation, calculateur) plutôt que lues ?</li>
-    <li><strong>Papier ou écran</strong> : faut-il aussi un support Word / PDF au gabarit CF-geo, généré depuis les mêmes pages ?</li>
-    <li><strong>Exercices</strong> : solutions visibles dans le support, ou réservées au formateur ?</li>
-    <li><strong>Diffusion</strong> : fichiers sur un partage, dossier zip, ou site en ligne (GitHub Pages, intranet) ?</li>
-    <li><strong>Maintenance</strong> : qui écrit, qui relit, comment on suit les versions (ce dépôt git) ?</li>
-  </ol>
-</div>
+## Comment lire ce support
+
+:::retenir
+L'essentiel du chapitre. C'est ce qui sera demandé.
+:::
+
+:::attention
+Un piège fréquent, une erreur classique.
+:::
+
+:::terrain
+Où vous rencontrerez cela dans votre métier.
+:::
+
+:::exo
+À faire seul ou à deux, avec solution à déplier.
+:::
+
+Chaque chapitre commence par des objectifs à cocher ; le navigateur s'en souvient. Raccourcis : ++←++ ++→++ pour changer de chapitre, ++P++ pour agrandir le texte au beamer, ++N++ pour annoter.
+
+:::info Vos annotations
+Activez **Mode annotation** dans le menu (ou ++N++), survolez n'importe quel bloc et cliquez sur **+** pour y attacher une note, une question ou une correction.
+
+Les annotations restent dans votre navigateur. Le menu **Annotations** permet de les **exporter** dans un fichier JSON et de les **réimporter** plus tard, sur un autre poste, ou de recevoir celles du formateur.
+:::
+
+:::info Application hors ligne
+Ce support s'installe comme une application, sur ordinateur, tablette ou téléphone, et fonctionne ensuite **sans connexion**.
+
+- **Ordinateur** (Edge, Chrome) : bouton « Installer l'appli » dans le menu, ou icône d'installation dans la barre d'adresse.
+- **Android** : menu du navigateur → « Installer l'application ».
+- **iPhone / iPad** (Safari) : Partager → « Sur l'écran d'accueil ».
+
+Il suffit d'avoir ouvert le site une fois en ligne. Les mises à jour arrivent automatiquement à la connexion suivante.
+:::
+
+## Questions pour la séance de brainstorming
+
+1. **Public et durée** : quel module, combien de périodes, quel niveau de départ ?
+2. **Fil rouge** : un seul jeu de données pour tout le cours, ou un exemple par chapitre ?
+3. **Part d'interactif** : quelles notions gagnent vraiment à être manipulées plutôt que lues ?
+4. **Papier ou écran** : faut-il aussi un support Word / PDF au gabarit CF-geo ?
+5. **Exercices** : solutions visibles dans le support, ou réservées au formateur ?
+6. **Maintenance** : qui écrit, qui relit, comment on suit les versions (ce dépôt git) ?
+</script>
 
 </main>
-</div>
-<script src="app.js"></script>
-<script src="notes.js" defer></script>
 <script>
+// ---- animation de l'accueil : balayage LiDAR ----
 (function(){
   const NS = 'http://www.w3.org/2000/svg', svg = document.getElementById('scan');
   const W = 520, BX0 = 300, BX1 = 362, BT = 196;
   const gnd = x => 292 - 16*Math.sin(x/70) - 8*Math.sin(x/23 + 1);
   const TREES = [{cx:118, r:21}, {cx:172, r:17}, {cx:440, r:24}].map(t => ({...t, cy: gnd(t.cx) - 50 - t.r/2}));
-  // première surface touchée par le laser (vertical simplifié) : [y, classe]
   function hit(x){
     let y = gnd(x), c = 'sol';
     if(x >= BX0 && x <= BX1 && BT < y){ y = BT; c = 'bat'; }
     for(const t of TREES){ const d = x - t.cx; if(Math.abs(d) < t.r){ const yc = t.cy - Math.sqrt(t.r*t.r - d*d); if(yc < y){ y = yc; c = 'veg'; } } }
     return [y, c];
   }
-  // décor
   let d = `M0 340 L0 ${gnd(0)}`; for(let x = 0; x <= W; x += 4) d += ` L${x} ${gnd(x).toFixed(1)}`; d += ` L${W} 340Z`;
-  const ter = svg.querySelector('#terrain');
-  ter.innerHTML = `<path class="gnd" d="${d}"/>
-    <path class="bld" d="M${BX0} ${gnd(BX0)+4}V${BT}H${BX1}V${gnd(BX1)+4}"/>` +
-    TREES.map(t => `<path class="trunk" d="M${t.cx} ${gnd(t.cx)}V${t.cy}"/><circle class="crown" cx="${t.cx}" cy="${t.cy}" r="${t.r}"/>`).join('') +
-    `<text class="lbl" x="12" y="24">h = 50 m sol · ~ 20 pts/m²</text>`;
-  const pts = svg.querySelector('#pts'), plane = svg.querySelector('#plane'), beam = svg.querySelector('#beam');
-  const dot = (x, y, c) => { const e = document.createElementNS(NS, 'circle'); e.setAttribute('cx', x.toFixed(1)); e.setAttribute('cy', (y-1.5).toFixed(1)); e.setAttribute('r', 2.1); e.setAttribute('class', 'p-' + c); pts.appendChild(e); return e; };
+  svg.querySelector('#terrain').innerHTML = `<path class="gnd" d="${d}"/><path class="bld" d="M${BX0} ${gnd(BX0)+4}V${BT}H${BX1}V${gnd(BX1)+4}"/>` +
+    TREES.map(t => `<path class="trunk" d="M${t.cx} ${gnd(t.cx)}V${t.cy}"/><circle class="crown" cx="${t.cx}" cy="${t.cy}" r="${t.r}"/>`).join('');
+  const pts = svg.querySelector('#pts'), plane = svg.querySelector('#plane');
+  const dot = (x, y, c) => { const e = document.createElementNS(NS, 'circle'); e.setAttribute('cx', x.toFixed(1)); e.setAttribute('cy', (y-1.5).toFixed(1)); e.setAttribute('r', 2.1); e.setAttribute('class', 'p-' + c); pts.appendChild(e); };
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     for(let x = 4; x < W; x += 5){ const [y, c] = hit(x); dot(x, y, c); }
     plane.setAttribute('transform', 'translate(260 60)');
     return;
   }
-  const line = document.createElementNS(NS, 'line'); line.setAttribute('class', 'beam'); beam.appendChild(line);
-  const PY = 60, SPEED = 0.055;
+  const line = document.createElementNS(NS, 'line'); line.setAttribute('class', 'beam'); svg.querySelector('#beam').appendChild(line);
   let t0 = null, lastX = -999;
   function frame(now){
     if(t0 === null) t0 = now;
-    const t = now - t0, px = (t*SPEED) % (W + 120) - 60;
-    if(px < lastX) pts.replaceChildren();          // nouveau passage : on efface
+    const t = now - t0, px = (t*0.055) % (W + 120) - 60;
+    if(px < lastX) pts.replaceChildren();
     lastX = px;
-    plane.setAttribute('transform', `translate(${px.toFixed(1)} ${PY})`);
-    for(let k = 0; k < 2; k++){
-      const x = px + 70*Math.sin(t/90 + k*1.7);
-      if(x < 0 || x > W){ continue; }
-      const [y, c] = hit(x);
-      dot(x, y, c);
-      if(k === 0){ line.setAttribute('x1', px); line.setAttribute('y1', PY+4); line.setAttribute('x2', x); line.setAttribute('y2', y); }
-    }
+    plane.setAttribute('transform', `translate(${px.toFixed(1)} 60)`);
+    const x = px + 70*Math.sin(t/90);
+    if(x >= 0 && x <= W){ const [y, c] = hit(x); dot(x, y, c); line.setAttribute('x1', px); line.setAttribute('y1', 64); line.setAttribute('x2', x); line.setAttribute('y2', y); }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

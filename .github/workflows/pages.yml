@@ -33,6 +33,10 @@ jobs:
       - name: Configurer Pages
         uses: actions/configure-pages@v5
 
+      - name: Versionner le cache hors ligne
+        # chaque déploiement porte un numéro unique : les applis installées récupèrent la nouvelle version
+        run: sed -i "s/__BUILD__/${GITHUB_SHA::7}-${GITHUB_RUN_NUMBER}/" cours/sw.js
+
       - name: Préparer l'artefact (dossier cours/)
         uses: actions/upload-pages-artifact@v3
         with:

@@ -4,76 +4,49 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Aide-mémoire</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
-<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="app.js"></script>
 </head>
 <body>
-<div class="site">
-<aside class="toc" id="toc"></aside>
 <main class="doc">
 
-<header class="chap wide">
-  <div>
-    <div class="kicker">Annexe A · à imprimer</div>
-    <h1>Aide-mémoire</h1>
-    <p class="lead">L'essentiel de chaque chapitre sur une page recto. Imprimez avec <kbd>Ctrl</kbd>+<kbd>P</kbd> : le menu et les boutons disparaissent.</p>
-  </div>
-  <div class="cartouche">
-    <div><i>Format</i><b>A4 recto</b></div>
-    <div><i>Version</i><b>0.0</b></div>
-    <div class="full last"><i>Usage</i><b>Autorisé en examen ? à décider</b></div>
-  </div>
-</header>
+<script type="text/markdown">
+:::carte 1 · Systèmes de référence
+$$ E ≈ Y + 2 000 000 $$
+$$ N ≈ X + 1 000 000 $$
+MN95 : 7 chiffres, E commence par 2, N par 1. Transformation rigoureuse : REFRAME.
+:::
 
-<div class="cards wide" style="margin-top:28px">
-  <div class="card">
-    <h3>1 · Systèmes de référence</h3>
-    <div class="formula">E ≈ Y + 2 000 000</div>
-    <div class="formula">N ≈ X + 1 000 000</div>
-    <p>MN95 : 7 chiffres, E commence par 2, N par 1. Origine 2 600 000 / 1 200 000. Transformation rigoureuse : REFRAME.</p>
-  </div>
-  <div class="card">
-    <h3>2 · GNSS</h3>
-    <ul>
-      <li>≥ 4 satellites (E, N, h, temps).</li>
-      <li>PDOP petit = bonne géométrie.</li>
-      <li>Masque d'élévation : compromis nombre / qualité.</li>
-      <li>Obstacles et réflexions : multitrajet.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h3>3 · Nivellement</h3>
-    <div class="formula">Δh = AR − AV</div>
-    <div class="formula">Σ AR − Σ AV = Σ Δh</div>
-    <p>Boucle fermée : Σ Δh = écart de fermeture. Compenser seulement si dans la tolérance.</p>
-  </div>
-  <div class="card">
-    <h3>4 · LiDAR</h3>
-    <ul>
-      <li>Classes : 2 sol, 3–5 végétation, 6 bâtiment, 7 bruit.</li>
-      <li>MNT = terrain nu ; MNS = surface.</li>
-      <li>MNS − MNT = hauteur des objets.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h3>5 · Analyse spatiale</h3>
-    <div class="formula">ST_DWithin(a, b, d)</div>
-    <p>Distance en mètres seulement dans un système projeté (MN95 = EPSG:2056).</p>
-  </div>
-  <div class="card">
-    <h3>Codes EPSG utiles</h3>
-    <ul>
-      <li><code>2056</code> MN95 / CH1903+</li>
-      <li><code>21781</code> MN03 / CH1903</li>
-      <li><code>4326</code> WGS84 (degrés)</li>
-    </ul>
-  </div>
-</div>
+:::carte 2 · GNSS
+- ≥ 4 satellites (E, N, h, temps).
+- PDOP petit = bonne géométrie.
+- Masque d'élévation : compromis nombre / qualité.
+:::
+
+:::carte 3 · Nivellement
+$$ Δh = AR − AV $$
+$$ Σ AR − Σ AV = Σ Δh $$
+Boucle fermée : Σ Δh = écart de fermeture.
+:::
+
+:::carte 4 · LiDAR
+- Classes : 2 sol, 3–5 végétation, 6 bâtiment, 7 bruit.
+- MNT = terrain nu ; MNS = surface.
+- MNS − MNT = hauteur des objets.
+:::
+
+:::carte 5 · Analyse spatiale
+$$ ST_DWithin(a, b, d) $$
+Distance en mètres seulement dans un système projeté (MN95 = EPSG:2056).
+:::
+
+:::carte Codes EPSG utiles
+- `2056` MN95 / CH1903+
+- `21781` MN03 / CH1903
+- `4326` WGS84 (degrés)
+:::
+</script>
 
 </main>
-</div>
-<script src="app.js"></script>
-<script src="notes.js" defer></script>
 </body>
 </html>

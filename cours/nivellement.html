@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Nivellement</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
-<link rel="stylesheet" href="style.css">
+<script src="config.js"></script>
+<script src="app.js"></script>
 <style>
+/* styles propres aux composants interactifs de cette page */
 .carnet td,.carnet th{white-space:nowrap}
-.carnet input{width:7.2em;font-family:var(--f-mono);text-align:right}
-.carnet input.pt{width:5.5em;text-align:left}
+.carnet input{width:6.6em;font-family:var(--f-mono);text-align:right}
+.carnet input.pt{width:4.6em;text-align:left}
 .carnet td.o{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
 .carnet tfoot td{font-weight:600;border-top:2px solid var(--ink);border-bottom:0}
 .carnet .del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem}
@@ -21,108 +21,91 @@
 </style>
 </head>
 <body>
-<div class="site">
-<aside class="toc" id="toc"></aside>
 <main class="doc">
 
-<header class="chap wide">
-  <div>
-    <div class="kicker">Chapitre 3 · 45 min</div>
-    <h1>Nivellement</h1>
-    <p class="lead">Le niveau ne mesure pas d'altitude : il mesure des différences de hauteur entre deux mires. En enchaînant les stations depuis un repère connu, on transporte l'altitude de proche en proche.</p>
-  </div>
-  <div class="cartouche">
-    <div><i>Chapitre</i><b>3 / 6</b></div>
-    <div><i>Durée</i><b>45 min</b></div>
-    <div><i>Prérequis</i><b>aucun</b></div>
-    <div><i>Activité</i><b>carnet calculé, exercice</b></div>
-    <div class="full last"><i>Question clé</i><b>Comment savoir si un cheminement est juste ?</b></div>
-  </div>
-</header>
+<script type="text/markdown">
+## Une station
 
-<section class="goals">
-  <h4>Objectifs du chapitre</h4>
-  <ul>
-    <li><label><input type="checkbox"><span>Calculer une dénivelée à partir d'une lecture arrière et d'une lecture avant.</span></label></li>
-    <li><label><input type="checkbox"><span>Tenir un carnet de nivellement et calculer les altitudes.</span></label></li>
-    <li><label><input type="checkbox"><span>Calculer l'écart de fermeture et le répartir simplement.</span></label></li>
-  </ul>
-</section>
+Le niveau est posé entre deux mires. On lit d'abord la mire placée sur le point **connu** (lecture **arrière**), puis celle sur le point **à déterminer** (lecture **avant**).
 
-<h2><span class="sn">3.1</span>Une station</h2>
-<div class="two">
-  <div>
-    <p>Le niveau est posé entre deux mires. On lit d'abord la mire placée sur le point <strong>connu</strong> (lecture <strong>arrière</strong>), puis celle sur le point <strong>à déterminer</strong> (lecture <strong>avant</strong>).</p>
-    <div class="formula">Δh = AR − AV</div>
-    <div class="formula">H<sub>avant</sub> = H<sub>arrière</sub> + Δh</div>
-    <p>Si la lecture avant est plus petite, la mire est plus haute : le terrain monte.</p>
-  </div>
-  <figure class="fig gridbg" style="margin:0">
-    <svg class="sk" viewBox="0 0 320 200" role="img" aria-label="Croquis : un niveau entre deux mires, ligne de visée horizontale, lecture arrière 1,43 m à gauche et lecture avant 0,87 m à droite sur un terrain qui monte">
-      <g class="crayon">
-        <path class="ln" d="M0 168 C80 166 200 140 320 128"/>
-        <rect class="staff" x="34" y="44" width="10" height="124"/>
-        <rect class="staff" x="268" y="44" width="10" height="87"/>
-        <path class="ln" d="M150 160l10-62l10 62M160 98v58"/>
-        <rect class="ln" x="146" y="86" width="28" height="12" rx="2"/>
-      </g>
-      <path class="sight" d="M44 92H268"/>
-      <text class="lbl" x="2" y="38">mire arrière</text>
-      <text class="lbl" x="226" y="38">mire avant</text>
-      <text class="lbl" x="50" y="132">AR = 1.43</text>
-      <text class="lbl" x="214" y="116">AV = 0.87</text>
-      <text class="lbl-s" x="128" y="190">Δh = +0.56 m</text>
-    </svg>
-  </figure>
-</div>
+$$ Δh = AR − AV $$
+$$ H<sub>avant</sub> = H<sub>arrière</sub> + Δh $$
 
-<h2><span class="sn">3.2</span>Le carnet qui se calcule</h2>
-<p>Voici un cheminement fermé : il part du repère <strong>RP1</strong> et y revient. Modifiez les lectures, ajoutez des stations : tout se recalcule. En boucle fermée, la somme des dénivelées devrait valoir zéro.</p>
-<div class="row" style="margin:.4rem 0 .2rem">
-  <label class="small" for="h0">Altitude de départ (m)</label><input id="h0" type="number" step="0.001" value="452.318" style="width:8em">
-  <label class="small" for="tol">Tolérance (mm)</label><input id="tol" type="number" step="0.5" value="4" style="width:5em">
+Si la lecture avant est plus petite, la mire est plus haute : le terrain monte.
+</script>
+
+<figure class="fig gridbg">
+  <svg class="sk" viewBox="0 0 320 200" role="img" aria-label="Croquis : un niveau entre deux mires, ligne de visée horizontale, lecture arrière 1,43 m et lecture avant 0,87 m sur un terrain qui monte" style="max-width:420px;margin:0 auto">
+    <g class="crayon">
+      <path class="ln" d="M0 168 C80 166 200 140 320 128"/>
+      <rect class="staff" x="34" y="44" width="10" height="124"/>
+      <rect class="staff" x="268" y="44" width="10" height="87"/>
+      <path class="ln" d="M150 160l10-62l10 62M160 98v58"/>
+      <rect class="ln" x="146" y="86" width="28" height="12" rx="2"/>
+    </g>
+    <path class="sight" d="M44 92H268"/>
+    <text class="lbl" x="2" y="38">mire arrière</text>
+    <text class="lbl" x="226" y="38">mire avant</text>
+    <text class="lbl" x="50" y="132">AR = 1.43</text>
+    <text class="lbl" x="214" y="116">AV = 0.87</text>
+    <text class="lbl-s" x="128" y="190">Δh = +0.56 m</text>
+  </svg>
+  <figcaption>Fig. 3.1 · Une station de nivellement.</figcaption>
+</figure>
+
+<script type="text/markdown">
+## Le carnet qui se calcule
+
+Voici un cheminement fermé : il part du repère **RP1** et y revient. Modifiez les lectures, ajoutez des stations : tout se recalcule. En boucle fermée, la somme des dénivelées devrait valoir zéro.
+</script>
+
+<!-- composant interactif : carnet de nivellement -->
+<div class="row" style="margin-top:.4rem;margin-bottom:.2rem">
+  <label class="small" for="h0">Altitude de départ (m)</label><input id="h0" type="number" step="0.001" value="452.318" style="width:7.5em">
+  <label class="small" for="tol">Tolérance (mm)</label><input id="tol" type="number" step="0.5" value="4" style="width:4.5em">
   <button class="btn sm" type="button" id="add">+ station</button>
   <button class="btn sm" type="button" id="reset">Réinitialiser</button>
 </div>
-<div class="tbl wide">
+<div class="tbl">
 <table class="carnet" id="carnet">
-  <thead><tr><th>Station</th><th>De</th><th>À</th><th>AR [m]</th><th>AV [m]</th><th>Δh [m]</th><th>H brute [m]</th><th>Corr. [mm]</th><th>H compensée [m]</th><th></th></tr></thead>
+  <thead><tr><th>St.</th><th>De</th><th>À</th><th>AR [m]</th><th>AV [m]</th><th>Δh [m]</th><th>H brute [m]</th><th>Corr. [mm]</th><th>H comp. [m]</th><th></th></tr></thead>
   <tbody></tbody>
   <tfoot><tr><td colspan="3">Σ</td><td class="o" id="sAR"></td><td class="o" id="sAV"></td><td class="o" id="sDH"></td><td colspan="4"></td></tr></tfoot>
 </table>
 </div>
 <p id="ferm"></p>
-<p class="small muted">Compensation simple : l'écart est réparti à parts égales entre les stations. D'autres règles (proportionnelle aux distances) se discuteront au cours.</p>
 
-<div class="box retenir"><span class="lab">À retenir</span>
-  <p>Contrôle de calcul : <strong>Σ AR − Σ AV = Σ Δh</strong>. Sur un cheminement fermé, Σ Δh est l'<strong>écart de fermeture</strong>. On ne compense que si cet écart est dans la tolérance.</p>
-</div>
-<div class="box attention"><span class="lab">Attention</span>
-  <p>Une fermeture parfaite ne prouve pas que tout est juste : deux fautes de même valeur et de signe contraire s'annulent. Le carnet, les croquis et les contrôles indépendants restent indispensables.</p>
-</div>
-<div class="box terrain"><span class="lab">Sur le terrain</span>
-  <p>Les niveaux numériques lisent une mire à code-barres et enregistrent eux-mêmes les lectures. Le principe du carnet reste identique, et c'est lui qu'on contrôle en cas de doute.</p>
-</div>
+<script type="text/markdown">
+Compensation simple : l'écart est réparti à parts égales entre les stations.
 
-<h2><span class="sn">3.3</span>À vous</h2>
-<div class="box exo"><span class="lab">Exercice · 10 min, seul</span>
-  <p>Depuis le repère RP2 (H = 512.640 m), on mesure : station 1, AR 1.254, AV 2.031 ; station 2, AR 0.986, AV 1.612. Quelle est l'altitude du point d'arrivée ?</p>
-  <details><summary>Solution</summary>
-    <p>Δh₁ = 1.254 − 2.031 = −0.777 m ; Δh₂ = 0.986 − 1.612 = −0.626 m.</p>
-    <p>H = 512.640 − 0.777 − 0.626 = <strong>511.237 m</strong>. Contrôle : Σ AR − Σ AV = 2.240 − 3.643 = −1.403 m ✓</p>
-    <p>Astuce : saisissez ces valeurs dans le carnet ci-dessus pour vérifier.</p>
-  </details>
-</div>
+:::retenir
+Contrôle de calcul : **Σ AR − Σ AV = Σ Δh**. Sur un cheminement fermé, Σ Δh est l'**écart de fermeture**. On ne compense que si cet écart est dans la tolérance.
+:::
 
-<div class="box prof"><span class="lab">Formateur</span>
-  <p>Faire d'abord le calcul à la main sur papier, puis seulement montrer le carnet calculé. Introduire volontairement une faute de lecture (1.4325 au lieu de 1.3425) et laisser la classe la détecter grâce à la fermeture.</p>
-</div>
+:::attention
+Une fermeture parfaite ne prouve pas que tout est juste : deux fautes de même valeur et de signe contraire s'annulent.
+:::
+
+:::terrain
+Les niveaux numériques lisent une mire à code-barres et enregistrent eux-mêmes les lectures. Le principe du carnet reste identique.
+:::
+
+## À vous
+
+:::exo 10 min, seul
+Depuis le repère RP2 (H = 512.640 m), on mesure : station 1, AR 1.254, AV 2.031 ; station 2, AR 0.986, AV 1.612. Quelle est l'altitude du point d'arrivée ?
+
+??? Solution
+Δh₁ = 1.254 − 2.031 = −0.777 m ; Δh₂ = 0.986 − 1.612 = −0.626 m.
+
+H = 512.640 − 0.777 − 0.626 = **511.237 m**. Contrôle : Σ AR − Σ AV = 2.240 − 3.643 = −1.403 m ✓
+???
+:::
+</script>
 
 </main>
-</div>
-<script src="app.js"></script>
-<script src="notes.js" defer></script>
 <script>
+// ---- composant interactif : carnet de nivellement ----
 (function(){
   const $ = id => document.getElementById(id);
   const DEF = [['RP1','P1','1.4325','0.8712'],['P1','P2','1.9054','1.2210'],['P2','P3','0.7120','2.0436'],['P3','RP1','1.1023','1.0134']];
@@ -131,26 +114,24 @@
   const n = v => { const x = parseFloat(String(v).replace(',', '.')); return isFinite(x) ? x : NaN; };
   const sgn = (v, d) => isFinite(v) ? `<span class="${v > 0 ? 'pos' : v < 0 ? 'neg' : ''}">${v > 0 ? '+' : ''}${v.toFixed(d)}</span>` : '–';
   function render(){
-    tb.innerHTML = rows.map((r, i) => `<tr data-i="${i}">
-      <td class="o">${i+1}</td>
-      <td><input class="pt" data-k="0" value="${GEO.esc(r[0])}" aria-label="Point arrière, station ${i+1}"></td>
-      <td><input class="pt" data-k="1" value="${GEO.esc(r[1])}" aria-label="Point avant, station ${i+1}"></td>
-      <td><input data-k="2" inputmode="decimal" value="${r[2]}" aria-label="Lecture arrière, station ${i+1}"></td>
-      <td><input data-k="3" inputmode="decimal" value="${r[3]}" aria-label="Lecture avant, station ${i+1}"></td>
+    tb.innerHTML = rows.map((r, i) => `<tr data-i="${i}"><td class="o">${i+1}</td>
+      <td><input class="pt" data-k="0" value="${GEO.esc(r[0])}" aria-label="Point arrière ${i+1}"></td>
+      <td><input class="pt" data-k="1" value="${GEO.esc(r[1])}" aria-label="Point avant ${i+1}"></td>
+      <td><input data-k="2" inputmode="decimal" value="${r[2]}" aria-label="Lecture arrière ${i+1}"></td>
+      <td><input data-k="3" inputmode="decimal" value="${r[3]}" aria-label="Lecture avant ${i+1}"></td>
       <td class="o dh"></td><td class="o hb"></td><td class="o co"></td><td class="o hc"></td>
-      <td><button class="del" type="button" title="Supprimer la station" aria-label="Supprimer la station ${i+1}">×</button></td></tr>`).join('');
+      <td><button class="del" type="button" aria-label="Supprimer la station ${i+1}">×</button></td></tr>`).join('');
     calc();
   }
   function calc(){
     const H0 = n($('h0').value), tol = n($('tol').value);
-    let H = H0, sAR = 0, sAV = 0;
+    let H = H0, Hc = H0, sAR = 0, sAV = 0;
     const dh = rows.map(r => n(r[2]) - n(r[3]));
     rows.forEach(r => { sAR += n(r[2]); sAV += n(r[3]); });
     const f = dh.reduce((a, b) => a + b, 0);
     const closed = rows.length && rows[0][0].trim() === rows[rows.length-1][1].trim();
     const ok = closed && isFinite(f) && Math.abs(f*1000) <= tol;
     const corr = ok ? -f / rows.length : 0;
-    let Hc = H0;
     [...tb.rows].forEach((tr, i) => {
       H += dh[i]; Hc += dh[i] + corr;
       tr.querySelector('.dh').innerHTML = sgn(dh[i], 4);
@@ -167,14 +148,8 @@
       : `<span class="chip err">hors tolérance</span> fermeture ${(f*1000).toFixed(1)} mm > ${tol} mm : chercher la faute.`;
     GEO.store.set('niv.rows', rows);
   }
-  tb.addEventListener('input', e => {
-    const tr = e.target.closest('tr'); if(!tr || e.target.dataset.k === undefined) return;
-    rows[+tr.dataset.i][+e.target.dataset.k] = e.target.value; calc();
-  });
-  tb.addEventListener('click', e => {
-    if(!e.target.classList.contains('del')) return;
-    rows.splice(+e.target.closest('tr').dataset.i, 1); render();
-  });
+  tb.addEventListener('input', e => { const tr = e.target.closest('tr'); if(!tr || e.target.dataset.k === undefined) return; rows[+tr.dataset.i][+e.target.dataset.k] = e.target.value; calc(); });
+  tb.addEventListener('click', e => { if(!e.target.classList.contains('del')) return; rows.splice(+e.target.closest('tr').dataset.i, 1); render(); });
   $('add').onclick = () => { const last = rows[rows.length-1]; rows.push([last ? last[1] : 'RP1', 'P' + (rows.length + 1), '', '']); render(); };
   $('reset').onclick = () => { rows = DEF.map(r => [...r]); $('h0').value = 452.318; render(); };
   $('h0').oninput = $('tol').oninput = calc;
