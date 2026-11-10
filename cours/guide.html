@@ -32,7 +32,7 @@ Le menu, les liens précédent / suivant, le plan de l'accueil, l'en-tête de ch
 
 ```js config.js (extrait)
 { file: 'dmav.html', num: '9', title: 'Le modèle DMAV',
-  duration: '45 min', prereq: 'chapitre 7', activity: 'exercice',
+  duration: '45 min', prereq: 'Outils et pratique', activity: 'exercice',
   info: { 'Fichiers': '.ili, .xtf' },          // cases libres de l'en-tête (facultatif)
   question: 'La question à laquelle le chapitre répond ?',
   lead: "Le chapeau : deux ou trois phrases d'introduction.",
@@ -226,9 +226,13 @@ Survoler un mot le surligne dans tous les blocs du même groupe : pratique pour 
 - Phrases courtes, un fait par phrase. Vouvoiement.
 - Nombres suisses : `2'600'000` ou `2 600 000`. Toujours préciser le cadre (MN95) et l'unité.
 - Noms INTERLIS (classes, attributs) sans accents ni espaces : `NumeroInventaire`, `Espece`.
-- Un seul fil rouge : l'inventaire des arbres de Montavaux (commune fictive), modèle `Arbres_Communaux_V1`.
+- Un seul fil rouge : Montavaux (commune fictive). Inventaire des arbres, modèle `Arbres_Communaux_V1` ; pour la mensuration officielle, les biens-fonds de la place (structure DM.01-AV-CH).
 - Données fictives clairement signalées.
-- Après une modification : ouvrir la page dans le navigateur pour vérifier, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
+- Renvoyer à un autre chapitre par son **titre**, jamais par son numéro (« voir [Contrôler les données](controler.html) ») : les numéros changent quand on ajoute un chapitre. Même règle pour `prereq` dans `config.js`. Les tests refusent « chapitre 4 ».
+- Numéros de figures : `Fig. N.x`, N = numéro du chapitre. Après un ajout ou un déplacement de chapitre, lancer `node tests/renumber-figures.mjs`.
+- Ne jamais indiquer de nombre de périodes ni d'élèves (données internes).
+- Données d'un composant (fichier ITF, XTF à télécharger…) : dans un `<script type="text/plain" id="…">`, lu par le script de la page.
+- Après une modification : ouvrir la page dans le navigateur, lancer `node tests/check.mjs` et `node tests/render.mjs`, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
 </script>
 
 </main>
