@@ -1,0 +1,692 @@
+INTERLIS 2.3;
+
+/** Minimal geodata model
+ * Minimales Geodatenmodell
+ * Modèle de géodonnées minimal
+ */
+MODEL Atteintes_sols_Ext_VD (en)
+AT "http://www.geo.admin.ch"
+VERSION "2012-02-02"  =
+  IMPORTS ErgebnisseBodenbelastung_Punktdaten_Codelisten_V1,ErgebnisseBodenbelastung_Punktdaten_LV95_V1,CatalogueObjects_V1;
+
+  TOPIC Atteintes_sols =
+
+    DOMAIN
+
+      CHCantonCode = (
+        ZH,
+        BE,
+        LU,
+        UR,
+        SZ,
+        OW,
+        NW,
+        GL,
+        ZG,
+        FR,
+        SO,
+        BS,
+        BL,
+        SH,
+        AR,
+        AI,
+        SG,
+        GR,
+        AG,
+        TG,
+        TI,
+        VD,
+        VS,
+        NE,
+        GE,
+        JU,
+        FL,
+        CH
+      );
+
+      Coord2 = COORD 2490000.000 .. 2590000.000 [INTERLIS.m], 1110000.000 .. 1210000.000 [INTERLIS.m];
+
+      LV_Acidite = (
+        Alcalin_pH_plusgrand_7_2,
+        Neutre_pH_6_8_a_7_2,
+        Faiblement_acide_pH_5_9_a_6_7,
+        Acide_pH_5_3_a_5_8,
+        Tres_acide_pH_3_9_a_5_2,
+        Extremement_acide_pH_pluspetit_3_9,
+        Non_sonde,
+        Non_determine
+      );
+
+      LV_ExcesEau = (
+        Faiblement_pseudogleyifie_pseudogleyifie,
+        Pseudogleyifie_horizon_g_avant_60cm,
+        Fortement_pseudogleyifie_horizon_gg_entre_40_et_60cm,
+        Tres_fortement_pseudogleyifie_horizon_gg_avant_40cm,
+        Horizon_g_en_dessous_de_90cm,
+        Horizon_g_entre_60_et_90cm,
+        Horizon_g_avant_60_cm,
+        Horizon_gg_entre_40_et_60cm,
+        Horizon_gg_entre_20_et_40cm,
+        Horizon_gg_avant_20cm,
+        g_avant_60cm,
+        Horizon_r_en_dessous_de_90cm,
+        Horizon_r_entre_60_et_90cm,
+        Horizon_r_entre_30_et_60cm,
+        Horizon_r_entre_10_et_30cm,
+        Horizon_r_avant_10cm,
+        r_entre_30_et_60cm,
+        r_entre_60_et_90cm,
+        Non_sonde
+      );
+
+      LV_Humus = (
+        mor_humide,
+        moder_mull,
+        mull_non_specifie,
+        Tourbe_non_specifiee,
+        anmoor_calcique,
+        anmoor,
+        hydromull_acide_pH_pluspetit_5,
+        hydromull_calcique_pH_environ_7,
+        hydromull_carbonate_pH_plusgrand_7,
+        hydromull_eutrophe_pH_6,
+        hydromull_mesotrope_pH_5_a_6,
+        hydromor,
+        moder,
+        hydromoder,
+        moder_mor,
+        mull_moder,
+        xeromoder,
+        mor,
+        mor_calcique,
+        mull_acide_pH_pluspetit_5,
+        mull_calcique_pH_environ_7,
+        mull_carbonate_pH_plusgrand_7,
+        mull_eutrophe_pH_6,
+        mull_mesotrope_pH_5_a_6,
+        tourbe_fibreuse,
+        tourbe_humifiee,
+        tourbe_semi_fibreuse
+      );
+
+      LV_LithoSondage = (
+        argile,
+        calcaire_tendre_craie_lacustre_tuf,
+        eboulis_depots_de_pente_grossiers,
+        alluvions,
+        gres_poudingue,
+        calcaire_dur_massif_ou_fragmente,
+        limon_eolien,
+        marnogres,
+        marne,
+        colluvions,
+        moraine_alpine,
+        moraine_jurassienne_a_elements_calcaires_dominants,
+        horizon_caillouteux,
+        cailloutis_greseux,
+        cailloutis_calcaire,
+        banc_de_calcaire_fragmente,
+        blocage_sur_un_cailloutis_de_moraine_locale,
+        moraine_caillouteuse,
+        schiste,
+        dolomie_cargneule,
+        cailloutis_dolomitique,
+        granite_gneiss,
+        sables_et_graviers,
+        calcaire_siliceux
+      );
+
+      LV_MatiereOrganique = (
+        A_humus_brut,
+        A_moder_a_mull_moder,
+        Pauvre_en_humus,
+        Moyennement_pourvu_en_humus,
+        Riche_en_humus_en_milieu_aere,
+        A_mull,
+        Enrichi_en_mull,
+        anmoorique,
+        Sapro_organique_tourbe_decomposee,
+        Paratourbeux,
+        Tourbeux_superficiel,
+        Tourbeux_epais,
+        Non_sonde,
+        Non_determine
+      );
+
+      LV_Pente = (
+        plat_0_a_5_pourc,
+        regulierement_incline_10_pourc,
+        convexe_10_pourc,
+        concave_10_pourc,
+        irregulier_0_a_10_pourc,
+        pente_reguliere_10_a_15_pourc,
+        convexe_15_pourc,
+        concave_15_pourc,
+        irregulier_0_a_15_pourc,
+        pente_reguliere_15_a_25_pourc,
+        convexe_25_pourc,
+        concave_25_pourc,
+        irregulier_0_a_25_pourc,
+        pente_reguliere_25_a_35_pourc,
+        convexe_35_pourc,
+        concave_35_pourc,
+        irreguliere_0_a_35_pourc,
+        pente_reguliere_35_a_50_pourc,
+        convexe_50_pourc,
+        concave_50_pourc,
+        irregulier_0_a_50_pourc,
+        pente_reguliere_50_a_75_pourc,
+        irregulier_0_a_75_pourc,
+        pente_reguliere_plusgrand_75_pourc,
+        irregulier_0_plusgrand_75_pourc
+      );
+
+      LV_Pierrosite = (
+        Non_peu_pierreux,
+        Faiblement_pierreux,
+        Graveleux,
+        Caillouteux,
+        Tres_graveleux,
+        Tres_caillouteux,
+        Riche_en_gravier,
+        Riche_en_cailloux,
+        Graviers,
+        Blocs,
+        Non_sonde,
+        Non_determine
+      );
+
+      LV_Prof = (
+        Tres_profond_plusgrand_100_cm,
+        Profond_70_a_100_cm,
+        Moyennement_profond_50_70_cm,
+        Assez_superficiel_30_50_cm,
+        Superficiel_pluspetit_30_cm,
+        Non_sonde,
+        Non_determine
+      );
+
+      LV_RegimeHydrique = (
+        Sans_exces_d_eau,
+        A_hydromorphie_faible_ou_de_profondeur,
+        Moderement_engorges_par_l_eau,
+        Humides_rarement_engorges_jusqu_en_surface,
+        Tres_humide_souvent_engorges_jusqu_en_surface,
+        Generalement_mouilles_des_la_surface,
+        Non_sonde,
+        Non_determine
+      );
+
+      LV_RocheMere = (
+        Eboulis_eboulements,
+        Colluvions,
+        Alluvions_fluviatiles,
+        Alluvions_lacustres,
+        Alluvions_marecageuses,
+        Remblai_artificiel,
+        Limon_eolien,
+        Moraine_rhodanienne_indifferenciee,
+        Moraine_rhodanienne_sableuse,
+        Moraine_rhodanienne_marneuse,
+        Moraine_rhodanienne_de_fond_compact,
+        Moraine_rhodanienne_caillouteuse,
+        Moraine_locale_de_vallee_alpine,
+        Moraine_jurasienne,
+        Moraine_mixte_caillouteuse_du_pied_du_Jura,
+        Graviers_fluvioglaciaires,
+        Depots_glaciolacustres,
+        Molasse_greseuse,
+        Molasse_alteree_sableuse,
+        Molasse_marno_greseuse,
+        Molasse_marneuse,
+        Flysch_greseux,
+        Flysch_marneux,
+        Conglomerat,
+        Calcaire_dur,
+        Calcaire_marneux,
+        Calcaire_siliceux,
+        Calcaire_jaune,
+        Argile,
+        Dolomie_cargneule,
+        Gypse,
+        Schiste,
+        Granite_gneiss,
+        Non_sonde
+      );
+
+      LV_Texture = (
+        Tourbe_fibreuse,
+        Sableux_s,
+        Sablo_silteux_su,
+        Sablo_limoneux_sl,
+        Limoneux_l,
+        Limono_argileux_la,
+        Argilo_imoneux_al,
+        Argileux_a,
+        Silto_sableux_slu,
+        Silteux_u,
+        Silto_limoneux_ul,
+        Silto_argileux_ua,
+        Limoneux_a_limono_argileux_lla,
+        Limono_sableux_a_silto_limoneux_lsul,
+        Limoneux_a_limono_sableux_lls,
+        Limoneux_a_silto_limoneux_lul,
+        Limono_argileux_a_silto_argileux_laua,
+        Tourbe_decomposee_H,
+        Limono_sableux_leger_lS,
+        Limono_sableux_ls,
+        Limono_sableux_a_limoneux_lsl,
+        Limono_sableux_leger_a_silto_limoneux_lSul,
+        Non_sonde,
+        Non_determine,
+        Tourbe_demifibreuse
+      );
+
+      LV_Type = (
+        Profil,
+        Sondage_seul,
+        Sondage_analyse
+      );
+
+      LV_TypeSol = (
+        Sol_alluvial,
+        Sol_lithique_calco_silicate,
+        Sol_humo_lithique_silicate,
+        Sol_humo_lithique_calco_silicate,
+        Fluviosol,
+        Regosol,
+        Rendzine,
+        Sol_brun_calcaire,
+        Phaeoezm,
+        Sol_brun,
+        Sol_brun_lessive,
+        Sol_brun_acide,
+        Sol_ocre_podzolique,
+        Podzol_humique,
+        Podzol_ferrugineux,
+        Pseudogley_sol_brun,
+        Pseudogley,
+        Gley_sol_brun,
+        Gley_reduit,
+        Gley_oxyde,
+        Sol_semi_tourbeux,
+        Sol_tourbeux,
+        Remblais,
+        Sol_lithique_sur_roche_carbonatee,
+        Sol_humo_lithique_sur_roche_carbonatee,
+        Non_sonde,
+        A_saisir,
+        Non_determine
+      );
+
+      LV_TypeSolSondage = (
+        Artificiel,
+        Gley_reduit,
+        Gley_reduit_calcique,
+        Gley_reduit_carbonate,
+        Gley_oxyde,
+        Gley_oxyde_calcique,
+        Gley_oxyde_calcaire,
+        Gley_reduit_tourbeux,
+        Gley_tourbeux_calcaire,
+        Gley_tourbeux_calcique,
+        Brun,
+        Brun_a_gley_faible_ou_profond,
+        Brun_a_gley_oxyde_faible,
+        Brun_calcique,
+        Brun_calcique_hydromorphe,
+        Brun_calcique_humifere,
+        Brun_calcique_faiblement_hydromorphe,
+        Brun_faiblement_pseudo_gleyifie,
+        Brun_a_gley,
+        Brun_a_gley_oxyde,
+        Brun_acide,
+        Brun_calcaire,
+        Brun_calcaire_faiblement_hydromorphe,
+        Brun_calcaire_hydromorphe,
+        Brun_calcaire_humifere,
+        Brun_a_pseudo_gley,
+        Brun_lessive,
+        Brun_lessive_faiblement_peudo_gleyifie,
+        Brun_lessive_acide,
+        Brun_lessive_a_pseudo_gley,
+        Peu_evolue_d_erosion,
+        Peu_evolue_d_erosion_calcaire,
+        Alluvial_ou_fluvisol,
+        Alluvial_a_gley_oxyde_faible_ou_profond,
+        Alluvial_a_gley_oxyde_faible_carbonate,
+        Alluvial_a_gley_oxyde,
+        Alluvial_a_gley_calcique,
+        Alluvial_a_gley_oxyde_carbonate,
+        Alluvial_carbonate,
+        Alluvial_carbonate_a_gley,
+        Pseudogley,
+        Humocalcique,
+        Humocalcaire,
+        Lessive,
+        Lessive_acide,
+        Lessive_acide_a_pseudogley,
+        Lithosol_et_sol_lithocalcique,
+        Rendzine_brunifiee,
+        Rendzine_brunifeie_humifere,
+        Rendzine_humifere_2,
+        Rendzine,
+        Rendzine_humifere,
+        Rendzine_atypique,
+        Tourbeux,
+        Tourbe_calcique,
+        Tourbe_eutrophe,
+        Colluvial,
+        Colluvial_carbonate,
+        Colluvial_a_gley_oxyde,
+        Colluvial_a_gley,
+        Colluvial_a_gley_faible,
+        Colluvial_a_gley_oxyde_faible
+      );
+
+      LV_Utilisation = (
+        Paturage_alpage,
+        Pre_bois,
+        Prairie_naturelle,
+        Prairie_marecageuse,
+        Prairie_permanente,
+        Prairie_temporaire,
+        Tourbiere,
+        Terre_ouverte,
+        Verger_intensif_arboriculture,
+        Viticulture,
+        Petits_fruits,
+        Jardin_potager,
+        Maraichage,
+        Foret_feuillus,
+        Foret_mixte,
+        Foret_resineux,
+        Foret_buissonnante,
+        Friche,
+        Parcs_et_jardins_d_ornement,
+        Terrain_artificiel,
+        Terrain_de_sport
+      );
+
+      LVT_ExcesEau = (
+        nappe_perchee_temporaire,
+        imbibition_capillaire,
+        nappe_souterraine,
+        submersion_debordement,
+        resurgences_sources,
+        ruissellements_lateraux_compacite_du_sous_sol
+      );
+
+      LVT_Hydromorphie = (
+        Sol_a_caractere_redoxique_leger_ou_a_circulation_laterale_d_eau,
+        Exces_d_eau_temporaire_visible_a_une_profondeur_inferieure_a_50cm_net_a_70_a_80cm,
+        Exces_d_eau_temporaire_visible_a_une_profondeur_inferieure_a_50cm,
+        Caractere_redoxique_de_sub_surface_et_ou_exces_d_eau_permanent_gley_gris_bleu_a_une_profondeur_inferieure_a_80cm
+      );
+
+      LVT_LithoP = (
+        argile_non_calcaire,
+        calcaire_marneux,
+        calcaire_gypseux,
+        calcaire_crayeux,
+        conglomerat_poudingue,
+        dolomie,
+        eboulis_elements_grossiers_plusgrand_60_pourc,
+        alluvions,
+        fluvio_glaciaire_elements_grossiers_plusgrand_50_a_60_pourc,
+        flysch_de_Chietres,
+        calcaire_greseux,
+        depot_glacio_lacustre_sable_ou_silt_glaciaire,
+        gres_non_calcaire,
+        gypse,
+        calcaire_dur,
+        marne,
+        molasse_conglomeratique,
+        molasse_greseuse,
+        molasse_marneuse,
+        molasse_marno_greseuse,
+        moraine_alpine_30_a_50_pourc_d_elements_grossiers,
+        moraine_alpine_sur_molasse_greseuse,
+        moraine_de_fond_compacte,
+        moraine_jurassienne_60_a_70_pourc_d_elements_grossiers,
+        moraine_locale_30_a_50_pourc_d_elements_grossiers_dont_la_moitie_est_calcaire,
+        moraine_molassique_marneuse,
+        moraine_sablo_caillouteuse_30_50_pourc_d_elements_grossiers,
+        molasse_sableuse,
+        cone_de_dejection_elements_grossiers_plusgrand_60_pourc,
+        granite_gneiss,
+        schiste_argileux,
+        marais_tourbe,
+        colluvions,
+        remblais
+      );
+
+      LVT_ProfEnracinement = (
+        Prof_pluspetit_50cm,
+        Prof_50_a_70cm,
+        Prof_70_a_100cm,
+        Prof_40_a_100cm_zones_de_profondeur_variable,
+        Prof_100_a_180cm,
+        Plusgrand_150cm_et_pente_inferieure_a_7_a_10_pourc,
+        Composite_indeterminable_20_a_250_cm
+      );
+
+      LVT_RegimeHydrique = (
+        sans_exces_d_eau,
+        exces_temporaire,
+        exces_d_eau_permanent
+      );
+
+      LVT_RocheMere = (
+        FORMATIONS_GLACIAIRES_EPAISSES(
+          Moraine_rhodanienne_caillouteuse_peu_ou_moyennement_compacte_en_general_a_elements_grossiers_melanges_calcaires_et_siliceux_EG_mixtes,
+          Sable_ou_Moraine_sableuse_peu_caillouteuse_EG_pluspetit_15_a_20_pourc,
+          Moraine_de_fond_compacte_et_peu_caillouteuse_EG_pluspetit_15_a_20_pourc,
+          Moraine_marnomolassique_plus_argileuses_peu_caillouteuse_litee_rabotage_petrissage_de_molasse_argileuse,
+          Moraine_locale_du_Chablais_a_elements_calcaires_majoritaires_40_a_50_pourc_d_EG_terre_fine_legere,
+          Fluvioglaciaire_glaciotorrentiel_ou_moraine_tres_sablocaillouteuse_de_retrait,
+          Depots_glaciolacustres_gris_beiges_et_lites_varves_de_sables_et_silts_tres_peu_caillouteuses
+        ),
+        FORMATIONS_GLACIAIRES_EN_FAIBLE_CONVERTURE(
+          Moraine_moyenne_sur_gres_molassique,
+          Moraine_sur_marne_molassique,
+          Moraine_moyenne_sur_conglomerat_molassique,
+          Moraine_moyenne_sur_calcaire_jaune_jurassien_noir_du_lias,
+          Moraine_locale_sur_Gypse,
+          Moraine_sur_Flysch
+        ),
+        ROCHES_ANCIENNES_CALCAIRES_DURE(
+          Gres_calcaire,
+          Poudingue_calcaire_du_Pelerin,
+          Calcaire_greseux_jaune_du_Jura,
+          Calcaire_fortement_gypseux_Gypse,
+          Calcaire_marneux_noir_en_plaques_Flysch_de_Chietres,
+          MarnoCalcaire_noir_feuillete_peu_calcaire_de_Chietres,
+          MarnoCalcaire_beige_a_bancs_marneux
+        ),
+        ROCHES_ANCIENNES_TENDRES(
+          Marne_limonoargileuse_beige,
+          Molasse_sablogreseuse_frise_ou_bariolee_du_Vully_rares_lentilles_marneuses_lie_de_vin,
+          Marnes_rouges_a_bancs_greseux,
+          Marnes_bariolees_lie_de_vin_beige_bleute_ocre,
+          Marnes_beiges_a_petits_bancs_greseux,
+          Molasse_complexe_de_l_Orbe_a_marnes_lie_de_vin_sables_beiges_marnocalcaires_calcaires_lacustres_et_gres_poreux_fractures_en_lentilles_metriques
+        ),
+        EBOULIS_DE_PENTE_PLUS_LOESS(
+          Eboulis_et_cones_a_elements_anguleux_EG_calcaires_40_a_60_pourc,
+          Eboulis_et_cones_a_elements_anguleux_EG_calcaires_plusgrand_60_pourc,
+          Loess_silt_eolien_poreux_non_caillouteux,
+          Cones_torrentiels_a_elements_arrondis_mixtes_terre_fine_moyenne,
+          Epandage_caillouteux_de_coulee_boueuse_recente_et_compactee_a_terre_fin_lourde
+        ),
+        ALLUVIONS_RECENTES_DE_PLAINES(
+          Alluvions_de_texture_moyenne,
+          Alluvions_de_texture_sableuse,
+          Alluvions_caillouteuses_texture_non_sableuse,
+          Alluvions_caillouteuses_texture_sableuse_sur_tout_le_profil
+        ),
+        COLLUVIONS_RECENTES_DE_BAS_DE_PENTES(
+          Colluvions_de_texture_moyenne,
+          Colluvions_de_texture_sableuse,
+          Colluvions_caillouteuses,
+          Colluvions_sur_cailloutis_EG_plusgrand_60_pourc_en_profondeur,
+          Depots_variables_ecents_de_pentes_et_combes_en_bordures_de_torrents
+        )
+      );
+
+      LVT_TypeSol = (
+        Regosol_rendosol,
+        Calcosol,
+        Calcosol_calcarique,
+        Calsisol,
+        Calsisol_rubefie,
+        Brunisol_peu_acide,
+        Luvisol_acide,
+        Unite_complexe_de_sols_differents
+      );
+
+      LVT_Variantes = (
+        Unite_complexe_recouverte_par_la_formation_90,
+        Unite_complexe_superposee_a_la_formation_20,
+        Recabonate_en_surface,
+        Zones_plus_plastiques,
+        Accumulations_de_calcaire_tendre_en_profondeur,
+        Presence_de_drain_ou_de_lits_de_cailloux_en_profondeur,
+        Remblais_ou_zones_fortement_remaniees,
+        Zones_plus_sableuses,
+        Niveaux_organiques_enfouis,
+        Zones_a_tuf,
+        Zones_plus_caillouteuses,
+        Zones_amenagees_en_terrasses
+      );
+
+    STRUCTURE Status_Ref
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) ErgebnisseBodenbelastung_Punktdaten_Codelisten_V1.CodelistenProjektstandort.Status;
+    END Status_Ref;
+
+    DOMAIN
+
+      Surface = SURFACE WITH (ARCS,STRAIGHTS) VERTEX Coord2;
+
+    STRUCTURE Untersuchungstyp_Ref
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) ErgebnisseBodenbelastung_Punktdaten_Codelisten_V1.CodelistenProjektstandort.Untersuchungstyp;
+    END Untersuchungstyp_Ref;
+
+    /** Projektdaten
+     */
+    CLASS Projekt =
+      /** Name oder Kuerzel des Projekts
+       */
+      Name : MANDATORY TEXT*25;
+      /** Kurzbeschreibung des Projektes
+       */
+      Kurzinfo : MANDATORY TEXT*60;
+      Status_Projekt : MANDATORY Atteintes_sols_Ext_VD.Atteintes_sols.Status_Ref;
+      Untersuchungstyp : BAG {1..*} OF Atteintes_sols_Ext_VD.Atteintes_sols.Untersuchungstyp_Ref;
+    END Projekt;
+
+    CLASS SolUniteCartographieVD =
+      TypeSol : MANDATORY LV_TypeSol;
+      MatiereOrganique : MANDATORY LV_MatiereOrganique;
+      DegresAcidite : MANDATORY LV_Acidite;
+      ProfDecarbonatation : MANDATORY 0 .. 1000;
+      RocheMereSup : MANDATORY LV_RocheMere;
+      RegimeHydrique : MANDATORY LV_RegimeHydrique;
+      ProfPhysiologique : MANDATORY LV_Prof;
+      Texture : MANDATORY LV_Texture;
+      Pierrosite : MANDATORY LV_Pierrosite;
+      Geometrie : MANDATORY Surface;
+    END SolUniteCartographieVD;
+
+    CLASS SolUniteViticoleVD =
+      CodeCarto : MANDATORY 1 .. 100;
+      RocheMere : MANDATORY LVT_RocheMere;
+      TypeSol : MANDATORY LVT_TypeSol;
+      ProfEnracinement : MANDATORY LVT_ProfEnracinement;
+      FicheUnite : TEXT*20;
+      Hydromorphie : MANDATORY LVT_Hydromorphie;
+      VariantesLocales : LVT_Variantes;
+      Geometrie : MANDATORY Surface;
+    END SolUniteViticoleVD;
+
+    /** Enthaelt die Standortdaten der Beobachtungsflaeche oder des untersuchten Standortes.
+     */
+    CLASS Standort =
+      /** Standortkuerzel oder Standortnummer
+       */
+      StandortID : MANDATORY TEXT*60;
+      /** Profilblatt FAL, Feld 9
+       */
+      Kanton : MANDATORY CHCantonCode;
+      /** Profilblatt FAL, Feld 8
+       */
+      Gemeinde : MANDATORY TEXT*100;
+      /** Generell:
+       * - Punktbeprobung: Standortkoordinaten (bei Profilaufnahme: Profilblatt FAL, Feld 13/14)
+       * - Mischprobe Flaeche, Linie: Zentrumskoordinate (wenn nicht anders dokumentiert)
+       * 
+       * Sonderfall DBF:
+       * - Flaechenmischprobe: Zentrumskoordinate der Flaeche (wenn nicht anders dokumentiert)
+       * - Profilkoordinaten der DBF sind in Klasse Profil abzulegen
+       */
+      Koordinaten : MANDATORY Coord2;
+    END Standort;
+
+    CLASS Sol
+    EXTENDS Standort =
+      ID : MANDATORY TEXT*20;
+      Type : MANDATORY LV_Type;
+      Date : FORMAT INTERLIS.XMLDate "1900-1-1" .. "2999-12-31";
+      Commune : TEXT*20;
+      LieuDit : TEXT*20;
+      CoordX : MANDATORY 2490000 .. 2590000;
+      CoordY : MANDATORY 1110000 .. 1210000 CIRCULAR;
+      Observateur : TEXT*20;
+      Provenance : TEXT*20;
+      Commentaires : TEXT*254;
+      ProfNappe : 0 .. 1000;
+      Pente : LV_Pente;
+      Geometrie : MANDATORY Coord2;
+    END Sol;
+
+    ASSOCIATION ProjektStandort =
+      Projekt -- {1..*} Projekt;
+      Standort -- {0..*} Standort;
+      DatumVon : FORMAT INTERLIS.XMLDate "1900-1-1" .. "2050-1-1";
+      DatumBis : FORMAT INTERLIS.XMLDate "1900-1-1" .. "2050-1-1";
+      Bemerkung : MTEXT*500;
+      interneBezeichnung : MTEXT*60;
+      Status_ProjektStandort : MANDATORY Atteintes_sols_Ext_VD.Atteintes_sols.Status_Ref;
+    END ProjektStandort;
+
+    CLASS PointCartographieVD
+    EXTENDS Sol =
+      TypeSolS : LV_TypeSolSondage;
+      TypeSolP : LV_TypeSol;
+      RocheMere : MANDATORY LV_LithoSondage;
+      TypeHumus : LV_Humus;
+      ExcesEau : LV_ExcesEau;
+      RegimeHydrique : LV_RegimeHydrique;
+      Photo : TEXT*20;
+      Utilisation : LV_Utilisation;
+      NumCarte : TEXT*20;
+    END PointCartographieVD;
+
+    CLASS PointViticoleVD
+    EXTENDS Sol =
+      TypeRocheP : LVT_LithoP;
+      ExcesEauP : LVT_ExcesEau;
+      RegimeHydriqueP : LVT_RegimeHydrique;
+      TypeRocheS : TEXT*20;
+    END PointViticoleVD;
+
+    ASSOCIATION StandortSol =
+      Sol -- {0..*} Sol;
+      Standort -<#> {1} Standort;
+    END StandortSol;
+
+  END Atteintes_sols;
+
+END Atteintes_sols_Ext_VD.

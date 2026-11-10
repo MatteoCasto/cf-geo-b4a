@@ -1,0 +1,124 @@
+INTERLIS 2.3;
+
+CONTRACTED MODEL PlanZones (fr) AT "http://www.interlis.ch/models"
+  VERSION "2005-06-16" =
+
+  IMPORTS Units, Time, PlanZones_CH;
+  
+  UNIT
+    Debit [m3s] = (Units.m3 / INTERLIS.s); !! en m3/s
+
+
+DOMAIN
+
+    Altitude = -200.000..5000.000 [INTERLIS.m];
+
+    Rotation = 0.0..399.9 [Units.Gon];
+
+    GrandeurEcriture = (
+        petite,
+        moyenne,
+        grande);
+        
+    Dates = FORMAT INTERLIS.XMLDate "2000-01-01" .. "2050-12-31";
+
+TOPIC Plan_des_zones EXTENDS PlanZones_CH.Plan_des_zones =
+
+  DOMAIN
+  
+      TypeZone_CT EXTENDS PlanZones_CH.Plan_des_zones.TypeZone = (
+        agricole (
+          agricole,
+          agricole_protegee:FINAL),
+        attente (
+          attente_1,
+          attente_2,
+          attente_3:FINAL),
+        peripherique(
+          peripherique_a,
+          peripherique_c,
+          peripherique_d,
+          peripherique_e:FINAL));
+
+      SuperficieTechniqueParcelle = 0.00..1000000.00 [Units.m2];
+
+      TypeBatiment = (
+        habitation,
+        commerce,
+        usine,
+        porcherie,
+        autre:FINAL);
+        
+      GenreParcelle_CT EXTENDS PlanZones_CH.Plan_des_zones.GenreParcelle = (
+        dp (
+          communal,
+          cantonal:FINAL));
+
+      Taux = 0.00..100.00 [Units.Percent]; 
+
+      QualiteEau = 1..10 ;
+
+      Debit = 0.00..1000.00 [m3s]; 
+
+    CLASS Zone (EXTENDED) =
+      Date_Approb_CC: MANDATORY Dates;
+    END Zone;
+
+    CLASS Parcelle (EXTENDED) =
+      Surf_technique : MANDATORY SuperficieTechniqueParcelle;
+      Genre (EXTENDED): MANDATORY GenreParcelle_CT;
+    UNIQUE No_parcelle;
+    END Parcelle;
+
+    CLASS PosNoParc =
+      Position : MANDATORY PlanZones_CH.CoordP;
+      Ori: Rotation; !! indefini = 100.0
+      HAli: HALIGNMENT; !! indefini = Center
+      VAli: VALIGNMENT; !! indefini = Half
+      Grandeur : MANDATORY GrandeurEcriture; !! indefini = moyenne
+    END PosNoParc;
+    
+    ASSOCIATION Parcelle_No =
+      Num_parcelle -<#> {1} Parcelle;
+      A_position -- {1..*} PosNoParc;
+    END Parcelle_No;
+    
+    CLASS Proprietaire (EXTENDED) =
+      Rue (EXTENDED): MANDATORY;
+      CP (EXTENDED): MANDATORY;
+      Lieu (EXTENDED): MANDATORY;
+    END Proprietaire;
+
+    ASSOCIATION AttributionParcelleProprietaire (EXTENDED) =
+      PartPropriete: Taux;
+    END AttributionParcelleProprietaire;
+    
+    CLASS Source = 
+      Geometrie: MANDATORY PlanZones_CH.CoordP;
+      DateConstruction: MANDATORY Dates;
+      AltitudeMoyenne: MANDATORY Altitude;
+      Qualite: MANDATORY QualiteEau;
+    UNIQUE Geometrie;
+    END Source;
+    
+    CLASS Mesure = 
+      DateMesure: MANDATORY Dates;
+      DebitJournalier: MANDATORY Debit;
+    END Mesure;
+    
+    ASSOCIATION MesureSource =
+      Source -<#> {1} Source;
+      Mesure -- {1..*} Mesure;
+    END MesureSource;
+    
+    CLASS Batiment =
+      Geometrie: MANDATORY SURFACE WITH (STRAIGHTS, ARCS) VERTEX PlanZones_CH.CoordP
+                   WITHOUT OVERLAPS > 0.050;
+      No_ECA: MANDATORY TEXT*12;
+      Type: MANDATORY TypeBatiment;
+    UNIQUE No_ECA;
+    END Batiment;
+
+  END Plan_des_zones;
+
+END PlanZones.

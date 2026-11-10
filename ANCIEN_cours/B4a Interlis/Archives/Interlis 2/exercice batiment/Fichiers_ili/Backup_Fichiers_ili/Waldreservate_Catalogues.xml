@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- File Waldreservate_Catalogues.xml 2013-11-19(http://models.geo.admin.ch/BAFU) -->
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://models.geo.admin.ch/BAFU/Waldreservate_V1.xsd">
+  <HEADERSECTION VERSION="2.3" SENDER="BAFU">
+    <MODELS>
+      <MODEL NAME="CatalogueObjects_V1" URI="http://models.geo.admin.ch/CHBase" VERSION="2011-05-01"/>
+      <MODEL NAME="Units" URI="http://models.interlis.ch/refhb23" VERSION=" 2012-02-20"/>
+	  <MODEL NAME="CoordSys" URI="http://models.interlis.ch/refhb23" VERSION=" 2005-06-16"/>
+	  <MODEL NAME="LocalisationCH_V1" URI="http://models.geo.admin.ch/CHBase" VERSION="2011-05-01"/>
+	  <MODEL NAME="GeometryCHLV03_V1" URI="http://models.geo.admin.ch/CHBase" VERSION="2011-08-30"/>
+      <MODEL NAME="Waldreservate_V1" URI="http://models.geo.admin.ch/BAFU" VERSION="2013-11-19"/>
+    </MODELS>
+  </HEADERSECTION>
+
+  <DATASECTION>
+
+    <Waldreservate_V1.Codelisten BID="b001">
+    	    	
+    	<Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue TID="2001">
+    		<IsUseable>true</IsUseable>
+    		<Code>MCPFE1.1</Code>
+    		<Description>
+    		  <LocalisationCH_V1.MultiLingualText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>de</Language>
+    		  		<Text>Keine aktiven Eingriffe</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>fr</Language>
+    		  		<Text>Pas d’interventions actives</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>it</Language>
+    		  		<Text>Nessun intervento attivo</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+				<LocalisationCH_V1.LocalisedText>
+    		  		<Language>en</Language>
+    		  		<Text>No active intervention</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  </LocalisationCH_V1.MultiLingualText>
+    		</Description>
+    	</Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue>
+    	<Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue TID="2002">
+    		<IsUseable>true</IsUseable>
+    		<Code>MCPFE1.2</Code>
+    		<Description>
+    		  <LocalisationCH_V1.MultiLingualText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>de</Language>
+    		  		<Text>Minimale Eingriffe</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>fr</Language>
+    		  		<Text>Interventions minimales</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>it</Language>
+    		  		<Text>Interventi minimi</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+				<LocalisationCH_V1.LocalisedText>
+    		  		<Language>en</Language>
+    		  		<Text>Minimum intervention</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  </LocalisationCH_V1.MultiLingualText>
+    		</Description>
+    	</Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue>
+    	<Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue TID="2003">
+    		<IsUseable>true</IsUseable>
+    		<Code>MCPFE1.3</Code>
+    		<Description>
+    		  <LocalisationCH_V1.MultiLingualText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>de</Language>
+    		  		<Text>Biodiversitätsförderung durch gezielte Eingriffe</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>fr</Language>
+    		  		<Text>Promotion de la biodiversité par des interventions ciblées</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  	<LocalisationCH_V1.LocalisedText>
+    		  		<Language>it</Language>
+    		  		<Text>Promozione delle biodiversità per mezzo di interventi specifici</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+				<LocalisationCH_V1.LocalisedText>
+    		  		<Language>en</Language>
+    		  		<Text>Conservation through active management</Text>
+    		  	</LocalisationCH_V1.LocalisedText>
+    		  </LocalisationCH_V1.MultiLingualText>
+    		</Description>
+    	</Waldreservate_V1.Codelisten.MCPFE_Category_Catalogue>
+		    	
+    </Waldreservate_V1.Codelisten>
+
+  </DATASECTION>
+</TRANSFER>

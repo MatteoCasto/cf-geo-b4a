@@ -1,0 +1,108 @@
+INTERLIS 2.3;
+
+/** Kataloge zu den Landwirtschaftlichen Zonengrenzen
+ */
+!!@ technicalContact=mailto:info@blw.admin.ch
+!!@ furtherInformation="http://www.blw.admin.ch/dienstleistungen/00568/01328/01329/index.html?lang=de"
+!!@ IDGeoIV=149.1
+MODEL Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2 (de)
+AT "http://models.geo.admin.ch/BLW/"
+VERSION "2014-07-01"  =
+  IMPORTS CatalogueObjects_V1,LocalisationCH_V1,CatalogueObjectTrees_V1;
+
+  TOPIC LZ_Kataloge
+  EXTENDS CatalogueObjectTrees_V1.Catalogues =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON CatalogueObjects_V1.Catalogues;
+
+    /** dynamische Liste aller LZ-Typen
+     */
+    CLASS LZ_Katalog_Typ
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+      LZ_Code : MANDATORY INTERLIS.I32OID;
+      Typ : MANDATORY LocalisationCH_V1.MultilingualText;
+      UNIQUE LZ_Code;
+    END LZ_Katalog_Typ;
+
+    STRUCTURE LZ_Katalog_TypRef
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) LZ_Katalog_Typ;
+    END LZ_Katalog_TypRef;
+
+  END LZ_Kataloge;
+
+END Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2.
+
+!!@ technicalContact=mailto:info@blw.admin.ch
+!!@ Issuer=blw
+!!@ furtherInformation="http://www.blw.admin.ch/dienstleistungen/00568/01328/01329/index.html?lang=de"
+!!@ IDGeoIV=149.1
+MODEL Landwirtschaftliche_Zonengrenzen_V1_2 (de)
+AT "http://models.geo.admin.ch/BLW/"
+VERSION "2014-07-01"  =
+  IMPORTS GeometryCHLV03_V1,Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2;
+
+  TOPIC Gueltigkeitsdauer =
+
+    /** Für dieses Jahr haben die Daten in diesem Modell Gültigkeit
+     */
+    CLASS Bezugsjahr =
+      Bezugsjahr : MANDATORY INTERLIS.GregorianYear;
+    END Bezugsjahr;
+
+  END Gueltigkeitsdauer;
+
+  TOPIC Zonengrenzen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2.LZ_Kataloge;
+
+    /** Landwirtschaftliche Zonengrenzen ...
+     */
+    CLASS LZ_Flaeche =
+      Flaeche : MANDATORY GeometryCHLV03_V1.Area;
+      /** Aktualisierungsdatum
+       */
+      ErstellungsDatum : MANDATORY INTERLIS.XMLDate;
+      Typ : MANDATORY Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2.LZ_Kataloge.LZ_Katalog_TypRef;
+    END LZ_Flaeche;
+
+  END Zonengrenzen;
+
+END Landwirtschaftliche_Zonengrenzen_V1_2.
+
+!!@ technicalContact=mailto:info@blw.admin.ch
+!!@ Issuer=blw
+!!@ furtherInformation="http://www.blw.admin.ch/dienstleistungen/00568/01328/01329/index.html?lang=de"
+!!@ IDGeoIV=149.1
+MODEL Landwirtschaftliche_Zonengrenzen_LV95_V1_2 (de)
+AT "http://models.geo.admin.ch/BLW/"
+VERSION "2014-07-01"  =
+  IMPORTS GeometryCHLV95_V1,Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2;
+
+  TOPIC Gueltigkeitsdauer =
+
+    /** Für dieses Jahr haben die Daten in diesem Modell Gültigkeit
+     */
+    CLASS Bezugsjahr =
+      Bezugsjahr : MANDATORY INTERLIS.GregorianYear;
+    END Bezugsjahr;
+
+  END Gueltigkeitsdauer;
+
+  TOPIC Zonengrenzen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2.LZ_Kataloge;
+
+    /** Landwirtschaftliche Zonengrenzen
+     */
+    CLASS LZ_Flaeche =
+      Flaeche : MANDATORY GeometryCHLV95_V1.Area;
+      /** Aktualisierungsdatum
+       */
+      ErstellungsDatum : MANDATORY INTERLIS.XMLDate;
+      Typ : MANDATORY Landwirtschaftliche_Zonengrenzen_Kataloge_V1_2.LZ_Kataloge.LZ_Katalog_TypRef;
+    END LZ_Flaeche;
+
+  END Zonengrenzen;
+
+END Landwirtschaftliche_Zonengrenzen_LV95_V1_2.

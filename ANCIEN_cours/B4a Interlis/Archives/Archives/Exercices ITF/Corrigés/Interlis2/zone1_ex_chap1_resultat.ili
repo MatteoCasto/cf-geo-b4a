@@ -1,0 +1,129 @@
+INTERLIS 2.3;
+
+MODEL PlanZones (fr) AT "http://www.interlis.ch/models"
+  VERSION "2005-06-16" =
+
+IMPORTS UNQUALIFIED INTERLIS;
+
+DOMAIN
+
+    CoordP = COORD 480000.000..840000.000,
+                    70000.000..300000.000;
+
+    Altitude = -200.000..5000.000;
+
+    Rotation = 0.0..399.9;
+
+    GrandeurEcriture = (
+        petite,
+        moyenne,
+        grande);
+
+TOPIC Plan_des_zones =
+
+  DOMAIN
+
+    SuperficieZone = 0..1000000;
+
+    TypeZone = (
+      agricole,
+      agricole_protegee,
+      attente_1,
+      attente_2,
+      attente_4,
+      interdiction_batir,
+      utilite_publique,
+      protection,
+      reserve_naturelle_protegee,
+      verdure,
+      village,
+      intermediaire,
+      peripherique_a,
+      peripherique_c,
+      peripherique_d,
+      peripherique_e,
+      ppa,
+      protegee,
+      viticole);
+
+      SuperficieTechniqueParcelle = 0.00..1000000.00;
+
+      SuperficieRFParcelle = 0..1000000;
+
+      GenreParcelle = (
+        prive,
+        dp (
+          cantonal,
+          communale));
+
+      TypeBatiment = (
+        habitation,
+        commerce,
+        usine,
+        porcherie,
+        autre);
+
+      Taux = 0.00..100.00; !! en %
+
+      QualiteEau = 1..10;
+
+      Debit = 0.00..1000.00; !! en m3/s
+
+    CLASS Zone =
+      Type: TypeZone;
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                    WITHOUT OVERLAPS > 0.050;
+      Superficie: SuperficieZone;
+      Date_Approb_CC: INTERLIS_1_DATE;
+    END Zone;
+
+    CLASS Parcelle =
+      No_parcelle : MANDATORY TEXT*12;
+      Geometrie: MANDATORY AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                    WITHOUT OVERLAPS > 0.050;
+      Surf_technique : MANDATORY SuperficieTechniqueParcelle;
+      Surf_RF : MANDATORY SuperficieRFParcelle;
+      Genre: MANDATORY GenreParcelle;
+    UNIQUE No_parcelle;
+    END Parcelle;
+
+    CLASS PosNoParc =
+      Position : MANDATORY CoordP;
+      Ori: Rotation; !! indefini = 100.0
+      HAli: HALIGNMENT; !! indefini = Center
+      VAli: VALIGNMENT; !! indefini = Half
+      Grandeur : MANDATORY GrandeurEcriture; !! indefini = moyenne
+    END PosNoParc;
+
+    CLASS Proprietaire =
+      Nom: MANDATORY TEXT*30;
+      Prenom: MANDATORY TEXT*30;
+      Rue: MANDATORY TEXT*30;
+      CP: MANDATORY 1000..9999;
+      Lieu: MANDATORY TEXT*60;
+    END Proprietaire;
+    
+    CLASS Source = 
+      Geometrie: MANDATORY CoordP;
+      DateConstruction: MANDATORY INTERLIS_1_DATE;
+      AltitudeMoyenne: MANDATORY Altitude;
+      Qualite: MANDATORY QualiteEau;
+    UNIQUE Geometrie;
+    END Source;
+    
+    CLASS Mesure = 
+      DateMesure: MANDATORY INTERLIS_1_DATE;
+      DebitJournalier: MANDATORY Debit;
+    END Mesure;
+    
+    CLASS Batiment =
+      Geometrie: MANDATORY SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                   WITHOUT OVERLAPS > 0.050;
+      No_ECA: MANDATORY TEXT*12;
+      Type: MANDATORY TypeBatiment;
+    UNIQUE No_ECA;
+    END Batiment;
+
+  END Plan_des_zones;
+
+END PlanZones.

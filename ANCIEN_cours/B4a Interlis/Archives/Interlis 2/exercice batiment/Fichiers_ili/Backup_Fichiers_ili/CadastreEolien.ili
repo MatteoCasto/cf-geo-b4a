@@ -1,0 +1,35 @@
+INTERLIS 2.3;
+
+/** Minimal geodata model
+ * Minimales Geodatenmodell
+ * Modèle de géodonnées minimal
+ */
+MODEL CadastreEolien (en)
+AT "http://www.geo.admin.ch"
+VERSION "2012-02-02"  =
+  IMPORTS Units,GeometryCHLV95_V1;
+
+  TOPIC Eolien =
+
+    DOMAIN
+
+      Code_TypePlanif = (Secteurs_d_exclusion_a_l_echelle_regionale,Zones_d_exclusion_a_l_echelle_locale);
+
+      Code_TypeSite = (Site_retenu_sous_condition,Site_integre_sous_reserve,Site_integre_a_la_planification_cantonale);
+
+      Surface = SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2;
+	  
+    CLASS EolPlanif =
+      TypePlanif : MANDATORY Code_TypePlanif;
+      Geometrie : MANDATORY Surface;
+    END EolPlanif;
+
+    CLASS EolSite =
+      Site : MANDATORY TEXT*200;
+      TypeSite : MANDATORY Code_TypeSite;
+      Geometrie : MANDATORY Surface;
+    END EolSite;
+
+  END Eolien;
+
+END CadastreEolien.

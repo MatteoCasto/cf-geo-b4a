@@ -1,0 +1,240 @@
+INTERLIS 2.3;
+
+TYPE MODEL DM_Flex_AV_CH_Geometrie_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+
+  DOMAIN
+
+    Hoehe = -200.000 .. 5000.000 [INTERLIS.m];
+
+END DM_Flex_AV_CH_Geometrie_V1_0.
+
+TYPE MODEL DM_Flex_AV_CH_Modinfo_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+
+  DOMAIN
+
+    Status = (
+      projektiert,
+      gueltig,
+      annuliert
+    );
+
+    UnterhaltsStrategie = (
+      /** z.B. Punkt wird ersetzt bei Zerstoerung
+       */
+      AktiverErhalt,
+      PassiverErhalt
+    );
+
+END DM_Flex_AV_CH_Modinfo_V1_0.
+
+TYPE MODEL DM_Flex_AV_CH_Qualitaet_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+  IMPORTS Units;
+
+  DOMAIN
+
+    Genauigkeit = 0.000 .. 7.000 [INTERLIS.m];
+
+    Schriftgroesse = (
+      durchschnittliche
+    );
+
+    Zuverlaessigkeit = (
+      ja,
+      nein
+    );
+
+    Qualitaetsstandard = (
+      AV93,
+      PV74,
+      PN,
+      PEP,
+      weitere
+    );
+
+END DM_Flex_AV_CH_Qualitaet_V1_0.
+
+TYPE MODEL DM_Flex_AV_CH_Grafik_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+  IMPORTS Units;
+
+  DOMAIN
+
+    Rotation = 0.0 .. 399.9 [Units.Gon];
+
+END DM_Flex_AV_CH_Grafik_V1_0.
+
+TYPE MODEL DM_Flex_AV_CH_Vermarkung_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+
+  DOMAIN
+
+    Versicherungsart = (
+      Stein,
+      Kunststoffzeichen,
+      Bolzen,
+      Rohr,
+      Pfahl,
+      Kreuz,
+      unversichert,
+      weitere
+    );
+
+END DM_Flex_AV_CH_Vermarkung_V1_0.
+
+MODEL DM_Flex_AV_CH_LS_V1_0 (de)
+AT "http://www.cadastre.ch/xxx"
+VERSION "2018-11-16"  =
+  IMPORTS Units,GeometryCHLV95_V1,DM_Flex_AV_CH_Modinfo_V1_0,DM_Flex_AV_CH_Vermarkung_V1_0,DM_Flex_AV_CH_Qualitaet_V1_0,DM_Flex_AV_CH_Grafik_V1_0;
+
+  TOPIC Liegenschaften =
+    OID AS INTERLIS.UUIDOID;
+
+    DOMAIN
+
+      Grundstuecksart = (
+        Liegenschaft,
+        SelbstRecht(
+          Baurecht,
+          Quellenrecht,
+          Konzessionsrecht,
+          weitere
+        ),
+        Bergwerk
+      );
+
+    CLASS GrundstueckPos =
+      Pos : MANDATORY GeometryCHLV95_V1.Coord3;
+      Ori : MANDATORY DM_Flex_AV_CH_Grafik_V1_0.Rotation;
+      HAli : HALIGNMENT;
+      VAli : VALIGNMENT;
+      Groesse : DM_Flex_AV_CH_Qualitaet_V1_0.Schriftgroesse;
+      Hilfslinie : GeometryCHLV95_V1.Line;
+    END GrundstueckPos;
+
+    CLASS LSNachfuehrung =
+      NBIdent : MANDATORY TEXT*12;
+      Identifikator : MANDATORY TEXT*12;
+      Beschreibung : MANDATORY TEXT*30;
+      Perimeter : SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS>0.050;
+      Gueltigkeit : MANDATORY DM_Flex_AV_CH_Modinfo_V1_0.Status;
+      GueltigerEintrag : MANDATORY INTERLIS.XMLDateTime;
+      GBEintrag : MANDATORY INTERLIS.XMLDateTime;
+      UNIQUE NBIdent, Identifikator;
+    END LSNachfuehrung;
+
+    CLASS Grenzpunkt =
+      Identifikator : TEXT*12;
+      Geometrie : MANDATORY GeometryCHLV95_V1.Coord2;
+      LageGen : MANDATORY DM_Flex_AV_CH_Qualitaet_V1_0.Genauigkeit;
+      LageZuv : MANDATORY DM_Flex_AV_CH_Qualitaet_V1_0.Zuverlaessigkeit;
+      Punktzeichen : MANDATORY DM_Flex_AV_CH_Vermarkung_V1_0.Versicherungsart;
+      ExaktDefiniert : MANDATORY (
+        ja,
+        nein
+      );
+      HoheitsgrenzsteinAlt : MANDATORY (
+        ja,
+        nein
+      );
+      GrenzpunktSymbolOri : DM_Flex_AV_CH_Grafik_V1_0.Rotation;
+    END Grenzpunkt;
+
+    ASSOCIATION Entstehung_Grenzpunkt =
+      Entstehung -- {1} LSNachfuehrung;
+      Mutierte_Grenzpunkt -- {0..*} Grenzpunkt;
+    END Entstehung_Grenzpunkt;
+
+    ASSOCIATION Loeschung_Grenzpunkt =
+      Loeschung -- {0..1} LSNachfuehrung;
+      Annulierte_Grenzpunkt -- {0..*} Grenzpunkt;
+    END Loeschung_Grenzpunkt;
+
+
+    CLASS Grundstueck =
+      NBIdent : MANDATORY TEXT*12;
+      Nummer : MANDATORY TEXT*12;
+      EGRIS_EGRID : TEXT*14;
+      Gueltigkeit : MANDATORY (
+        rechtskraeftig,
+        streitig
+      );
+      Vollstaendigkeit : MANDATORY (
+        Vollstaendig,
+        unvollstaendig
+      );
+      Art : MANDATORY Grundstuecksart;
+      GesamteFlaechenmass : 1 .. 999999999 [Units.m2];
+    END Grundstueck;
+
+    ASSOCIATION Entstehung_Grundstueck =
+      Entstehung -- {1} LSNachfuehrung;
+      Mutierte_Grundstueck -- {0..*} Grundstueck;
+    END Entstehung_Grundstueck;
+
+    ASSOCIATION Grundst_GrundstPos =
+      GrundstueckPos_Von -<#> {1} Grundstueck;
+      GrundstueckPosi -- {1..*} GrundstueckPos;
+    END Grundst_GrundstPos;
+
+    ASSOCIATION Loeschung_Grundstueck =
+      Loeschung -- {0..1} LSNachfuehrung;
+      Annulierte_Grundstueck -- {0..*} Grundstueck;
+    END Loeschung_Grundstueck;
+
+
+    CLASS Liegenschaft =
+      NummerTeilGrundstueck : TEXT*12;
+      Geometrie : MANDATORY SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS>0.050;
+      Flaechenmass : MANDATORY 1 .. 999999999 [Units.m2];
+      Streitig : GeometryCHLV95_V1.MultiLine;
+    END Liegenschaft;
+
+    ASSOCIATION LiegenschaftGrundstueckBez =
+      Liegenschaft_von -<#> {1} Grundstueck;
+      Liegenschaefte -- {0..*} Liegenschaft;
+      MANDATORY CONSTRAINT
+        Liegenschaft_von->Art == #Liegenschaft;
+    END LiegenschaftGrundstueckBez;
+
+
+    CLASS SelbstRecht =
+      NummerTeilGrundstueck : TEXT*12;
+      Geometrie : MANDATORY SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS>0.050;
+      Flaechenmass : MANDATORY 1 .. 999999999 [Units.m2];
+      Streitig : GeometryCHLV95_V1.MultiLine;
+    END SelbstRecht;
+
+    ASSOCIATION SelbstRechtBez =
+      SelbstRecht_von -<#> {1} Grundstueck;
+      SelbstRechte -- {0..*} SelbstRecht;
+      MANDATORY CONSTRAINT
+        SelbstRecht_von->Art == #SelbstRecht.Baurecht OR SelbstRecht_von->Art == #SelbstRecht.Quellenrecht OR SelbstRecht_von->Art == #SelbstRecht.Konzessionsrecht OR SelbstRecht_von->Art == #SelbstRecht.weitere;
+    END SelbstRechtBez;
+
+
+    CLASS Bergwerk =
+      NummerTeilGrundstueck : TEXT*12;
+      Geometrie : MANDATORY SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS>0.050;
+      Flaechenmass : MANDATORY 1 .. 999999999 [Units.m2];
+      Streitig : GeometryCHLV95_V1.MultiLine;
+    END Bergwerk;
+
+    ASSOCIATION BergwerkBez =
+      Bergwerk_von -<#> {1} Grundstueck;
+      Bergwerke -- {0..*} Bergwerk;
+      MANDATORY CONSTRAINT
+        Bergwerk_von->Art == #Bergwerk;
+    END BergwerkBez;
+
+
+  END Liegenschaften;
+
+END DM_Flex_AV_CH_LS_V1_0.

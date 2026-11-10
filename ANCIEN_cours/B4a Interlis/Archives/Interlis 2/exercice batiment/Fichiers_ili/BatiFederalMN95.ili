@@ -1,0 +1,48 @@
+INTERLIS 2.3;
+
+/** Minimal geodata model
+ * Minimales Geodatenmodell
+ * Modèle de géodonnées minimal
+ */
+MODEL BatiFederal (en)
+AT "http://www.geo.admin.ch"
+VERSION "2012-02-02"  =
+  IMPORTS GeometryCHLV95_V1,Units;
+
+  TOPIC Bati =
+
+    DOMAIN
+
+      StatutBati = (
+        En_Projet,
+        Demoli,
+        Construit
+      );
+
+    CLASS Logement =
+      Surface : 1 .. 1000000 [Units.m2];
+    END Logement;
+
+    CLASS Batiment (ABSTRACT) =
+      StatutBati : MANDATORY StatutBati;
+      Bati : MANDATORY 1 .. 1000000;
+    END Batiment;
+
+    CLASS BatimentCentroide
+    EXTENDS Batiment =
+      Geometrie : MANDATORY GeometryCHLV95_V1.Coord2;
+    END BatimentCentroide;
+
+    CLASS BatimentPolygone
+    EXTENDS Batiment =
+      Geometrie : MANDATORY GeometryCHLV95_V1.Surface;
+    END BatimentPolygone;
+
+    ASSOCIATION Assoc_Bat_Log =
+      Bati_Avec -<#> {1} Batiment;
+      Logement_De -- {0..*} Logement;
+    END Assoc_Bat_Log;
+
+  END Bati;
+
+END BatiFederal.

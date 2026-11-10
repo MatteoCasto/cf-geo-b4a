@@ -1,0 +1,86 @@
+INTERLIS 2.3;
+
+/** Minimal geodata model
+ * Minimales Geodatenmodell
+ * Modèle de géodonnées minimal
+ */
+MODEL GeoCadVD (en)
+AT "http://www.geo.admin.ch"
+VERSION "2018-05-30"  =
+  IMPORTS INTERLIS;
+
+  TOPIC CadastreGeologiqueVD =
+
+    DOMAIN
+
+      Coord3 = COORD 2480000.000 .. 2608000.000 [INTERLIS.m], 1110000.000 .. 1206000.000 [INTERLIS.m], 0.000 .. 5000.000 ,ROTATION 2 -> 1;
+
+      domBut = (
+        Geothermique,
+        Geotechnique,
+        Geomateriaux,
+        Eaux_minerales,
+        Hydrogeologique,
+        Hydrocarbure,
+        Sites_pollues,
+        Sismique,
+        Autre,
+        Non_specifie
+      );
+
+      domTYPESOND = (
+        Forage,
+        Fouille,
+        Geophysique,
+        Tariere,
+        Puits,
+        Penetrometre,
+        Autre,
+        Non_specifie
+      );
+
+    CLASS Auteur =
+      IDAuteur : MANDATORY 1 .. 1000000;
+      Nom : MANDATORY TEXT*100;
+    END Auteur;
+
+    CLASS SondageConf =
+      IDSondage : MANDATORY 1 .. 10000000;
+      CoordX : MANDATORY 2480000 .. 2600000;
+      CoordY : MANDATORY 1110000 .. 1210000;
+      CoordZ : MANDATORY 0 .. 5000;
+      DateReal : MANDATORY INTERLIS.XMLDate;
+      Geometrie : MANDATORY Coord3;
+    END SondageConf;
+
+    CLASS SondagePub =
+      IDSondage : MANDATORY 1 .. 10000000;
+      CoordX : MANDATORY 2480000 .. 2600000;
+      CoordY : MANDATORY 1110000 .. 1210000;
+      /** Altitude du forage.
+       */
+      CoordZ : MANDATORY 0 .. 5000;
+      DateReal : MANDATORY INTERLIS.XMLDate;
+      But : MANDATORY domBut;
+      TypeSond : MANDATORY domTYPESOND;
+      Profondeur : MANDATORY 0 .. 1000000 [INTERLIS.m];
+      NoAutoris : TEXT*100;
+      AngleFor : -90 .. 90;
+      AzimutFor : 0 .. 360;
+      URL : MANDATORY TEXT*100;
+      Geometrie : MANDATORY Coord3;
+    END SondagePub;
+
+    ASSOCIATION REL_SondageConfAuteur =
+      SondageConfToAuteur -- {1} Auteur;
+      AuteurToSondageConf -- {1..*} SondageConf;
+    END REL_SondageConfAuteur;
+
+    ASSOCIATION REL_SondagePubAuteur =
+      SondagePubToAuteur -- {1} Auteur;
+      AuteurToSondagePub -- {1..*} SondagePub;
+    END REL_SondagePubAuteur;
+
+  END CadastreGeologiqueVD;
+
+END GeoCadVD.

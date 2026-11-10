@@ -1,0 +1,1 @@
+java -jar C:\Users\oitdi\Documents\INTERLIS\ilivalidator-1.11.0\ilivalidator-1.11.0.jar --modeldir C:\Claudio\CF-GEO_ModuleB4\Exercice_MO_BF_PF\Fichiers_ili\Interlis2 --log C:\Claudio\CF-GEO_ModuleB4\Exercice_MO_BF_PF\Fichier_log\%~n1.log %1

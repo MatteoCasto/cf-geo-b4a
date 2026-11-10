@@ -1,0 +1,178 @@
+
+TRANSFER INTERLIS1;
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!
+!! Modele de donnees 2001 de la mensuration officielle "Confederation"
+!! (MD.01-MO-CH) decrit en INTERLIS version 1 (SN 612030).
+!! 
+!! Office federal de topographie (swisstopo)
+!! Direction federale des mensurations cadastrales (D+M)
+!! CH-3084 Wabern
+!! www.cadastre.ch et www.interlis.ch
+!!
+!! Version: 24 francaise
+!! Nom du fichier: DM.01-AV-CH_LV95_24f_ili1.ili (date: 4 juin 2004)
+!!
+!! Le present modele de donnees est valable dans le cadre de reference
+!! "Mensuration Nationale 1903+ (MN95)".
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+MODEL MD01MOCH24MN95F
+
+  DOMAIN
+
+    CoordP = COORD2    2480000.000     1070000.000
+                       2850000.000    1310000.000;
+
+    Precision = [0.0 .. 700.0]; !! en cm
+
+    Fiabilite = (
+      oui,  !! suffisante
+      non); !! insuffisante
+
+    Statut = (
+      projete,
+      valable);
+
+    Rotation = GRADS 0.0 399.9;
+
+    GrandeurEcriture = (
+      petite,
+      moyenne,
+      grande);
+
+    Materiel = (
+      borne,
+      borne_artificielle,
+      cheville,
+      tuyau, 
+      pieu, 
+      croix, 
+      non_materialise,
+      autre); !! Pas d'objet dans la categorie autre, uniquement pour extensions
+ 
+  TOPIC Biens_fonds =
+
+    DOMAIN
+
+      Genre_Immeuble = (
+        bien_fonds, 
+        DDP (
+          superficie, 
+          source,
+          concession,
+          autre), !! Pas d'objet dans la categorie autre,
+                  !! uniquement pour extensions
+        mine);
+
+    TABLE Mise_a_jourBF =
+      IdentDN: TEXT*12; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      !! Pour les mises a jour futures les dates a renseigner sont En_vigueur.
+      !! et Enregistrement_RF. Date1 et Date2 correspondent aux anciennes 
+      !! mises a jour. Dans la prochaine revision du modele de donnees Date1 et
+      !! Date 2 seront supprimes, En_vigueur sera declare obligatoire.
+      En_vigueur: OPTIONAL DATE; !! traitement technique
+      Enregistrement_RF: OPTIONAL DATE;
+      Date1: OPTIONAL DATE; !! par ex. traitement technique
+      Date2: OPTIONAL DATE; !! attribution par le canton
+                            !! par ex. introduction au registre foncier,
+                            !! reconnaissance de la MO
+      
+    IDENT IdentDN, Identification;
+    END Mise_a_jourBF;
+
+    !! Comprend tous les points limites d'un bien-fonds a l'exception des points
+    !! limites de bien-fonds qui sont aussi des points limites
+    !! territoriaux et/ou PFP1, PFP2, PFP3.
+    !! Se referer aussi aux remarques sur les points limites
+    !! territoriaux (topic Limites_commune).
+    TABLE Point_limite =
+      Origine: -> Mise_a_jourBF; !! relation 1-mc
+      Identification: OPTIONAL TEXT*12;
+      Geometrie: CoordP;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Signe: Materiel;
+      Defini_exactement: (  !! tenir compte des tolerances selon l'OTEMO
+        oui,
+        non);
+      !! Suite au declassement d'une ancienne borne speciale de limite territoriale
+      !! en un point limite uniquement (voir aussi explications chap. 3.11).
+      Anc_borne_speciale: ( !! indication de la materialisation
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_limite;
+
+    TABLE Immeuble =
+      Origine: -> Mise_a_jourBF;
+      !! Validite = valable !! relation 1-mc
+      IdentDN: TEXT*12; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12;
+      !! Identificateur du systeme electronique d'informations foncieres
+      EGRIS_EGRID: OPTIONAL TEXT*14;
+      !! Contenu de l'attribut: doit etre litigieux si le bien-fonds, le DDP
+      !! ou la Mine est litigieux;
+      Validite: (
+        en_vigueur,
+        litigieux);
+      !! incomplet si par ex. l'immeuble est situe en partie
+      !! a l'exterieur du perimetre.
+      Integralite: (
+        complet,
+        incomplet);
+      Genre: Genre_Immeuble;
+      !! Superficie_totale sera renseignee uniquement dans le cas des parties
+      !! d'immeubles. Cela signife que plusieurs objets Bien_fonds, DDP ou Mine
+      !! forment un objet Immeuble
+      Superficie_totale: OPTIONAL DIM2 1 999999999;
+    IDENT IdentDN, Numero;
+    END Immeuble;
+
+    TABLE PosImmeuble =
+      PosImmeuble_de: -> Immeuble; !! relation 1-m; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation; !! indefini = 100.0
+      HAli: OPTIONAL HALIGNMENT; !! indefini = Center
+      VAli: OPTIONAL VALIGNMENT; !! indefini = Half
+      Grandeur: OPTIONAL GrandeurEcriture; !! indefini = moyenne
+      Ligne_auxiliaire: OPTIONAL POLYLINE WITH (STRAIGHTS) VERTEX CoordP;
+      !! trait de rappel pour numero d'immeuble
+    NO IDENT
+    END PosImmeuble;
+
+    TABLE Bien_fonds =
+      Bien_fonds_de: -> Immeuble; !! Genre = bien_fonds !! relation 1-mc
+      !! Numero_ PartieNumeroImmeuble si necessaire partie d'immeuble
+      PartieNumeroImmeuble: OPTIONAL TEXT*12; 
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050
+        LINEATTR =
+          Genre_ligne: OPTIONAL (
+            !! indefini pour en vigueur et complet
+            litigieux, 
+            incomplet);
+        END;
+      Superficie: DIM2 1 999999999;
+    NO IDENT
+    END Bien_fonds;
+  END Biens_fonds.
+
+END MD01MOCH24MN95F.
+
+FORMAT FREE;  
+!! FORMAT FIX WITH LINESIZE = 107, TIDSIZE = 16; 
+
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.
+

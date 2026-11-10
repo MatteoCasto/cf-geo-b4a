@@ -1,0 +1,28 @@
+Info: ilivalidator-1.9.3-ed793181cf69052de426e98ede52d16aa6daf867
+Info: ili2c-4.7.9-20180705
+Info: iox-ili-1.20.9-0e947c9f9e3d29aa52fb8cfe9d27c95760589398
+Info: maxMemory 7436800 KB
+Info: dataFile <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichier_XTF\Bati_Logements_Federal.xtf>
+Info: pluginFolder <P:\Geodonnees\Projets\Diff_MGDM\Documents\Valides\ilivalidator-1.9.3\plugins>
+Info: ilidirs <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili>
+Info: lookup model <Units> in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili>
+Info: lookup model <CoordSys> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili>
+Info: lookup model <GeometryCHLV03_V1> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili>
+Info: lookup model <BatiFederal> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili\Units.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili\CoordSys-20151124.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili\GeometryCHLV95_V1.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili\BatiFederalMN95.ili>
+Info: validate data...
+Info: assume unknown/external objects
+Info: first validation pass...
+Error: line 5: BatiFederal.Bati.BatimentCentroide: tid 1: value Constuit is not a member of the enumeration
+Info: second validation pass...
+Info: validate multiplicity of role BatiFederal.Bati.Assoc_Bat_Log.Logement_De...
+Info: validate target of role BatiFederal.Bati.Assoc_Bat_Log.Bati_Avec...
+Info: validate multiplicity of role BatiFederal.Bati.Assoc_Bat_Log.Bati_Avec...
+Info: P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichier_XTF\Bati_Logements_Federal.xtf: BatiFederal.Bati BID=b1
+Info:      20 objects in CLASS BatiFederal.Bati.BatimentCentroide
+Info:      20 objects in CLASS BatiFederal.Bati.BatimentPolygone
+Info:      50 objects in CLASS BatiFederal.Bati.Logement
+Info: ...validation failed

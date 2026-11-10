@@ -1,0 +1,1672 @@
+TRANSFER INTERLIS1;
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!
+!! Modele de donnees 2001 de la mensuration officielle "Confederation"
+!! (MD.01-MO-CH) decrit en INTERLIS version 1 (SN 612030).
+!! 
+!! Office federal de topographie (S+T)
+!! Direction federale des mensurations cadastrales (D+M)
+!! CH-3084 Wabern
+!! www.swisstopo.ch/fr/vd et www.interlis.ch
+!!
+!! Version: 23 française
+!! Nom du fichier: dm01avch23f.ili (date: 18 decembre 2001)
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+MODEL MD01MOCH23F
+
+  DOMAIN
+
+    CoordP = COORD2    480000.000     70000.000
+                       840000.000    300000.000;
+
+    CoordA = COORD3    480000.000     70000.000     -200.000
+                       840000.000    300000.000     5000.000;
+
+    Altitude = DIM1    -200.000      5000.000;
+
+    Precision = [0.0 .. 700.0]; !! en cm
+
+    Fiabilite = (
+      oui,  !! suffisante
+      non); !! insuffisante
+
+    Statut = (
+      projete,
+      valable);
+
+    StandardQualite = (
+      MO93,
+      MP74,
+      NP,
+      autre);
+
+    Rotation = GRADS 0.0 399.9;
+
+    GrandeurEcriture = (
+      petite,
+      moyenne,
+      grande);
+ 
+    StyleEcriture = (
+      normal,
+      ecarte,
+      autre);
+
+    Materiel = (
+      borne,
+      borne_artificielle,
+      cheville,
+      tuyau, 
+      pieu, 
+      croix, 
+      non_materialise);
+
+
+
+   TOPIC Points_fixesCategorie1 =
+
+    TABLE Mise_a_jourPFP1 =
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE;
+    IDENT Identification;
+    END Mise_a_jourPFP1;
+
+    TABLE PFP1 = !! point de triangulation I-IIIe ordre
+      Origine: -> Mise_a_jourPFP1; !! relation 1-mc
+      Numero: TEXT*12; !! attribution par le S+T
+      Geometrie: CoordP;
+      GeomAlt: OPTIONAL Altitude;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      PrecAlt: OPTIONAL Precision; !! dependant de GeomAlt
+      FiabAlt: OPTIONAL Fiabilite; !! dependant de GeomAlt
+      Accessibilite: (
+        accessible,
+        inaccessible);
+    IDENT Numero; Geometrie, GeomAlt;
+    END PFP1;
+
+    TABLE PosPFP1 =
+      Objet: -> PFP1; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFP1;
+
+    TABLE SymbolePFP1 =
+      Objet: -> PFP1; !! relation 1-c
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymbolePFP1;
+
+    TABLE Mise_a_jourPFA1 =
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE;
+    IDENT Identification;
+    END Mise_a_jourPFA1;
+
+     TABLE PFA1 = !! nivellement federal
+      Origine: -> Mise_a_jourPFA1; !! relation 1-mc
+      Numero: TEXT*12; !! attribution par le S+T
+      Geometrie: CoordP;
+      GeomAlt: Altitude;
+      PrecPlan: OPTIONAL Precision;
+      FiabPlan: OPTIONAL Fiabilite;
+      PrecAlt: Precision;
+      FiabAlt: Fiabilite;
+    IDENT Numero; Geometrie;
+    END PFA1;
+
+    TABLE PosPFA1 =
+      Objet: -> PFA1; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFA1;
+
+  END Points_fixesCategorie1.
+
+
+
+   TOPIC Points_fixesCategorie2 =
+
+    TABLE Mise_a_jourPFP2 =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourPFP2;
+
+    TABLE PFP2 = !! point de triangulation IVe ordre
+      Origine: -> Mise_a_jourPFP2; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12; !! attribution par le S+T
+      Geometrie: CoordP;
+      GeomAlt: OPTIONAL Altitude;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      PrecAlt: OPTIONAL Precision; !! dependant de GeomAlt
+      FiabAlt: OPTIONAL Fiabilite; !! dependant de GeomAlt
+      Accessibilite: (
+        accessible,
+        inaccessible);
+    IDENT IdentDN, Numero; Geometrie, GeomAlt;
+    END PFP2;
+
+    TABLE PosPFP2 =
+      Objet: -> PFP2; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFP2;
+
+    TABLE SymbolePFP2 =
+      Objet: -> PFP2; !! relation 1-c
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymbolePFP2;
+
+    TABLE Mise_a_jourPFA2 =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourPFA2;
+
+     TABLE PFA2 = !! nivellement cantonal
+      Origine: -> Mise_a_jourPFA2; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12; !! attribution par le canton
+      Geometrie: CoordP;
+      GeomAlt: Altitude;
+      PrecPlan: OPTIONAL Precision;
+      FiabPlan: OPTIONAL Fiabilite;
+      PrecAlt: Precision;
+      FiabAlt: Fiabilite;
+    IDENT IdentDN, Numero; Geometrie;
+    END PFA2;
+
+    TABLE PosPFA2 =
+      Objet: -> PFA2; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFA2;
+
+  END Points_fixesCategorie2.
+
+
+
+   TOPIC Points_fixesCategorie3 =
+
+    TABLE Mise_a_jourPFP3 =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourPFP3;
+
+    TABLE PFP3 =
+      !! anciennement point de base, point intercalaire,
+      !! point de polygone, point ajustage.
+      Origine: -> Mise_a_jourPFP3; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12;  !! attribution par le canton
+      Geometrie: CoordP;
+      GeomAlt: OPTIONAL Altitude;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      PrecAlt: OPTIONAL Precision;  !! dependant de GeomAlt
+      FiabAlt: OPTIONAL Fiabilite; !! dependant de GeomAlt
+      Signe: Materiel; !! Non materialise pas permis
+      Fiche: (
+        oui,
+        non);
+    IDENT IdentDN, Numero; Geometrie;
+    END PFP3;
+
+    TABLE PosPFP3 =
+      Objet: -> PFP3; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFP3;
+
+    TABLE SymbolePFP3 =
+      Objet: -> PFP3; !! relation 1-c
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymbolePFP3;
+
+    TABLE Mise_a_jourPFA3 =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourPFA3;
+
+     TABLE PFA3 = !! nivellement communal, si PFP3 sans altitude
+      Origine: -> Mise_a_jourPFA3; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12; !! attribution par le canton
+      Geometrie: CoordP;
+      GeomAlt: Altitude;
+      PrecPlan: OPTIONAL Precision;
+      FiabPlan: OPTIONAL Fiabilite;
+      PrecAlt: Precision;
+      FiabAlt: Fiabilite;
+    IDENT IdentDN, Numero; Geometrie;
+    END PFA3;
+
+    TABLE PosPFA3 =
+      Objet: -> PFA3; !! relation 1-1; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPFA3;
+
+  END Points_fixesCategorie3.
+
+
+
+   TOPIC Couverture_du_sol =
+
+    DOMAIN
+
+      Genre_CS = (
+        batiment, !!0
+        revetement_dur (
+          route_chemin, !! 1
+          trottoir, !! 2
+          ilot, !! 3
+          chemin_de_fer, !! 4
+          place_aviation, !! 5
+          bassin, !! 6
+          autre_revetement_dur), !! 7
+        verte (
+          champ_pre_paturage, !! 8
+          culture_intensive (
+            vigne,
+            autre_culture_intensive),
+          jardin,
+          tourbiere,
+          autre_verte),
+        eau (
+          eau_stagnante,
+          cours_eau,
+          roseliere),
+        boisee (
+          foret_dense,
+          autre_boisee),
+        sans_vegetation (
+          rocher,
+          glacier_neve,
+          eboulis_sable,
+          graviere_decharge,
+          autre_sans_vegetation));
+
+    TABLE Mise_a_jourCS =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourCS;
+
+     TABLE SurfaceCSProj=
+      Origine: -> Mise_a_jourCS
+        // Validite = projete //; !! relation 1-mc
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Qualite: StandardQualite;
+      Genre: Genre_CS;
+    NO IDENT
+    END SurfaceCSProj;
+
+    TABLE NumeroBatimentProj =
+      Objet: -> SurfaceCSProj // Genre = batiment //; !! relation 1-mc
+      Numero: TEXT*12; !! attribution par le canton (resp. la commune)
+    NO IDENT
+    END NumeroBatimentProj;
+
+    TABLE PosNumeroBatimentProj =
+      Objet: -> NumeroBatimentProj; !! relation 1-mc; inscription de Numero
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNumeroBatimentProj;
+
+    TABLE NomObjetProj =
+      Objet: -> SurfaceCSProj; !! relation 1-mc
+      Nom: TEXT*30;
+    NO IDENT
+    END NomObjetProj;
+
+    TABLE PosNomObjetProj =
+      Objet: -> NomObjetProj; !! relation 1-mc; inscription de Nom
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNomObjetProj;
+
+    !! Se referer aussi aux commentaires de SymboleSurfaceCS.
+    TABLE SymboleSurfaceCSProj =
+      Objet: -> SurfaceCSProj; !! relation 1-mc
+      Pos: CoordP // Pos dans SurfaceCSProj //;
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymboleSurfaceCSProj;
+
+     TABLE SurfaceCS =
+      Origine: -> Mise_a_jourCS
+        // Validite = valable //; !! relation 1-mc
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Qualite: StandardQualite;
+      Genre: Genre_CS;
+    NO IDENT
+    END SurfaceCS;
+
+    TABLE Numero_de_batiment =
+      Objet: -> SurfaceCS // Genre = batiment //; !! relation 1-mc
+      Numero: TEXT*12;
+    NO IDENT
+    END Numero_de_batiment;
+
+    TABLE PosNumero_de_batiment =
+      Objet: -> Numero_de_batiment; !! relation 1-mc; Inscription de Numero
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNumero_de_batiment;
+
+    TABLE Nom_objet =
+      Objet: -> SurfaceCS; !! relation 1-mc
+      Nom: TEXT*30;
+    NO IDENT
+    END Nom_objet;
+
+    TABLE PosNom_objet =
+      Objet: -> Nom_objet; !! relation 1-mc; inscription de Nom
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNom_objet;
+
+    !! Sur le plan du registre foncier, les surfaces de la couverture du sol
+    !! seront remplies soit à l'aide de trames, soit avec des symboles. Ainsi,
+    !! en fonction du genre, uniquement les symboles suivants sont judicieusement
+    !! figures:
+    !! revetement_dur.bassin, vigne, tourbiere (symbole marais), eau.eau_stagnante
+    !! (symbole bassin), eau.cours_eau (symbole direction du courant),
+    !! eau.roseliere (symbole roseliere).
+    TABLE SymboleSurfaceCS =
+      Objet: -> SurfaceCS; !! relation 1-mc
+      Pos: CoordP // Pos dans SurfaceCS //;
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymboleSurfaceCS;
+
+     TABLE Point_particulier =
+      Origine: OPTIONAL -> Mise_a_jourCS; !! relation c-mc
+      Identification: OPTIONAL TEXT*12;
+      Geometrie: CoordP 
+      // pas de PFP1, PFP2, PFP3, Point_limite ou Point_limite_territorial //;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Defini_exactement: (  !! tenir compte des tolerances selon OTEMO
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_particulier;
+
+    TABLE PosPoint_particulier =
+      Objet: -> Point_particulier; !! relation 1-c; inscription de Identification
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_particulier;
+
+  END Couverture_du_sol.
+
+
+
+   TOPIC Objets_divers =
+
+    DOMAIN
+
+      Genre_OD = (
+        mur,
+        batiment_souterrain,
+        autre_corps_de_batiment,
+        eau_canalisee_souterraine,
+        escalier_important,
+        tunnel_passage_inferieur_galerie,
+        pont_passerelle,
+        fontaine,
+        reservoir,
+        pilier,
+        couvert_independant,
+        silo_tour_gazometre,
+        cheminee,
+        monument,
+        mat_antenne,
+        tour_panoramique,
+        ouvrage_de_protection_des_rives,
+        seuil,
+        paravalanche,
+        socle_massif,
+        ruine_objet_archeologique,
+        debarcadere,
+        bloc_erratique,
+        cordon_boise,
+        ru,
+        sentier,
+        ligne_aerienne_a_haute_tension,
+        conduite_forcee,
+        voie_ferree,
+        telepherique,
+        telecabine_telesiege,
+        telepherique_de_chantier,
+        skilift,
+        bac,
+        grotte_entree_de_caverne,
+        axe,
+        arbre_isole_important,
+        statue_crucifix,
+        source,
+        point_de_reference,
+        autre);
+
+
+     TABLE Mise_a_jourOD =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourOD;
+
+    TABLE Objet_divers =
+      Origine: -> Mise_a_jourOD; !! relation 1-mc
+      Qualite: StandardQualite;
+      Genre: Genre_OD;
+    NO IDENT
+    END Objet_divers;
+
+    TABLE Element_surfacique =
+      Objet: -> Objet_divers; !! relation 1-mc
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+    NO IDENT
+    END Element_surfacique;
+
+    TABLE SymboleElement_surfacique =  !! par ex. direction du courant pour un ru
+      Objet: -> Element_surfacique; !! relation 1-mc
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymboleElement_surfacique;
+
+    TABLE Element_lineaire =
+      Objet: -> Objet_divers; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP;
+    NO IDENT
+    END Element_lineaire;
+ 
+    TABLE SymboleElement_lineaire = !! par ex. bac
+      Objet: -> Element_lineaire; !! relation 1-mc
+      Pos: CoordP;
+      Ori: Rotation;
+    NO IDENT
+    END SymboleElement_lineaire;
+
+    TABLE Element_ponctuel =
+      Objet: -> Objet_divers; !! relation 1-mc
+      Geometrie: CoordP;
+      Ori: Rotation;
+    NO IDENT
+    END Element_ponctuel;
+
+     TABLE Nom_Objet =
+      Objet: -> Objet_divers; !! relation 1-mc
+      Nom: TEXT*30;
+    NO IDENT
+    END Nom_Objet;
+
+    TABLE PosNom_Objet =
+      Objet: -> Nom_Objet; !! relation 1-mc; inscription de Nom
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNom_Objet;
+
+    TABLE Numero_Objet =
+      Objet: -> Objet_divers; !! relation 1-mc
+      Numero: TEXT*12;
+    NO IDENT
+    END Numero_Objet;
+
+    TABLE PosNumero_Objet =
+      Objet: -> Numero_Objet; !! relation 1-mc; inscription de Numero
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNumero_Objet;
+
+    TABLE Point_particulier =
+      Origine: OPTIONAL -> Mise_a_jourOD; !! relation c-mc
+      Identification: OPTIONAL TEXT*12;
+      Geometrie: CoordP
+      // pas de PFP1, PFP2, PFP3, Point_limite ou Point_limite_territorial //;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Defini_exactement: (  !! tenir compte des tolerances selon OTEMO
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_particulier;
+
+    TABLE PosPoint_particulier =
+      Objet: -> Point_particulier; !! relation 1-c; inscription de Identification
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_particulier;
+
+  END Objets_divers.
+
+
+
+   TOPIC Altimetrie =
+
+    TABLE Mise_a_jourAL =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Validite: Statut;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourAL;
+
+    TABLE Point_cote = !! valable ou projete
+      Origine: -> Mise_a_jourAL; !! relation 1-mc
+      Geometrie: CoordA;
+      Qualite: StandardQualite;
+      IDENT Geometrie;
+    END Point_cote;
+
+    TABLE PosPoint_cote = 
+      Objet: -> Point_cote; !! relation 1-c; inscription de Geometrie
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_cote;
+
+    TABLE Arete =
+      Origine: -> Mise_a_jourAL; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS) VERTEX CoordA; !! sans ARCS !
+      Qualite: StandardQualite;
+      Genre: (
+        ligne_de_rupture,
+        ligne_de_structure,
+        autre);
+    NO IDENT
+    END Arete;
+
+    TABLE Surface_vide =
+      Origine: -> Mise_a_jourAL;  !! relation 1-mc
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP;
+      Qualite: StandardQualite;
+      Genre: (
+        surface_morte, 
+        autre);
+    NO IDENT
+    END Surface_vide;
+
+  END Altimetrie.
+
+
+
+   TOPIC Nomenclature =
+
+    TABLE Mise_a_jourNO =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourNO;
+
+    TABLE Nom_local =
+      Origine: -> Mise_a_jourNO; !! relation 1-mc
+      Nom: TEXT*40;
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+    NO IDENT
+    END Nom_local;
+
+    TABLE PosNom_local =
+      Objet: -> Nom_local; !! relation 1-mc; inscription de Nom
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+      Style: OPTIONAL StyleEcriture // indefini = normal //;
+    NO IDENT
+    END PosNom_local;
+
+    TABLE Nom_de_lieu =
+      Origine: -> Mise_a_jourNO; !! relation 1-mc
+      Nom: TEXT*40;
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Type: OPTIONAL TEXT*30; !! attribution par le canton
+    NO IDENT
+    END Nom_de_lieu;
+
+    TABLE PosNom_de_lieu =
+      Objet: -> Nom_de_lieu; !! relation 1-mc; inscription de Nom
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+      Style: OPTIONAL StyleEcriture // indefini = normal //;
+    NO IDENT
+    END PosNom_de_lieu;
+
+    TABLE Lieudit =
+      Origine: -> Mise_a_jourNO; !! relation 1-mc
+      Nom: TEXT*40;
+    NO IDENT
+    END Lieudit;
+
+     TABLE PosLieudit =
+      Objet: -> Lieudit;  !! relation 1-m; inscription de Nom
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+      Style: OPTIONAL StyleEcriture // indefini = normal //;
+    NO IDENT
+    END PosLieudit;
+
+  END Nomenclature.
+
+
+
+   TOPIC Biens_fonds =
+
+    DOMAIN
+
+      Genre_Immeuble = (
+        bien_fonds, 
+        DDP (
+          superficie, 
+          source,
+          autre),
+        mine);
+
+    TABLE Mise_a_jourBF =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      Date1: DATE;          !! par ex. traitement technique
+      Date2: OPTIONAL DATE; !! attribution par le canton
+                            !! par ex. introduction au registre foncier,
+                            !!         reconnaissance de la MO
+      Date3: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourBF;
+
+    !! Comprend tous les points limites d'un bien-fonds a l'exception des points
+    !! d'appui d'une limite de bien-fonds qui sont aussi des points limites
+    !! territoriaux. Se referer aussi aux remarques sur les points limites
+    !! territoriaux (topic Limites_commune).
+    TABLE Point_limite =
+      Origine: -> Mise_a_jourBF; !! relation 1-mc
+      Identification: OPTIONAL TEXT*12;
+      Geometrie: CoordP;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Signe: Materiel;
+      Defini_exactement: (  !! tenir compte des tolerances selon OTEMO
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_limite;
+
+    TABLE PosPoint_limite =
+      Objet: -> Point_limite; !! relation 1-c; inscription de Identification
+      Pos: CoordP; 
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_limite;
+
+    TABLE SymbolePoint_limite =
+      Objet: -> Point_limite; !! relation 1-c
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymbolePoint_limite;
+
+     TABLE ImmeubleProj =
+      Origine: -> Mise_a_jourBF
+        // Validite = projete //; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12;
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement PFP1, PFP2, PFP3, Point_limite ou
+           Point_limite_territorial //
+        WITHOUT OVERLAPS > 0.050
+      LINEATTR =
+        Genre_ligne: OPTIONAL (
+          !! indefini pour complet
+          litigieux,
+          incomplet);
+      END;
+      Genre: Genre_Immeuble;
+    IDENT Origine, IdentDN, Numero;
+    END ImmeubleProj;
+
+    TABLE PosImmeubleProj =
+      Objet: -> ImmeubleProj; !! relation 1-m; inscription Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+      Ligne_auxiliaire: OPTIONAL POLYLINE WITH (STRAIGHTS) VERTEX CoordP;
+      !! trait de rappel pour numero d'immeuble
+    NO IDENT
+    END PosImmeubleProj;
+
+    TABLE Immeuble =
+      Origine: -> Mise_a_jourBF
+        // Validite = valable //; !! relation 1-mc
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12;
+      Validite: (
+        en_vigueur, !! et complet
+        litigieux,
+        incomplet);
+        !! Contenu de l'attribut: doit etre litigieux si le bien-fonds ou le DDP
+        !! sont litigieux; incomplet si par ex. l'immeuble est situe en partie
+        !! a l'exterieur du perimetre.
+      Genre: Genre_Immeuble;
+    IDENT IdentDN, Numero;
+    END Immeuble;
+
+    TABLE PosImmeuble =
+      Objet: -> Immeuble; !! relation 1-m; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+      Ligne_auxiliaire: OPTIONAL POLYLINE WITH (STRAIGHTS) VERTEX CoordP;
+      !! trait de rappel pour numero d'immeuble
+    NO IDENT
+    END PosImmeuble;
+
+     TABLE Bien_fonds =
+      Objet: -> Immeuble // Genre = bien_fonds //; !! relation 1-c
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement PFP1, PFP2, PFP3, Point_limite ou
+           Point_limite_territorial //
+        WITHOUT OVERLAPS > 0.050
+        LINEATTR =
+          Genre_ligne: OPTIONAL (
+            !! indefini pour en vigueur et complet
+            litigieux, 
+            incomplet);
+        END;
+      Superficie: DIM2 1 999999999;
+    NO IDENT
+    END Bien_fonds;
+
+    !! Si un DDP n'a pas de surface, alors il n'existe aussi pas d'objet.
+    !! Une inscription avec une localisation dans PosImmeuble est tout de meme
+    !! possible.
+    TABLE DDP =
+      Objet: -> Immeuble // Genre = DDP //; !! relation 1-c
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement PFP1, PFP2, PFP3, Point_limite ou
+           Point_limite_territorial //
+        WITHOUT OVERLAPS > 0.050 
+        LINEATTR =
+          Genre_ligne: OPTIONAL (
+            !! indefini pour en vigueur et complet
+            litigieux, 
+            incomplet);
+        END;
+      Superficie: DIM2 1 999999999;
+    NO IDENT
+    END DDP;
+
+    !! Si une mine n'a pas de surface, alors il n'existe aussi pas d'objet.
+    !! Une inscription avec une localisation dans PosImmeuble est tout de meme
+    !! possible.
+    TABLE Mine =
+      Objet: -> Immeuble // Genre = mine //; !! relation 1-c
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement PFP1, PFP2, PFP3, Point_limite ou
+           Point_limite_territorial //
+        WITHOUT OVERLAPS > 0.050
+        LINEATTR =
+          Genre_ligne: OPTIONAL (
+            !! indefini pour en vigueur et complet
+            litigieux, 
+            incomplet);
+        END;
+      Superficie: DIM2 1 999999999;
+    NO IDENT
+    END Mine;
+
+  END Biens_fonds.
+
+
+
+   TOPIC Conduites =
+    !! selon loi federale sur les installations de transport par conduites
+
+    DOMAIN
+
+      Matiere = (
+        petrole,
+        gaz,
+        autre);
+
+    TABLE Mise_a_jourCO =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourCO;
+
+    TABLE Element_conduite =
+      Origine: -> Mise_a_jourCO; !! relation 1-mc
+      Exploitant: TEXT*30;
+      Qualite: StandardQualite;
+      Genre: Matiere;
+    NO IDENT
+    END Element_conduite;
+
+    TABLE PosElement_conduite =
+      Objet: -> Element_conduite;  !! relation 1-mc; inscription de Exploitant
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: HALIGNMENT;
+      VAli: VALIGNMENT;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosElement_conduite;
+
+    TABLE Element_surfacique =
+      Objet: -> Element_conduite; !! relation 1-mc
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050
+        LINEATTR =
+          Genre_ligne: OPTIONAL (
+            visible);
+        !! L'attribut Genre_ligne doit etre principalement reference comme
+        !! indefini a l'exception de la valeur visible.
+        END;
+    NO IDENT
+    END Element_surfacique;
+
+    TABLE Element_lineaire =
+      Objet:  -> Element_conduite; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP;
+      Genre_ligne: OPTIONAL (
+        visible);
+      !! L'attribut Genre_ligne doit etre principalement reference comme indefini
+      !! a l'exception de la valeur visible.
+    NO IDENT
+    END Element_lineaire;
+     TABLE Element_ponctuel =
+      Objet: -> Element_conduite; !! relation 1-mc
+      Geometrie: CoordP;
+      GeomAlt: OPTIONAL Altitude;
+      Ori: Rotation;
+    NO IDENT
+    END Element_ponctuel;
+
+    TABLE Signal = 
+      Origine: -> Mise_a_jourCO; !! relation 1-mc
+      Numero: TEXT*12;
+      Exploitant: TEXT*30;
+      Geometrie: CoordP;
+      Qualite: StandardQualite;
+      Genre: Matiere;
+      Genre_point: (
+        balise,
+        plaquette_borne,
+        autre);
+    NO IDENT
+    END Signal;
+
+    TABLE PosSignal =
+      Objet: -> Signal; !! relation 1-c; inscription de Numero
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosSignal;
+
+    TABLE Point_particulier =
+      Origine: OPTIONAL -> Mise_a_jourCO; !! relation c-mc
+      Identification: OPTIONAL TEXT*12;
+      Geometrie: CoordP 
+        // pas de PFP1, PFP2, PFP3, Point_limite ou Point_limite_territorial //;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Defini_exactement: (  !! tenir compte des tolerances selon OTEMO
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_particulier;
+
+    TABLE PosPoint_particulier =
+      Objet: -> Point_particulier; !! relation 1-c; inscription de Identification
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_particulier;
+
+  END Conduites.
+
+
+
+   TOPIC Domaines_numerotation =
+
+    DOMAIN
+      Abreviation_cantonale = ( !! ordre de l'OFS, completee avec FL et CH
+        ZH, BE, LU, UR, SZ, OW, NW, GL, ZG, FR, SO, BS, BL, SH,
+        AR, AI, SG, GR, AG, TG, TI, VD, VS, NE, GE, JU, FL, CH);
+
+    !! La cle utilisateur definie ici et les surfaces associees peuvent correpondre
+    !! a une commune, a une partie ou a une aggregation de plusieurs communes et
+    !! encore event. au canton et/ou a la Suisse (resp. au FL) dans leur ensemble 
+    !! (se referer au document explications).
+    TABLE Domaine_numerotation =
+      Ct: Abreviation_cantonale; !! univoque pour la Suisse (inclus le FL)
+      NumeroDN: TEXT*6;
+      DossierTech: TEXT*12;
+      Date: OPTIONAL DATE;
+    IDENT Ct, NumeroDN; !! constitue la cle utilisateur IdentDN
+    END Domaine_numerotation;
+
+    !! Dans un meme domaine de numerotation, la geometrie doit etre sans
+    !! superposition (c.-a-d. comme AREA).
+    TABLE GeometrieDN =
+      Objet: -> Domaine_numerotation; !! relation 1-m
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+    NO IDENT
+    END GeometrieDN;
+
+    TABLE PosDomaine_numerotation =
+      Objet: -> Domaine_numerotation; !! relation 1-mc; inscription de NumeroDN
+      Pos: CoordP // position dans GeometrieDN //;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosDomaine_numerotation;
+
+  END Domaines_numerotation.
+
+
+
+   TOPIC Limites_commune =
+
+    TABLE Mise_a_jourCOM =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Validite: Statut;
+      Date1: DATE; !! par ex. date de mise en service
+      Date2: OPTIONAL DATE; !! attribution par le canton
+      Date3: OPTIONAL DATE; !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourCOM;
+
+    !! Contient tous les points d'appui qui definissent une limite territoriale
+    !! (commune, canton, etc.) avec les regles complementaires suivantes:
+    !! - PFP1, PFP2 et PFP3 qui se situent sur une limite territoriale sont aussi
+    !!   contenus ici; lors de la reprise du topic Points_fixes, les attributs
+    !!   restent inchanges;
+    !! - Bornes limites territoriales materialisees de maniere speciale
+    !!   ("jolie" borne): l'attribut Borne_territoriale = oui;
+    !! - Points limites (topic biens_fonds) ne s'y trouvent pas.
+    TABLE Point_limite_territorial =
+      Origine: -> Mise_a_jourCOM; !! relation 1-mc
+      Identification: OPTIONAL TEXT*12; !! Num_Point_limite_territorial
+      Geometrie: CoordP;
+      PrecPlan: Precision;
+      FiabPlan: Fiabilite;
+      Signe: Materiel;
+      Borne_territoriale: ( !! indication de la materialisation
+        oui,
+        non);
+    IDENT Geometrie;
+    END Point_limite_territorial;
+
+    TABLE PosPoint_limite_territorial =
+      Objet: -> Point_limite_territorial; !! relation 1-c; inscription de
+                                          !! Identification
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Left //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Bottom //;
+    NO IDENT
+    END PosPoint_limite_territorial;
+
+    TABLE SymbolePoint_limite_territorial =
+      Objet: -> Point_limite_territorial; !! relation 1-c
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+    NO IDENT
+    END SymbolePoint_limite_territorial;
+
+    TABLE Commune =
+      Nom: TEXT*30;
+      NoOFS: [1 .. 9999];
+    IDENT NoOFS;
+    END Commune;
+
+     TABLE Limite_communeProj =
+      Origine: -> Mise_a_jourCOM
+        // Validite = projete //; !! relation 1-mc
+      Objet: -> Commune; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement Point_limite ou Point_limite_territorial //
+        WITHOUT OVERLAPS > 0.050;
+    NO IDENT
+    END Limite_communeProj;
+
+    TABLE Limite_commune = !! pour rendre possible des exclaves
+      Origine: -> Mise_a_jourCOM
+        // Validite = valable //; !! relation 1-mc
+      Objet: -> Commune; !! relation 1-m
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement PFP1, PFP2, PFP3, Point_limite ou
+           Point_limite_territorial si Genre_ligne = en_vigueur ou litigieux //
+        WITHOUT OVERLAPS > 0.050
+        LINEATTR =
+          Genre_ligne: (
+            en_vigueur, !! limite exacte de la mensuration officielle
+            litigieux, !! limite litigieuse
+            provisoire, !! limite definitive mais qualitativement insuffisante
+            indefini);  !! par ex. jonction inconnue dans un lac
+        END;
+    NO IDENT
+    END Limite_commune;
+
+  END Limites_commune.
+
+
+
+   TOPIC Limites_district =
+
+    TABLE Partie_limite_district =
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement Point_limite ou Point_limite_territorial //;
+      Validite: (
+        en_vigueur, !! limite exacte de la mensuration officielle
+        litigieux,  !! limite litigieuse
+        provisoire, !! limite definitive mais qualitativement insuffisante
+        indefini);  !! par ex. jonction inconnue dans un lac
+    NO IDENT
+    END Partie_limite_district;
+
+  END Limites_district.
+
+
+
+   TOPIC Limites_canton =  
+
+    TABLE Partie_limite_canton =
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement Point_limite ou Point_limite_territorial //;
+      Validite: (
+        en_vigueur, !! limite exacte de la mensuration officielle
+        litigieux,  !! limite litigieuse
+        provisoire, !! limite definitive mais qualitativement insuffisante
+        indefini);  !! par ex. jonction inconnue dans un lac
+    NO IDENT
+    END Partie_limite_canton;
+
+  END Limites_canton.
+
+
+
+   TOPIC Limites_nationales =  
+
+    TABLE Partie_limite_nationale =
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP BASE
+        // Geometrie uniquement Point_limite ou Point_limite_territorial //;
+      Validite: (
+        en_vigueur, !! limite exacte de la mensuration officielle
+        litigieux,  !! limite litigieuse
+        provisoire, !! limite definitive mais qualitativement insuffisante
+        indefini);  !! par ex. jonction inconnue dans un lac
+    NO IDENT
+    END Partie_limite_nationale;
+
+  END Limites_nationales.
+
+
+
+   TOPIC Repartitions_plans =
+
+    TABLE Plan =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Numero: TEXT*12;
+      DossierTech: TEXT*12;
+      Date: OPTIONAL DATE;
+    IDENT IdentDN, Numero;
+    END Plan;
+
+    TABLE Geometrie_plan =
+      Objekt: -> Plan;  !! relation 1-m
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+    NO IDENT
+    END Geometrie_plan;
+
+    TABLE Posplan =
+      Objet: -> Plan; !! relation 1-mc; inscription de Numero
+      Pos: CoordP // Pos dans Geometrie_plan //;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END Posplan;
+
+  END Repartitions_plans.
+
+
+
+   TOPIC RepartitionNT =
+
+    TABLE Niveau_tolerance =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date: OPTIONAL DATE;
+      Genre: (
+        NT1,
+        NT2,
+        NT3,
+        NT4,
+        NT5);
+    IDENT IdentDN, Identification;
+    END Niveau_tolerance;
+
+    TABLE PosNiveau_tolerance =
+      Objet: -> Niveau_tolerance; !! relation 1-mc; inscription de Genre
+      Pos: CoordP // Pos dans Niveau_tolerance //;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNiveau_tolerance;
+
+  END RepartitionNT.
+
+
+
+   TOPIC Zones_glissement =
+
+    TABLE Glissement =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12; !! par ex. numero du dossier technique
+      Nom: OPTIONAL TEXT*30;   !! Nom particulier
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.200;
+      Date: OPTIONAL DATE;
+    IDENT IdentDN, Identification;
+    END Glissement;
+
+    TABLE PosGlissement =
+      Objet: -> Glissement; !! relation 1-mc; inscription de Nom
+      Pos: CoordP // Pos dans Glissement //;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosGlissement;
+
+  END Zones_glissement.
+
+
+
+   TOPIC Adresses_batiment =  !! se referer a SN 612040; 
+
+    DOMAIN
+
+      Code_langue = (
+        de,  !! deutsch
+        fr,  !! francais
+        it,  !! italiano
+        rm,  !! rhaeto rumantsch
+        en,  !! english
+        autre); 
+
+      NPA6Domain = [100000 .. 999999];
+
+
+    TABLE Mise_a_jourBAT =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*12;  !! par ex. numero du dossier technique
+      Description: TEXT*30;
+      Perimetre: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.500;
+      Validite: Statut;
+      Date1: DATE;  !! par ex. date de mise en service
+      Date2: OPTIONAL DATE;  !! attribution par le canton
+    IDENT IdentDN, Identification;
+    END Mise_a_jourBAT;
+
+    !! Lieu est un terme générique regroupant Localite et Secteur_urbain.
+    !! Les limites de Lieu sont independantes de limite_commune.
+    !! La gestion de Lieu, Localite et Secteur_urbain est independant
+    !! de la couche d'information Nomenclature.
+    TABLE Lieu =
+      NPA6: NPA6Domain;
+      Origine: -> Mise_a_jourBAT;  !! relation 1-mc
+    IDENT NPA6;
+    END Lieu;
+
+    TABLE Localite =
+      Objet: -> Lieu;  !! relation par heritage
+      !! Nom(s) se referer a Des_nom_lieu ->Lieu
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.500;
+    IDENT Objet;
+    END Localite;
+
+    TABLE Secteur_urbain =
+      Objet: -> Lieu; !! relation 1-mc; heritage
+      Partie_de: -> Localite; !! relation 1-mc; aggregation
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.500;
+    IDENT Objet;
+    END Secteur_urbain;
+
+     TABLE Des_nom_lieu = 
+      Objet: -> Lieu; !! relation 1-mc; attribut par composition
+      Langue: Code_langue;
+      Nom: TEXT*40;
+      Nom_court: OPTIONAL TEXT*18;  !! si indefini, admettre les 18 premiers
+      !! caracteres de Nom
+      Nom_indice: OPTIONAL TEXT*16;  !! si indefini, admettre les 16 premiers
+      !! caracteres de Nom_court
+    NO IDENT
+    END Des_nom_lieu;
+  
+    !! Designation_rue est un terme generique (abstrait) regroupant
+    !! region_denommee, rue, place et quelque_part.
+    TABLE Designation_rue =  !! repertoire des rues
+      Dans: -> Lieu;  !! relation 1-mc
+      !! Nom(s) se referer a Nom_designation_rue->Designation_rue
+      Numero: OPTIONAL TEXT*12;  !! MO93: supplementaire par rapport a SN
+      Nom_adr: OPTIONAL TEXT*24;  !! deduit de Nom_designation_rue
+      !! Nom_adr est fonction de Nom(s)
+      Principe_numerotation: (
+        aucun,
+        quelconque,
+        ascendant,
+        impair_a_gauche,
+        pair_a_gauche);
+      Genre: (
+        region_denommee,
+        rue,
+        place,
+        quelque_part);
+      Geometrie_reg_den: OPTIONAL SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.500;  !! Geometrie si region_denommee
+    NO IDENT  
+    !! Si Nom_adr est defini, alors Dans et Nom_adr ensemble doit etre univoque.
+    !! Si Numero est defini, alors Dans et Numero ensemble doit etre univoque.
+    END Designation_rue;
+    
+    TABLE Nom_designation_rue =
+      Objet: -> Designation_rue; !! relation 1-mc; attribut par composition
+      Langue: Code_langue;
+      Nom: TEXT*60;
+      Nom_court: OPTIONAL TEXT*24;  
+      !! si indefini, admettre les 24 premiers caracteres de Nom
+      Nom_indice: OPTIONAL TEXT*16;  
+      !! si indefini, admettre les 16 premiers caracteres de Nom_court
+    NO IDENT
+    END Nom_designation_rue;
+
+    TABLE PosNom_designation_rue =  !! MO93: supplementaire par rapport a SN
+      Objet: -> Nom_designation_rue;  !! relation 1-mc; inscription de Nom
+      Indice_deb: OPTIONAL [1 .. 60] // indefini = 1 //;
+      Indice_fin: OPTIONAL [1 .. 60] // indefini = dernier caractere //; 
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNom_designation_rue;
+
+     TABLE Parcours_rue = !! SN: sens du parcours; attribut par composition
+      Objet: -> Designation_rue 
+        // Genre = rue ou place //;  !! relation 1-m
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP;  !! orientee
+      Ordre: [1 .. 99999999];  !! sequence pour Parcours_rue
+    IDENT Objet, Ordre;
+    END Parcours_rue;
+
+    TABLE Troncon_rue =
+      Rue: -> Designation_rue
+        // Genre = Rue //; !! relation 1-m; aggregation
+      Dans: -> Lieu
+        // Dans pas simultanement Rue.Dans //;  !! Le troncon de rue ne se trouve
+        !! pas au meme endroit que la rue elle-meme
+      Description: TEXT*50;  !! par ex. indication de la serie de numeros
+    NO IDENT
+    END Troncon_rue;
+
+    TABLE Axe_rue = !! MO93: supplementaire par rapport a SN
+      Objet: -> Designation_rue
+        // Genre = Rue //; !! relation 1-mc; aggregation
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP;
+    NO IDENT
+    END Axe_rue;
+
+    !! Entree_batiment
+    TABLE Entree_batiment =
+      Objet1: -> Mise_a_jourBAT; !! relation 1-mc
+      Objet2: -> Designation_rue; !! relation 1-mc; aggregation
+      Objet3: OPTIONAL -> Troncon_rue; !! relation c-mc
+      Situation: CoordP 
+        // Situation dans SurfaceCS et Genre = batiment //;
+        !! Condition de consistance avec le topic Couverture_du_sol
+      Designation_officielle: OPTIONAL (
+        oui,
+        non);
+      Numero_batiment: OPTIONAL TEXT*12; !! par ex. numero de police
+      Description: OPTIONAL TEXT*100;
+    NO IDENT
+    !! Si Numero_batiment est defini, alors dans Designation_rue:
+    !! - Nom_adr et Numero_batiment ensemble doit etre univoque;
+    !! - Genre ne doit pas avoir la valeur quelque_part;
+    !! - Principe_numerotation ne doit pas avoir la valeur aucun.
+    END Entree_batiment;
+
+    TABLE PosEntree_batiment = !! MO93: supplementaire par rapport a SN 
+      Objet: -> Entree_batiment;  !! relation 1-m; inscription de Numero_batiment
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosEntree_batiment;
+
+     TABLE Nom_entree_batiment =
+      Objet: -> Entree_batiment; !! relation 1-mc; attribut par composition
+      Langue: Code_langue;
+      Nom: TEXT*40;
+    NO IDENT
+    END Nom_entree_batiment;
+
+    TABLE PosNom_entree_batiment = !! MO93: supplementaire par rapport a SN 
+      Objet: -> Nom_entree_batiment;  !! relation 1-m; inscription de Nom
+      Pos: CoordP;
+      Ori: Rotation;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosNom_entree_batiment;
+
+  END Adresses_batiment.
+
+
+
+   TOPIC Bords_de_plan = 
+  !! Les objets mentionnes dans l'Ordonnance technique sur la mensuration
+  !! officielle doivent etre geres.
+
+    DOMAIN
+
+      Type_echelle = [1 .. 1000000];
+
+      Genre_description = (
+        voisins,               !! commune, district, canton ou pays
+        plan_voisin,           !! plans voisins en situation
+        plan_synoptique,       !! plans voisins, commune, district, canton ou pays
+                               !! dans un plan synoptique
+        direction_route,
+        no_CN,
+        noOFS,
+        autre);                !! seulement pour des extensions definies
+
+      Type_ligne = (
+        autre);
+
+      Genre_symbole = (
+        flecheNord,
+        autre);
+
+      Genre_croix = (
+        croix_coord,
+        croix_filet,
+        marque_filet,
+        autre);
+
+
+    TABLE Bord_de_plan =
+      IdentDN: TEXT*8; !! relation 1-m avec Domaine_numerotation
+      Identification: TEXT*32;
+      Type_bord_de_plan: TEXT*20;  !! definition du type de bord de plan 
+      Numero_du_plan: TEXT*12;
+      Nom_commune: TEXT*30;
+      Nom_geometre: OPTIONAL TEXT*30;
+      Date_etablissement: DATE;
+      Nom_geometre_conservateur: OPTIONAL TEXT*30;
+      Date_MAJ: OPTIONAL DATE;
+      Nombre_echelle: Type_echelle;
+      Origine_plan: CoordP;
+      E_Azimut: Rotation; !! Azimut 100 est E
+      Nombre_echelle_plan_synoptique: OPTIONAL Type_echelle;
+      Origine_plan_synoptique: OPTIONAL CoordP;
+      Avec_reseau_coord: (
+       oui,    !! livre avec
+       non);   !! a generer
+    IDENT IdentDN, Identification;
+    END Bord_de_plan;
+
+    TABLE Description_plan =
+      Origine: -> Bord_de_plan; !! relation 1-mc
+      Description: TEXT*30;
+      Genre: Genre_description;
+    NO IDENT
+    END Description_plan;
+
+     TABLE PosDescription_plan =
+      Objet: -> Description_plan; !! relation 1-m; inscription de Description
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    NO IDENT
+    END PosDescription_plan;
+
+    TABLE Indication_coordonnees =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Description: TEXT*12;
+    NO IDENT
+    END Indication_coordonnees;
+
+    TABLE PosIndication_coordonnees =
+      Objet: -> Indication_coordonnees; !! relation 1-m; inscription de Description
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+      Grandeur: OPTIONAL GrandeurEcriture // indefini = moyenne //;
+    IDENT Pos;
+    END PosIndication_coordonnees;
+
+    TABLE Element_lineaire =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS, ARCS) VERTEX CoordP;
+      Genre: Type_ligne;
+    NO IDENT
+    END Element_lineaire;
+
+    TABLE Ligne_coordonnees =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Geometrie: POLYLINE WITH (STRAIGHTS) VERTEX CoordP;
+    NO IDENT
+    END Ligne_coordonnees;
+
+    TABLE Surface_representation =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+        WITHOUT OVERLAPS > 0.050;
+      Choix_representation: (
+        completement_represente,
+        partiellement_represente);
+    NO IDENT
+    END Surface_representation;
+
+    TABLE SymboleBord_de_plan =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+      Genre: Genre_symbole;
+    NO IDENT
+    END SymboleBord_de_plan;
+
+     TABLE Croix_filet =
+      Objet: -> Bord_de_plan; !! relation 1-mc
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 0.0 //;
+      Genre: Genre_croix;
+    IDENT Pos;
+    END Croix_filet;
+
+  END Bords_de_plan.
+
+END MD01MOCH23F.
+
+
+!! FORMAT FREE;  
+FORMAT FIX WITH LINESIZE = 107, TIDSIZE = 16; 
+
+
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.
+

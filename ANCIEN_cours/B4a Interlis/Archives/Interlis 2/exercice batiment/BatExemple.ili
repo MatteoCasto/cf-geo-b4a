@@ -1,0 +1,39 @@
+TRANSFER MonTransert;
+
+MODEL Exercice_2
+  DOMAIN
+    CoordP = COORD2    480000.000    70000.000
+                       850000.000    310000.000;
+    Rotation = GRADS 0.0 399.9;
+    Surface_RF = DIM2 1 9999;
+
+  TOPIC MonTopic =
+  	
+    TABLE Parcelle =
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                 WITHOUT OVERLAPS > 0.050;
+      Numero : OPTIONAL [0..5500];
+      Numero_commune : TEXT*20;
+      Surface_RF : Surface_RF;
+    IDENT Numero; !! Par défaut Condition=vrai
+    END Parcelle;
+
+    TABLE Pos_Numero =
+      Pos_Numero_de: -> Parcelle; !! Relation 1-mc
+      Pos: CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0 //;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center //;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half //;
+    NO IDENT
+    END Pos_Numero;
+    
+  END MonTopic.
+  
+END Exercice_2.
+
+FORMAT
+  FREE;
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.

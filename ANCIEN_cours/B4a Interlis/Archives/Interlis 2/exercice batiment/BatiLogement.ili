@@ -1,0 +1,50 @@
+!! INTERLIS1 - Exercice BATIMENTS_LOGEMENTS
+TRANSFER Test;
+
+MODEL Exercice_3
+
+DOMAIN
+
+   CoordN = COORD2 2480000.00 1060000.00
+                   2850000.00 1320000.00;
+			 
+   StatutBat = (
+    En_Projet,
+    Demoli,
+    Construit);
+
+ TOPIC MonTopic =
+ 
+   TABLE Batiment =
+   	Bati: [1..1000000];
+    StatutBati: StatutBat;
+	Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordN
+               WITHOUT OVERLAPS > 0.050;
+   IDENT 
+    Bati;
+   END Batiment;
+   
+   TABLE BatimentCentroide =
+    BatimentCentroideDe: -> Batiment; !! relation 1-1
+	Geometrie: CoordN;
+   IDENT 
+    BatimentCentroideDe; 	
+   END BatimentCentroide;
+	
+   TABLE Logement =
+    LogementDe: -> Batiment; !! relation 1-mc
+	IdentLog: TEXT*12;
+    Surface: DIM2 1 1000000;
+   IDENT 
+    LogementDe,IdentLog;
+   END Logement;	
+
+ END MonTopic.
+ 
+END Exercice_3.
+
+FORMAT FREE;
+CODE
+BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+TID = ANY;
+END.

@@ -1,0 +1,1 @@
+java -jar C:\Users\oitdi\Documents\INTERLIS\ili2c-5.0.0\ili2c.jar  C:\Claudio\CF-GEO_ModuleB4\Exercices_ITF\Exercice_Bati_Logement\Fichier_ILI\BatiLogement.ili

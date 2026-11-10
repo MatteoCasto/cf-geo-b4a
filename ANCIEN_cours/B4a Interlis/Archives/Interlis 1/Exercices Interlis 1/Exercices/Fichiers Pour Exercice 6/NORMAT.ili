@@ -1,0 +1,177 @@
+TRANSFER INTERLIS1;
+
+!!* @Issuer mailto:znfrhr@localhost
+!!* @Version 2008-04-28
+MODEL NORMAT
+
+!! Service du developpement territorial du canton de Vaud 
+!! Version du 18 fevrier 2008 / R: Husler
+!! 
+!! Contient des objets issus de la legislation sur
+!! l’amenagement du territoire.
+
+  DOMAIN
+    !!* Coordonnées nationales utilisées pour la mensuration officielle. Elle doit être utilisée également pour l'affectation des sols.
+    CoordNat = COORD2
+      480000.000 110000.000
+      600000.000 210000.000;
+    !!* Type de base cartographique.
+    TYPE_BASE_CARTO = (       !! Type de la base cartographique utilisee pour la numerisation
+      CADNUM,                 !! Cadastre numérique 
+      CADSNN,                 !! Cadastre semi-numerique numerise 
+      CADGRN,                 !! Cadastre graphique numerise 
+      CADGRA,                 !! Cadastre graphique 
+      PLAENS);                !! Plan d'ensemble 
+    !!* Types de plan d'affectation des sols
+    TYPE_PLAN = (              
+      PAC,                    !! Plan d'affectation cantonal
+      ZR,                     !! Zone reservee
+      PQ,                     !! Plan de quartier
+      PPA,                    !! Plan partiel d'affectation
+      PGA,                    !! Plan general d'affectation
+      MPGA);                  !! Modification du PGA
+    !!* Degré de sensibilité au bruit (I à IV selon OPB)
+    TYPE_SENS_BRUIT = (
+      IV,
+      III,
+      II,
+      I);
+    !!* Type de zone selon typologie du Service du développement territorial.
+    TYPE_ZONE = (
+      CEN,                    !! Centre de localité (zone village)  
+      HFA,                    !! Habitation faible densité     
+      HMO,                    !! Habitation moyenne densité          
+      HFO,                    !! Habitation forte densité         
+      HTF,                    !! Habitation très faible densité           
+      IND,                    !! Industrielle                       
+      ACA,                    !! Activités artisanales              
+      ACT,                    !! Activités tertiaires               
+      COM,                    !! Centres commerciaux                
+      PUB,                    !! Installations (para-) publiques    
+      SPO,                    !! Sport et loisirs                   
+      AGP,                    !! Agricole protégée                  
+      AGR,                    !! Agricole                           
+      VIT,                    !! Viticole                           
+      VIP,                    !! Viticole protégée                  
+      ASP,                    !! Agricole spécialisée               
+      NAT,                    !! Naturelle protégée                 
+      HIS,                    !! Centre historique                  
+      SCP,                    !! Site construit protégé             
+      AGS,                    !! Para-agricole                      
+      FOR,                    !! Aire forestière                    
+      VER,                    !! Verdure                            
+      HAM,                    !! Hameau                             
+      MAT,                    !! Extraction et dépôt de matériaux   
+      AER,                    !! Aéroport / aérodrome               
+      FER,                    !! Ferroviaire                        
+      MIL,                    !! Militaire                          
+      TOU,                    !! Activités touristiques             
+      CAM,                    !! Camping                            
+      SKI,                    !! Piste de ski                       
+      GOL,                    !! Golf                               
+      EQU,                    !! Equestre                           
+      INT,                    !! Intermédiaire                      
+      DP,                     !! Domaine publique                   
+      OPT,                    !! Options                            
+      ZRE,                    !! Réservée                  
+      EXI);                   !! A plan existant
+  
+  !!* Affectation du sol.
+  TOPIC AFFECTATION =
+    TABLE BATIMENT_PROTEGE =
+      !!* Date de création ou de dernière mise à jour de la géographie ou des attributs du bâtiment protégé.
+      DATE_DERNIERE_MAJ : OPTIONAL DATE;
+      !!* Organisation ayant créé ou modifié la zone en dernier. Il s'agit du nom du bureau privé ou du service technique communale ayant effectué la mise à jour.
+      ACTEUR_MAJ : OPTIONAL TEXT*255;
+      !!* Géographie du bâtiment protégé dans le système de coordonnées national.
+      GEOMETRIE : CoordNat;
+    NO IDENT
+    END BATIMENT_PROTEGE;
+
+    TABLE PLAN_LEGAL =
+      !!* Identifiant du plan. Cet identifiant est libre et n'est utilisé que pour la définition de la relation avec les zones.
+      ID_PLAN : [1 .. 999999999];
+      !!* Type de plan, selon typologie suivante : PGA : plan général d´affectation, MPGA : modification du PGA, PQ : plan de quartier, PPA : plan partiel d´affectation, PAC : plan d´affectation cantonal, ZR : zone réservée
+      TYPE_PLAN : TYPE_PLAN;
+      !!* Date d´approbation du plan par le Conseil d´Etat ou le Chef du département compétent.
+      !!* Ce champ est obligatoire si le statut du plan est définitif.
+      DATE_DECISION : OPTIONAL DATE;
+      !!* Echelle à laquelle le plan (version papier) a été établi et approuvé.
+      ECH_ORIGINE : [0 .. 99999];
+      !!* Nom du plan
+      LIB_PLAN : TEXT*80;
+      !!* Nom informatique du fichier contenant le règlement associé au plan d'affectation du sol.
+      NOM_FIC_REGLEMENT : TEXT*255;
+      !!* Dénomination officielle du règlement.
+      DENOM_REGLEMENT : TEXT*50;
+      !!* Organisme ayant la responsabilité de la réalisation du plan. Il peut s'agir d'un bureau privé ou d'un service technique communal.
+      MANDATAIRE_PRINCIPAL : TEXT*255;
+      !!* Le cas échéant, nom du bureau de géomètre ayant certifié la représentation cadastrale.
+      BUREAU_GEOMETRE : TEXT*255;
+      !!* Le cas échéant, nom d'autres bureaux que le bureau mandataire principal ou le bureau de géomètre ayant collaboré à la réalisation du plan.
+      AUTRES_BUREAUX : OPTIONAL TEXT*255;
+      !!* Emprise géographique du plan dans les coordonnées nationales.
+      GEOMETRIE : SURFACE WITH (STRAIGHTS)
+        VERTEX CoordNat;
+    NO IDENT
+    END PLAN_LEGAL;
+
+    TABLE LIMITE_FORET =
+      !!* Date de réation ou de dernière mise à jour de la polyligne forêt.
+      DATE_DERNIERE_MAJ : OPTIONAL DATE;
+      !!* Organisation ayant créé ou modifié la limite forêt. Il s'agit du nom du bureau privé ou du service technique communal ayant effectué la mise à jour du plan.
+      ACTEUR_MAJ : OPTIONAL TEXT*255;
+      !!* Géographie de la polyligne dans le système de coordonnées national.
+      GEOMETRIE : POLYLINE WITH (STRAIGHTS)
+        VERTEX CoordNat;
+    NO IDENT
+    END LIMITE_FORET;
+
+    TABLE ZONE_AFFECTATION =
+      !!* Numéro de la commune selon numérotation de l´Office fédéral de la statistique (OFS).
+      COMM_OFS : [1 .. 9999];
+      !!* Type principal de la zone selon la typologie définie par le Service du Développement Territorial. Cet attribut n'est renseigné que par le SDT.
+      TYPE_PRINCIPAL : OPTIONAL TYPE_ZONE;
+      !!* Type secondaire de la zone selon la typologie définie par le Service du Développement Territorial. Cet attribut n'est renseigné que par le SDT.
+      TYPE_SECONDAIRE : OPTIONAL TYPE_ZONE;
+      !!* Type complémentaire de la zone selon la typologie définie par le Service du Développement Territorial. Cet attribut n'est renseigné que par le SDT.
+      TYPE_COMPLEMENTAIRE : OPTIONAL TYPE_ZONE;
+      !!* Nom de la zone selon légende originale des plans d´affectation. En général nom de la zone utilisé historiquement au niveau communal.
+      DENOM_COMM : TEXT*120;
+      !!* Degré de sensibilité au bruit (I à IV selon OPB), selon règlement de la zone.
+      SENSIBILITE_BRUIT : TYPE_SENS_BRUIT;
+      !!* Le coefficient d?occupation du sol d?une parcelle, appelé COS, est le rapport maximal entre la surface cadastrale occupée par les bâtiments et la surface constructible de cette parcelle.
+      COS : OPTIONAL [0.00 .. 1.00];
+      !!* Le coefficient d?utilisation du sol, appelé CUS, est le rapport maximal entre la surface brute totale des planchers et la surface constructible.
+      CUS : OPTIONAL [0.00 .. 99.99];
+      !!* Surface de plancher brute maximale.
+      SPB : OPTIONAL [0.00 .. 999999.99];
+      !!* Le coefficient de masse est la valeur maximale du rapport entre le volume des cubes des constructions d?une parcelle et sa surface constructible.
+      CM : OPTIONAL [0.00 .. 99.99];
+      !!* Indice de génération du trafic (IGT) maximum en nombre de mouvements de véhicules généré par jour et par hectare.
+      IGT : OPTIONAL [0.00 .. 99999.99];
+      !!* Commentaire libre.
+      COMMENTAIRE : OPTIONAL TEXT*255;
+      !!* Date de création ou de dernière mise à jour de la géographie ou des attributs de la zone.
+      DATE_DERNIERE_MAJ : OPTIONAL DATE;
+      !!* Organisation ayant créé ou modifié la zone en dernier. Il s'agit du nom du bureau privé ou du service technique communale ayant effectué la mise à jour du plan d'affectation.
+      ACTEUR_MAJ : OPTIONAL TEXT*255;
+      !!* Type de base cartographique utilisé pour la délimitation de la zone.
+      BASE_CARTO : TYPE_BASE_CARTO;
+      !!* Géographie de la zone dans le système de coordonnées national.
+      GEOMETRIE : AREA WITH (STRAIGHTS)
+        VERTEX CoordNat WITHOUT OVERLAPS > 0.10;
+      PLAN_REFERENCE : ->PLAN_LEGAL; !! {1..*}
+    NO IDENT
+    END ZONE_AFFECTATION;
+  END AFFECTATION.
+END NORMAT.
+
+FORMAT
+  FREE;
+
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.
+

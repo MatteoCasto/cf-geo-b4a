@@ -1,0 +1,10 @@
+INTERLIS 2.3;
+
+MODEL PlanZones (fr) AT "www.planzones.ch"
+	VERSION "2005-06-16"=
+	
+DOMAIN 
+CoordExpl = COORD 480000.000..840000.000..-200.000,
+					70000.000..300000.000..5000.000,
+					ROTATION 2-> 1;
+OriEcriture = 0.0..400.0[Grads];

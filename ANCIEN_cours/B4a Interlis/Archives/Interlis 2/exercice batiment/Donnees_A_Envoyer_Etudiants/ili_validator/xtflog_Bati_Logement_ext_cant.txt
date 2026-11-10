@@ -1,0 +1,28 @@
+Info: ilivalidator-1.9.3-ed793181cf69052de426e98ede52d16aa6daf867
+Info: ili2c-4.7.9-20180705
+Info: iox-ili-1.20.9-0e947c9f9e3d29aa52fb8cfe9d27c95760589398
+Info: maxMemory 7436800 KB
+Info: dataFile <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichier_XTF\Bati_Logements_Federal_ExtCant.xtf>
+Info: pluginFolder <P:\Geodonnees\Projets\Diff_MGDM\Documents\Valides\ilivalidator-1.9.3\plugins>
+Info: ilidirs <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili>
+Info: lookup model <CoordSys> in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili>
+Info: lookup model <Units> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili>
+Info: lookup model <GeometryCHLV03_V1> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili>
+Info: lookup model <BatiFederalExtCant> 2.3 in repository <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili\Units.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili\CoordSys-20151124.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili\GeometryCHLV95_V1.ili>
+Info: ilifile <P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichiers_ili\BatiFederalExtCantMN95.ili>
+Info: validate data...
+Info: assume unknown/external objects
+Info: first validation pass...
+Info: second validation pass...
+Info: validate multiplicity of role BatiFederalExtCant.Bati.AssociationDef101.Logement_De...
+Info: validate target of role BatiFederalExtCant.Bati.AssociationDef101.Bati_Avec...
+Info: validate multiplicity of role BatiFederalExtCant.Bati.AssociationDef101.Bati_Avec...
+Info: P:\Geodonnees\Formation\Formation_MGDM_interlis\Fichier_XTF\Bati_Logements_Federal_ExtCant.xtf: BatiFederalExtCant.Bati BID=b1
+Info:      20 objects in CLASS BatiFederalExtCant.Bati.BatimentCentroide
+Info:      20 objects in CLASS BatiFederalExtCant.Bati.BatimentCentroideCantonale
+Info:      20 objects in CLASS BatiFederalExtCant.Bati.BatimentPolygone
+Info:      50 objects in CLASS BatiFederalExtCant.Bati.Logement
+Info: ...validation done

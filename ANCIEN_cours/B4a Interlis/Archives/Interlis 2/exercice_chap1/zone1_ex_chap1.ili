@@ -1,0 +1,156 @@
+TRANSFER INTERLIS1;
+
+MODEL PlanZones
+
+DOMAIN
+
+    CoordP = COORD2 480000.000   70000.000
+                    840000.000  300000.000;
+
+    Altitude = DIM1   -200.000   5000.000;
+
+    Rotation = GRADS 0.0 399.9;
+
+    GrandeurEcriture = (
+        petite,
+        moyenne,
+        grande);
+
+TOPIC Plan_des_zones =
+
+  DOMAIN
+
+    SuperficieZone = DIM2 0 1000000;
+
+    TypeZone = (
+      agricole,
+      agricole_protegee,
+      attente_1,
+      attente_2,
+      attente_4,
+      interdiction_batir,
+      utilite_publique,
+      protection,
+      reserve_naturelle_protegee,
+      verdure,
+      village,
+      intermediaire,
+      peripherique_a,
+      peripherique_c,
+      peripherique_d,
+      peripherique_e,
+      ppa,
+      protegee,
+      viticole);
+
+      SuperficieTechniqueParcelle = DIM2 0.00 1000000.00;
+
+      SuperficieRFParcelle = DIM2 0 1000000;
+
+      GenreParcelle = (
+        prive,
+        dp (
+          cantonal,
+          communale));
+
+      TypeBatiment = (
+        habitation,
+        commerce,
+        usine,
+        porcherie,
+        autre);
+
+      Taux = [0.00 .. 100.00]; !! en %
+
+      QualiteEau = [1 .. 10];
+
+      Debit = [0.00 .. 1000.00]; !! en m3/s
+
+    TABLE Zone =
+      Type: TypeZone;
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                    WITHOUT OVERLAPS > 0.050;
+      Superficie: SuperficieZone;
+      Date_Approb_CC: DATE;
+    NO IDENT
+    END Zone;
+
+    TABLE Parcelle =
+      No_parcelle : TEXT*12;
+      Geometrie: AREA WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                    WITHOUT OVERLAPS > 0.050;
+      Surf_technique : SuperficieTechniqueParcelle;
+      Surf_RF : SuperficieRFParcelle;
+      Genre: GenreParcelle;
+    IDENT No_parcelle;
+    END Parcelle;
+
+    TABLE PosNoParc =
+      Objet: -> Parcelle; !! relation 1-mc inscriptiuon de Numero
+      Position : CoordP;
+      Ori: OPTIONAL Rotation // indefini = 100.0//;
+      HAli: OPTIONAL HALIGNMENT // indefini = Center//;
+      VAli: OPTIONAL VALIGNMENT // indefini = Half//;
+      Grandeur : GrandeurEcriture // indefini = moyenne//;
+    NO IDENT
+    END PosNoParc;
+
+    TABLE Proprietaire =
+      Nom: TEXT*30;
+      Prenom: TEXT*30;
+      Rue: TEXT*30;
+      CP: [1000 .. 9999];
+      Lieu: TEXT*60;
+    NO IDENT
+    END Proprietaire;
+
+    TABLE AttributionZoneParcelle =
+      Zone: -> Zone;
+      Parcelle: -> Parcelle;
+    NO IDENT
+    END AttributionZoneParcelle;
+
+    TABLE AttributionParcelleProprietaire =
+      Parcelle: -> Parcelle;
+      Proprietaire: -> Proprietaire;
+      PartPropriete: Taux;
+    NO IDENT
+    END AttributionParcelleProprietaire;
+    
+    TABLE Source = 
+      Geometrie: CoordP;
+      DateConstruction: DATE;
+      AltitudeMoyenne: Altitude;
+      Qualite: QualiteEau;
+    IDENT Geometrie;
+    END Source;
+    
+    TABLE Mesure = 
+      Source: -> Source;
+      DateMesure: DATE;
+      DebitJournalier: Debit;
+    NO IDENT
+    END Mesure;
+    
+    TABLE Batiment =
+      Geometrie: SURFACE WITH (STRAIGHTS, ARCS) VERTEX CoordP
+                   WITHOUT OVERLAPS > 0.050;
+      No_ECA: TEXT*12;
+      Type: TypeBatiment;
+    IDENT No_ECA;
+    END Batiment;
+
+  END Plan_des_zones.
+
+END PlanZones.
+
+
+!!FORMAT FREE;
+FORMAT FIX WITH LINESIZE = 107, TIDSIZE = 16;
+
+
+CODE
+  BLANK = DEFAULT, UNDEFINED = DEFAULT, CONTINUE = DEFAULT;
+  TID = ANY;
+END.
+

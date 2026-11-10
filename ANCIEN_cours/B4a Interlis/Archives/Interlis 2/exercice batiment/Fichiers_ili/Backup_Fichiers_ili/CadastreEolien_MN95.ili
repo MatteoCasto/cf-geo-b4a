@@ -1,0 +1,71 @@
+INTERLIS 2.3;
+
+/** Minimal geodata model
+ * Minimales Geodatenmodell
+ * Modèle de géodonnées minimal
+ */
+MODEL CadastreEolien (en)
+AT "http://www.geo.admin.ch"
+VERSION "2012-02-02"  =
+
+  TOPIC Eolien =
+
+    DOMAIN
+
+      Code_StatutMachine = (
+        En_projet,
+        En_service
+      );
+
+      Code_StatutSite = (
+        En_projet,
+        Realise
+      );
+
+      Code_TypePlanif = (
+        Secteurs_d_exclusion_a_l_echelle_regionale,
+        Zones_d_exclusion_a_l_echelle_locale
+      );
+
+      Code_TypeSite = (
+        Site_retenu_sous_condition,
+        Site_integre_sous_reserve,
+        Site_integre_a_la_planification_cantonale
+      );
+
+      Coord2 = COORD 2490000.000 .. 2590000.000, 1110000.000 .. 1210000.000;
+
+      Surface = SURFACE WITH (ARCS,STRAIGHTS) VERTEX Coord2;
+
+    CLASS EolMachine =
+      StatutMachine : MANDATORY Code_StatutMachine;
+      CoordX : MANDATORY 2000000 .. 2800000;
+      CoordY : MANDATORY 1000000 .. 1800000;
+      Hauteur : 0 .. 10000000;
+      HauteurTot : 0 .. 1000000;
+      Puissance : 0 .. 1000000;
+      Site : MANDATORY TEXT*20;
+      ModMachine : TEXT*50;
+      Geometrie : MANDATORY Coord2;
+    END EolMachine;
+
+    CLASS EolPlanif =
+      TypePlanif : MANDATORY Code_TypePlanif;
+      Geometrie : MANDATORY Surface;
+    END EolPlanif;
+
+    CLASS EolSite =
+      Site : MANDATORY TEXT*200;
+      TypeSite : MANDATORY Code_TypeSite;
+      Statut : MANDATORY Code_StatutSite;
+      Geometrie : MANDATORY Surface;
+    END EolSite;
+
+    ASSOCIATION SiteMachine =
+      ToSite -<#> {1} EolSite;
+      ToMachine -- {1..*} EolMachine;
+    END SiteMachine;
+
+  END Eolien;
+
+END CadastreEolien.

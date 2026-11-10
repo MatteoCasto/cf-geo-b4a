@@ -1,0 +1,3 @@
+cd P:\Geodonnees\Projets\Diff_MGDM\Documents\Valides\ilivalidator-1.9.3 
+java -jar ilivalidator-1.9.3.jar --log P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\ili_validator\xtflog_Bati_Logement_federal.txt --modeldir P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichiers_ili P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\Fichier_XTF\Bati_Logements_Federal_ExtCant.xtf
+cd P:\Geodonnees\Formation\Formation_MGDM_interlis\MGDM_Bati_Logement\ili_validator
