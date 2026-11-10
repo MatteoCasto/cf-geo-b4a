@@ -4,6 +4,8 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+## [0.1.1] – 2026-11-10
+
 ### Ajouté
 - Test de rendu `node tests/render.mjs` : chaque page est ouverte dans Edge ou Chrome sans fenêtre, toute erreur JavaScript fait échouer le test.
 - Quiz : six questions de plus (MO en ITF, XTF 2.4, IMPORTS, extension, contrainte, QGIS), seize au total.
@@ -52,5 +54,6 @@ Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en géné
 
 - Gabarit de démonstration (géomatique), non numéroté : moteur Markdown, menu généré, annotations exportables, application hors ligne.
 
-[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.0...HEAD
+[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MatteoCasto/cf-geo-b4a/releases/tag/v0.1.0
