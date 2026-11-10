@@ -10,6 +10,7 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 - Chapitre 6 **Le modèle qui dit non** : `UNIQUE` sur plusieurs attributs, `MANDATORY CONSTRAINT` (traduire « si… alors… »), `EXISTENCE CONSTRAINT`, banc des contraintes interactif.
 
 - Chapitre 4 **La MO en INTERLIS 1** : DM.01-AV-CH et ses thèmes, extrait du thème Biens-fonds, lecteur ITF ↔ plan (décodage de chaque ligne avec le modèle, lecture pas à pas, téléchargement de l'ITF fictif), ouverture dans QGIS par glisser-déposer.
+- Chapitre 9 **Lire un modèle existant** : méthode en cinq questions avec lecteur qui surligne le modèle, diagramme de solution repliable, où trouver les modèles officiels, travail de groupe sur un modèle de géodonnées minimal fédéral.
 - Outil `node tests/renumber-figures.mjs` : renumérote les « Fig. N.x » selon config.js ; les tests vérifient la cohérence et refusent les renvois « chapitre N » (on cite le titre).
 - Chapitre INTERLIS 2 : section « Le même arbre en XTF 2.4 » (XTF 2.3 et 2.4 côte à côte, tableau des différences).
 - Aide-mémoire : cartes « XTF 2.4 », « Importer et étendre », « Contraintes ».

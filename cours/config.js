@@ -144,7 +144,21 @@ var COURSE = {
         'Relier un texte .ili à son diagramme UML.',
       ] },
 
-    { file: 'controler.html', num: '9', title: 'Contrôler les données',
+    { file: 'lire-modele.html', num: '9', title: 'Lire un modèle existant',
+      prereq: 'Le modèle qui dit non', activity: 'lecture guidée, travail de groupe',
+      info: { 'Source': 'models.geo.admin.ch' },
+      question: 'Que me demande ce modèle, avant même de saisir une donnée ?',
+      lead: "Au bureau, on lit bien plus de modèles qu'on n'en écrit. Cinq questions suffisent pour comprendre n'importe quel modèle INTERLIS. On les applique à un exemple, puis chaque groupe analyse et présente un modèle de géodonnées minimal de la Confédération.",
+      summary: 'Méthode de lecture en cinq questions, où trouver les modèles officiels, présentation de groupe.',
+      tags: ['lecture guidée', 'groupes'],
+      goals: [
+        "Lire un modèle inconnu dans l'ordre : identité, imports, thèmes, classes et liens, règles.",
+        "Dessiner le diagramme de classes d'un modèle à partir de son texte.",
+        'Trouver un modèle officiel et sa documentation dans les dépôts de modèles.',
+        'Présenter un modèle de géodonnées minimal de façon claire et critique.',
+      ] },
+
+    { file: 'controler.html', num: '10', title: 'Contrôler les données',
       duration: '45 min', prereq: 'INTERLIS 2', activity: 'chasse aux erreurs',
       info: { 'Outil réel': 'ilivalidator' },
       question: 'Pourquoi le canton refuse-t-il ma livraison ?',
@@ -157,7 +171,7 @@ var COURSE = {
         'Lire un rapport de contrôle et corriger un fichier XTF.',
       ] },
 
-    { file: 'outils.html', num: '10', title: 'Outils et pratique',
+    { file: 'outils.html', num: '11', title: 'Outils et pratique',
       duration: '30 min', prereq: 'INTERLIS 2, Contrôler les données', activity: 'chaîne animée',
       info: { 'Logiciels': 'Java, QGIS' },
       question: 'Quel outil pour quelle tâche ?',
@@ -171,7 +185,7 @@ var COURSE = {
         'Situer DM.01-AV-CH, DMAV et les modèles de géodonnées minimaux.',
       ] },
 
-    { file: 'quiz.html', num: '11', title: 'Quiz final',
+    { file: 'quiz.html', num: '12', title: 'Quiz final',
       duration: '20 min', activity: 'auto-évaluation',
       question: 'Dix questions, correction immédiate.',
       lead: "Dix questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",

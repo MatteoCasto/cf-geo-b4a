@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lire un modèle existant</title>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<style>
+/* styles propres aux composants interactifs de cette page */
+.lm{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.lm{grid-template-columns:minmax(0,1fr)}}
+.mdl{list-style:none;margin:0;padding:8px 0;background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;font:400 .76rem/1.55 var(--f-mono);counter-reset:l;overflow:auto;max-height:640px}
+.mdl li{white-space:pre;padding:0 10px 0 0;color:var(--code-fg);border-left:4px solid transparent;transition:background .2s}
+.mdl li::before{counter-increment:l;content:counter(l);display:inline-block;width:2.6em;padding-right:.8em;text-align:right;color:var(--code-com)}
+.mdl li.on{background:var(--hl);border-left-color:var(--accent)}
+.mdl li.dim{opacity:.45}
+.qs{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:q}
+.qs button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:2rem minmax(0,1fr);gap:8px;width:100%;padding:8px 10px;border:1.5px solid var(--rule);border-radius:6px;background:var(--sheet);cursor:pointer;font-size:.9rem}
+.qs button::before{counter-increment:q;content:counter(q);font:800 1.2rem/1 var(--f-display);color:var(--accent)}
+.qs button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.qs button:focus-visible{outline:2px solid var(--accent)}
+.ans{border-left:3px solid var(--accent);padding:4px 0 4px 14px;margin:12px 0 0;font-size:.9rem;min-height:6em}
+.ans p{margin:.2rem 0}
+.sol-uml summary{cursor:pointer;font-size:.95rem}
+.sol-uml[open] summary{margin-bottom:12px}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<script type="text/markdown">
+## Pourquoi apprendre à lire
+
+Dans votre métier, vous écrirez rarement un modèle de A à Z. Vous en **lirez** beaucoup : celui de la mensuration officielle, ceux des géodonnées de base de la Confédération et du canton, celui qu'un client impose pour une livraison. Avant d'importer, de saisir ou de livrer, il faut savoir ce que le modèle exige.
+
+Un modèle se lit toujours dans le même ordre, avec **cinq questions**. Cliquez sur une question : les lignes qui y répondent s'allument dans le modèle ci-dessous, un modèle cantonal fictif sur les fontaines publiques.
+</script>
+
+<!-- composant interactif : lire un modèle en cinq questions -->
+<div class="lm">
+  <ol class="mdl" id="mdl" aria-label="Modèle Fontaines_Publiques_V1"></ol>
+  <div>
+    <ol class="qs" id="qs"></ol>
+    <div class="ans" id="ans" aria-live="polite"></div>
+  </div>
+</div>
+
+<script type="text/plain" id="mdlSrc">
+INTERLIS 2.3;
+
+!! Modèle de géodonnées cantonal : fontaines publiques
+!! Exemple de cours, fictif
+MODEL Fontaines_Publiques_V1 (fr)
+  AT "https://models.canton-exemple.ch"
+  VERSION "2026-03-01" =
+
+  IMPORTS GeometryCHLV95_V1, CHAdminCodes_V1;
+
+  DOMAIN
+    EtatFontaine = (en_service, hors_service, demolie);
+    Materiau = (pierre, beton, metal, bois, autre);
+
+  TOPIC Fontaines =
+
+    CLASS Fontaine =
+      Numero : MANDATORY TEXT*12;
+      Commune : MANDATORY CHAdminCodes_V1.CHMunicipalityCode;
+      Position : MANDATORY GeometryCHLV95_V1.Coord2;
+      Etat : MANDATORY EtatFontaine;
+      EauPotable : MANDATORY BOOLEAN;
+      AnneeConstruction : 1500 .. 2100;
+      DateHorsService : INTERLIS.XMLDate;
+    UNIQUE Commune, Numero;
+    !! hors service ou démolie : la date de mise hors service est connue
+    MANDATORY CONSTRAINT Etat == #en_service OR DEFINED(DateHorsService);
+    END Fontaine;
+
+    CLASS Bassin =
+      Materiau : MANDATORY Materiau;
+      VolumeLitres : 0 .. 100000;
+    END Bassin;
+
+    CLASS AnalyseEau =
+      Date : MANDATORY INTERLIS.XMLDate;
+      Conforme : MANDATORY BOOLEAN;
+      Remarque : TEXT*200;
+    END AnalyseEau;
+
+    ASSOCIATION FontaineBassin =
+      Fontaine -<#> {1} Fontaine;
+      Bassin -- {1..*} Bassin;
+    END FontaineBassin;
+
+    ASSOCIATION FontaineAnalyse =
+      Fontaine -- {1} Fontaine;
+      Analyse -- {0..*} AnalyseEau;
+    END FontaineAnalyse;
+
+  END Fontaines;
+
+END Fontaines_Publiques_V1.
+</script>
+
+<script type="text/markdown">
+:::exo 15 min, seul puis à deux
+Sur papier, **dessinez le diagramme de classes** de `Fontaines_Publiques_V1` : les trois classes avec leurs attributs (type et `[1]` si obligatoire), les deux associations avec leurs cardinalités. Comparez avec votre voisin, puis dépliez la solution sous l'exercice.
+:::
+</script>
+
+<details class="fig gridbg sol-uml">
+  <summary><strong>Solution : le diagramme de classes</strong></summary>
+  <svg viewBox="0 0 820 300" role="img" aria-label="Diagramme UML : Fontaine composée d'un ou plusieurs Bassins, et associée à zéro ou plusieurs AnalyseEau">
+    <g class="uml-box">
+      <rect x="280" y="20" width="270" height="164"/><rect class="hd" x="280" y="20" width="270" height="28"/>
+      <text class="nm" x="415" y="39" text-anchor="middle">Fontaine</text>
+      <text x="290" y="66">Numero : TEXT*12 [1]</text>
+      <text x="290" y="84">Commune : CHMunicipalityCode [1]</text>
+      <text x="290" y="102">Position : Coord2 [1]</text>
+      <text x="290" y="120">Etat : EtatFontaine [1]</text>
+      <text x="290" y="138">EauPotable : BOOLEAN [1]</text>
+      <text x="290" y="156">AnneeConstruction : 1500..2100</text>
+      <text x="290" y="174">DateHorsService : XMLDate</text>
+    </g>
+    <g class="uml-box">
+      <rect x="20" y="210" width="210" height="70"/><rect class="hd" x="20" y="210" width="210" height="28"/>
+      <text class="nm" x="125" y="229" text-anchor="middle">Bassin</text>
+      <text x="30" y="256">Materiau : Materiau [1]</text>
+      <text x="30" y="274">VolumeLitres : 0..100000</text>
+    </g>
+    <g class="uml-box">
+      <rect x="600" y="210" width="210" height="88"/><rect class="hd" x="600" y="210" width="210" height="28"/>
+      <text class="nm" x="705" y="229" text-anchor="middle">AnalyseEau</text>
+      <text x="610" y="256">Date : XMLDate [1]</text>
+      <text x="610" y="274">Conforme : BOOLEAN [1]</text>
+      <text x="610" y="292">Remarque : TEXT*200</text>
+    </g>
+    <path class="uml-edge" d="M296 184L174 210"/>
+    <path d="M296 184l-12 -2l-6 9l12 2z" fill="var(--ink)" stroke="var(--ink)"/>
+    <text class="uml-card" x="268" y="206">1</text><text class="uml-card" x="182" y="204">1..*</text>
+    <path class="uml-edge" d="M534 184L656 210"/>
+    <text class="uml-card" x="548" y="206">1</text><text class="uml-card" x="630" y="200">0..*</text>
+  </svg>
+  <p class="cap">Fig. 9.1 · Le losange plein (composition, <code>-&lt;#&gt;</code>) est du côté du tout : les bassins font partie de la fontaine et disparaissent avec elle. Les analyses sont liées à une fontaine par une simple association. À vérifier dans votre dessin : <code>{1..*}</code> bassins par fontaine, <code>{0..*}</code> analyses, <code>AnneeConstruction</code> et <code>DateHorsService</code> sans <code>[1]</code>.</p>
+</details>
+
+<script type="text/markdown">
+
+## Où trouver les vrais modèles
+
+| Source | Contenu |
+|---|---|
+| `models.geo.admin.ch` | Les **modèles de géodonnées minimaux** (MGDM) de la Confédération et les modèles de base, rangés par office fédéral responsable. |
+| `models.interlis.ch` | Le point d'entrée qui relie tous les dépôts : Confédération, cantons, organisations. |
+| Page du thème chez l'office fédéral responsable | La **documentation du modèle** (PDF) : contexte légal, explications de chaque classe, diagrammes, exemples. Souvent en allemand et en français. |
+| Dépôt de modèles de votre canton | Les modèles cantonaux et les **extensions** cantonales des MGDM. |
+
+:::retenir
+Un MGDM vient toujours avec une **documentation de modèle**. Lisez-la à côté du fichier `.ili` : le fichier dit *ce qui est permis*, la documentation dit *pourquoi*. Les noms des modèles fédéraux sont souvent en allemand (`Nutzungsplanung`, `Waldreservate`…) : le vocabulaire de l'aide-mémoire aide.
+:::
+
+:::attention
+Un modèle est **versionné** : `_V1`, `_V1_2`, `_V2`… et une date de version. Vérifiez toujours que vous lisez la version demandée par votre client ou votre canton, et pas la plus récente « par défaut ».
+:::
+
+## Travail de groupe : présenter un modèle fédéral
+
+Chaque groupe choisit un **modèle de géodonnées minimal** de la Confédération, le télécharge depuis `models.geo.admin.ch` avec sa documentation, l'analyse avec les cinq questions, puis le **présente oralement** aux autres groupes.
+
+Thèmes proposés (un par groupe) :
+
+- cadastre des sites pollués ;
+- réserves forestières ;
+- cartes des dangers ;
+- plans d'affectation (zones d'affectation) ;
+- protection des eaux (secteurs, zones et périmètres de protection) ;
+- degrés de sensibilité au bruit ;
+- limites statiques de la forêt.
+
+| Rubrique de la présentation | Contenu attendu |
+|---|---|
+| Fiche d'identité | nom exact, version, langue, office responsable, base légale |
+| Ce qu'il importe | modèles de base utilisés, et pourquoi |
+| Organisation | thèmes (`TOPIC`), et ce que chacun regroupe |
+| Diagramme | 3 à 6 classes principales, associations et cardinalités, dessiné par le groupe |
+| Règles | une énumération, une cardinalité et une contrainte (ou une unicité), expliquées en français |
+| Regard critique | une chose claire, une chose surprenante ou discutable |
+
+:::terrain
+Quand un client ou un canton vous envoie un nouveau modèle, c'est exactement ce travail que vous ferez avant toute saisie : identifier le modèle, ses dépendances, ses classes et ses règles. Le faire une fois à fond en groupe vous donne la méthode pour tous les autres.
+:::
+
+:::prof
+Le lecteur en cinq questions se fait au projecteur, question par question, en faisant répondre la classe **avant** d'afficher la réponse.
+
+Travail de groupe : prévoir les liens directs vers les modèles et les documentations, vérifiés juste avant le cours (les versions changent). Laisser les groupes choisir, en évitant les doublons. Durée de présentation conseillée : 5 minutes par groupe, suivies de 2 ou 3 questions. Ce travail peut servir de base aux présentations orales du module.
+:::
+</script>
+
+</main>
+<script>
+// ---- composant interactif : lire un modèle en cinq questions ----
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = GEO.esc;
+  const L = $('mdlSrc').textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const ind = Math.min(...L.filter(l => l.trim()).map(l => l.match(/^\s*/)[0].length));
+  const LINES = L.map(l => l.slice(ind));
+  $('mdl').innerHTML = LINES.map(l => `<li>${GEO.hl(l, 'ili') || ' '}</li>`).join('');
+  const lis = [...$('mdl').children];
+
+  const Q = [
+    {q:'Quel modèle, quelle version ?', re:[/^INTERLIS /, /^MODEL /, /^\s+AT /, /^\s+VERSION /, /^END Fontaines_Publiques_V1/],
+     a:"<p><code>Fontaines_Publiques_V1</code>, en <strong>INTERLIS 2.3</strong> (donc des fichiers XTF 2.3), rédigé en français <code>(fr)</code>, publié par le canton (<code>AT</code>), version du <strong>1<sup>er</sup> mars 2026</strong>.</p><p>Le suffixe <code>_V1</code> fait partie du nom : une version 2 incompatible s'appellerait <code>_V2</code>.</p>"},
+    {q:"Qu'est-ce qu'il importe ?", re:[/^\s+IMPORTS /, /GeometryCHLV95_V1\./, /CHAdminCodes_V1\./],
+     a:"<p>Deux modèles de base de la Confédération : <code>GeometryCHLV95_V1</code> pour la position en MN95, <code>CHAdminCodes_V1</code> pour le numéro OFS de la commune.</p><p>Il faudra que vos outils trouvent ces deux modèles (dépôt de modèles ou dossier local).</p>"},
+    {q:'Comment est-il organisé ?', re:[/^\s+TOPIC /, /^\s+END Fontaines;/, /^\s+DOMAIN/],
+     a:"<p>Des domaines communs à tout le modèle (<code>DOMAIN</code>), puis <strong>un seul thème</strong>, <code>Fontaines</code>. Un fichier XTF de ce modèle contiendra donc un panier (BID) <code>Fontaines</code>.</p>"},
+    {q:'Quelles classes, quels liens ?', re:[/^\s+CLASS /, /^\s+END (Fontaine|Bassin|AnalyseEau);/, /^\s+ASSOCIATION /, / -(-|<#>) \{/],
+     a:"<p>Trois classes : <code>Fontaine</code>, <code>Bassin</code>, <code>AnalyseEau</code>.</p><p><code>FontaineBassin</code> est une <strong>composition</strong> (<code>-&lt;#&gt;</code>) : une fontaine a au moins un bassin (<code>{1..*}</code>), un bassin appartient à exactement une fontaine. <code>FontaineAnalyse</code> : une fontaine a zéro, une ou plusieurs analyses.</p>"},
+    {q:'Quelles règles devrai-je respecter ?', re:[/MANDATORY/, /^\s+UNIQUE /, /= \(/],
+     a:"<p>Les attributs <code>MANDATORY</code> (numéro, commune, position, état, eau potable…), deux <strong>énumérations</strong> fermées, une <strong>unicité</strong> du couple (commune, numéro), et une <strong>contrainte</strong> : une fontaine qui n'est pas en service doit avoir sa date de mise hors service.</p><p>C'est la liste de ce qu'ilivalidator contrôlera à la livraison.</p>"},
+  ];
+  $('qs').innerHTML = Q.map((x, i) => `<li><button type="button" aria-pressed="false" data-i="${i}">${esc(x.q)}</button></li>`).join('');
+  const show = i => {
+    $('qs').querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', i === j));
+    let first = -1;
+    LINES.forEach((l, j) => {
+      const on = Q[i].re.some(r => r.test(l));
+      lis[j].classList.toggle('on', on);
+      lis[j].classList.toggle('dim', !on && l.trim() !== '');
+      if(on && first < 0) first = j;
+    });
+    if(first >= 0){ const box = $('mdl'); box.scrollTo({top: lis[first].offsetTop - box.offsetTop - 20, behavior:'smooth'}); }
+    $('ans').innerHTML = Q[i].a;
+  };
+  $('qs').querySelectorAll('button').forEach(b => b.onclick = () => show(+b.dataset.i));
+  $('ans').innerHTML = '<p class="muted">Choisissez une question.</p>';
+})();
+</script>
+</body>
+</html>
