@@ -1,0 +1,3 @@
+- système de notes export-import pour persistance
+- mettre en place des tests, et runné à chaque push avant le déploiement ça doit passer
+- rendre facile l'édition du contenu de texte pour les développeurs
