@@ -1,7 +1,7 @@
 /* =========================================================================
    CONFIGURATION DU COURS
    Le seul fichier à modifier pour : le titre, la version, la liste et l'ordre
-   des chapitres, leurs en-têtes (chapeau, durée, objectifs…) et les libellés.
+   des chapitres, leurs en-têtes (chapeau, prérequis, objectifs…) et les libellés.
 
    Tout le reste en découle automatiquement : menu, pages précédente/suivante,
    plan de l'accueil, numérotation des sections, cache hors ligne.
@@ -11,7 +11,7 @@ var COURSE = {
   title:    'INTERLIS',                           // nom court (menu, onglet)
   subtitle: '1 & 2 · CF-geo B4a',                 // sous le nom, dans le menu
   appName:  'Cours INTERLIS · CF-geo',            // nom de l'appli installée
-  version:  '0.1.1',                          // SemVer, = tag git v0.1.1 (voir CHANGELOG.md)
+  version:  '0.1.2',                          // SemVer, = tag git v0.1.2 (voir CHANGELOG.md)
   date:     '10.11.2026',
   author:   'CF-geo',
   colophon: 'Cours INTERLIS 1 & 2 · techniciennes et techniciens en géomatique',
@@ -35,7 +35,7 @@ var COURSE = {
     { file: 'index.html', num: '', title: 'Accueil' },
 
     { file: 'pourquoi.html', num: '1', title: 'Pourquoi INTERLIS ?',
-      duration: '30 min', prereq: 'aucun', activity: 'animation, frise',
+      prereq: 'aucun', activity: 'animation, frise',
       question: "Qu'est-ce qui se perd entre deux logiciels ?",
       lead: "Quand des données passent d'un logiciel à l'autre, elles s'abîment un peu à chaque étape. INTERLIS supprime ce problème : on décrit les données une fois, puis tout le monde échange selon cette description.",
       summary: "Le jeu du téléphone entre logiciels, l'approche basée sur les modèles, la LGéo.",
@@ -48,7 +48,7 @@ var COURSE = {
       ] },
 
     { file: 'modeliser.html', num: '2', title: 'Modéliser le territoire',
-      duration: '45 min', prereq: 'Pourquoi INTERLIS ?', activity: 'croquis, exercice papier',
+      prereq: 'Pourquoi INTERLIS ?', activity: 'croquis, exercice papier',
       question: "Qu'est-ce qu'un arbre, pour une base de données ?",
       lead: "Avant d'écrire une seule ligne d'INTERLIS, il faut décider ce qu'on garde de la réalité et comment on le décrit. C'est le travail de modélisation, et il se fait avec un crayon.",
       summary: 'Du terrain au fichier : choisir, abstraire, décrire. Classe, objet, attribut.',
@@ -61,7 +61,7 @@ var COURSE = {
       ] },
 
     { file: 'interlis1.html', num: '3', title: 'INTERLIS 1',
-      duration: '60 min', prereq: 'Modéliser le territoire', activity: 'éditeur de surfaces, ITF annoté',
+      prereq: 'Modéliser le territoire', activity: 'éditeur de surfaces, ITF annoté',
       info: { 'Fichiers': '.ili, .itf' },
       question: 'Comment une ligne de chiffres devient-elle un arbre ?',
       lead: "La première version du langage : des tables, des types simples, des géométries, et un fichier de transfert en lignes de texte, l'ITF. C'est toujours le format de la mensuration officielle dans la plupart des cantons.",
@@ -89,7 +89,7 @@ var COURSE = {
       ] },
 
     { file: 'interlis2.html', num: '5', title: 'INTERLIS 2',
-      duration: '60 min', prereq: 'INTERLIS 1', activity: 'banc des cardinalités',
+      prereq: 'INTERLIS 1', activity: 'banc des cardinalités',
       info: { 'Fichiers': '.ili, .xtf' },
       question: 'Comment dire « chaque arbre a exactement une espèce » ?',
       lead: "INTERLIS 2 passe des tables aux classes. On gagne l'héritage, les structures, les associations avec des cardinalités précises, et un fichier de transfert en XML, le XTF, qui porte le nom de chaque attribut.",
@@ -131,7 +131,7 @@ var COURSE = {
       ] },
 
     { file: 'atelier.html', num: '8', title: 'Atelier .ili',
-      duration: '45 min', prereq: 'INTERLIS 2', activity: 'éditeur en direct',
+      prereq: 'INTERLIS 2', activity: 'éditeur en direct',
       info: { 'Travail': 'seul ou à deux' },
       question: 'Livrable : un modèle sans erreur, téléchargé en .ili.',
       lead: "À vous d'écrire. L'éditeur ci-dessous comprend une partie d'INTERLIS 2.3. À chaque frappe, il vérifie votre modèle et redessine le diagramme de classes.",
@@ -158,7 +158,7 @@ var COURSE = {
       ] },
 
     { file: 'controler.html', num: '10', title: 'Contrôler les données',
-      duration: '45 min', prereq: 'INTERLIS 2', activity: 'chasse aux erreurs',
+      prereq: 'INTERLIS 2', activity: 'chasse aux erreurs',
       info: { 'Outil réel': 'ilivalidator' },
       question: 'Pourquoi le canton refuse-t-il ma livraison ?',
       lead: "Un fichier XTF peut s'ouvrir sans problème et être faux quand même. Le modèle permet de le vérifier automatiquement, avant que les erreurs n'arrivent dans la base du canton.",
@@ -171,7 +171,7 @@ var COURSE = {
       ] },
 
     { file: 'outils.html', num: '11', title: 'Outils et pratique',
-      duration: '30 min', prereq: 'INTERLIS 2, Contrôler les données', activity: 'chaîne animée, QGIS',
+      prereq: 'INTERLIS 2, Contrôler les données', activity: 'chaîne animée, QGIS',
       info: { 'Logiciels': 'Java, QGIS' },
       question: 'Quel outil pour quelle tâche ?',
       lead: "INTERLIS n'est utile que si des outils savent le lire. En Suisse, une petite famille d'outils libres couvre toute la chaîne : du modèle à la base de données, puis de la base au fichier contrôlé et livré.",
@@ -186,7 +186,7 @@ var COURSE = {
       ] },
 
     { file: 'quiz.html', num: '12', title: 'Quiz final',
-      duration: '20 min', activity: 'auto-évaluation',
+      activity: 'auto-évaluation',
       question: 'Seize questions, correction immédiate.',
       lead: "Seize questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",
       summary: "Seize questions pour vérifier l'essentiel, avec correction immédiate.",

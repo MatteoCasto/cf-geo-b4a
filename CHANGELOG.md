@@ -4,6 +4,11 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+## [0.1.2] – 2026-11-10
+
+### Supprimé
+- Durées des chapitres (en-tête, plan de l'accueil) et durée totale de l'accueil : données internes. Les tests refusent désormais le champ `duration` dans `config.js`.
+
 ## [0.1.1] – 2026-11-10
 
 ### Ajouté
@@ -54,6 +59,7 @@ Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en géné
 
 - Gabarit de démonstration (géomatique), non numéroté : moteur Markdown, menu généré, annotations exportables, application hors ligne.
 
-[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.1...HEAD
+[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MatteoCasto/cf-geo-b4a/releases/tag/v0.1.0

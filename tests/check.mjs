@@ -25,6 +25,7 @@ for (const ch of C.chapters) {
   if (!files.has(ch.file)) fail('config.js', `page manquante ${ch.file}`);
   if (ch.num) { if (nums.has(ch.num)) fail('config.js', `numéro en double ${ch.num}`); nums.add(ch.num); }
   for (const k of ['title']) if (!ch[k]) fail('config.js', `${ch.file} : champ ${k} manquant`);
+  if (ch.duration) fail('config.js', `${ch.file} : champ duration (durée de chapitre = donnée interne, à ne pas publier)`);
   if (/chapitres? \d/.test(ch.prereq || '')) fail('config.js', `${ch.file} : prérequis numéroté, citer le titre`);
 }
 // numérotation continue des chapitres numérotés
@@ -33,7 +34,7 @@ numbered.forEach((n, i) => { if (n !== i + 1) fail('config.js', `numérotation n
 
 // ---- pages
 const BOXES = new Set(['retenir', 'attention', 'terrain', 'exo', 'info', 'carte', 'prof']);
-const META = /\b\d+\s*(p[ée]riodes?)\b|\b\d+\s*x\s*45\s*min/i;
+const META = /\b\d+\s*(p[ée]riodes?)\b|\b\d+\s*x\s*45\s*min|Durée proposée/i;
 
 for (const f of [...files].sort()) {
   const html = fs.readFileSync(path.join(DIR, f), 'utf8');

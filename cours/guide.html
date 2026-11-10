@@ -15,7 +15,7 @@
 
 | Fichier | Contenu | Qui le modifie |
 |---|---|---|
-| `config.js` | Titre, version, **liste des chapitres**, en-têtes (chapeau, durée, objectifs…), libellés des encadrés | Auteurs |
+| `config.js` | Titre, version, **liste des chapitres**, en-têtes (chapeau, prérequis, objectifs…), libellés des encadrés | Auteurs |
 | `xxx.html` | Le **texte** d'un chapitre, en Markdown, et ses éventuels composants interactifs | Auteurs |
 | `style.css` | Couleurs, polices, mise en page (une seule colonne centrée) | Rarement |
 | `app.js` | Moteur : menu, en-têtes, Markdown, quiz, numérotation, thème, appli hors ligne | Rarement |
@@ -27,12 +27,12 @@ Le menu, les liens précédent / suivant, le plan de l'accueil, l'en-tête de ch
 ## Créer un chapitre
 
 1. Copier `modele.html` (page vide prête à remplir) sous un nouveau nom, par ex. `dmav.html`.
-2. Ajouter une entrée dans la liste `chapters` de `config.js` (titre, durée, chapeau, objectifs…). L'ordre de la liste est l'ordre du menu.
+2. Ajouter une entrée dans la liste `chapters` de `config.js` (titre, chapeau, prérequis, objectifs…). L'ordre de la liste est l'ordre du menu.
 3. Écrire le texte dans le bloc `script type="text/markdown"` de la page (il peut y en avoir plusieurs, entrecoupés de composants HTML).
 
 ```js config.js (extrait)
 { file: 'dmav.html', num: '9', title: 'Le modèle DMAV',
-  duration: '45 min', prereq: 'Outils et pratique', activity: 'exercice',
+  prereq: 'Outils et pratique', activity: 'exercice',
   info: { 'Fichiers': '.ili, .xtf' },          // cases libres de l'en-tête (facultatif)
   question: 'La question à laquelle le chapitre répond ?',
   lead: "Le chapeau : deux ou trois phrases d'introduction.",
@@ -230,7 +230,7 @@ Survoler un mot le surligne dans tous les blocs du même groupe : pratique pour 
 - Données fictives clairement signalées.
 - Renvoyer à un autre chapitre par son **titre**, jamais par son numéro (« voir [Contrôler les données](controler.html) ») : les numéros changent quand on ajoute un chapitre. Même règle pour `prereq` dans `config.js`. Les tests refusent « chapitre 4 ».
 - Numéros de figures : `Fig. N.x`, N = numéro du chapitre. Après un ajout ou un déplacement de chapitre, lancer `node tests/renumber-figures.mjs`.
-- Ne jamais indiquer de nombre de périodes ni d'élèves (données internes).
+- Ne jamais indiquer de nombre de périodes ni d'élèves, ni de durée de chapitre (données internes) : pas de champ `duration` dans `config.js`. Les durées indicatives d'exercice (`:::exo 10 min`) restent permises.
 - Données d'un composant (fichier ITF, XTF à télécharger…) : dans un `<script type="text/plain" id="…">`, lu par le script de la page.
 - Après une modification : ouvrir la page dans le navigateur, lancer `node tests/check.mjs` et `node tests/render.mjs`, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
 </script>

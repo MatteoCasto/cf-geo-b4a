@@ -12,7 +12,7 @@ Une suite de chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres
 | Pour… | Modifier |
 |---|---|
 | le texte d'un chapitre | `cours/<chapitre>.html`, en Markdown |
-| titre, durée, objectifs, ordre des chapitres, version | [`cours/config.js`](cours/config.js) |
+| titre, chapeau, prérequis, ordre des chapitres, version | [`cours/config.js`](cours/config.js) |
 | ajouter un chapitre | copier [`cours/modele.html`](cours/modele.html), puis l'ajouter dans `config.js` |
 
 Menu, en-têtes, numérotation et liens précédent / suivant sont générés automatiquement.
