@@ -73,12 +73,12 @@ Suivons l'inventaire des arbres, du modèle jusqu'à la livraison. Cliquez sur u
 - **ili2c** contrôle un *modèle* (.ili).
 - **ilivalidator** contrôle des *données* (.xtf, .itf) par rapport à leur modèle.
 - **ili2db** (ili2pg, ili2gpkg…) fait le lien entre fichiers INTERLIS et bases de données : création du schéma, import, export.
-- **QGIS Model Baker** rend tout cela accessible depuis QGIS, sans ligne de commande.
+- **QGIS** ouvre directement un fichier XTF (et les lignes d'un ITF) par glisser-déposer, pour le visualiser. Le plugin **QGIS Model Baker** offre en plus les fonctions d'ili2db dans QGIS.
 :::
 
 ## Les commandes essentielles
 
-Model Baker suffit pour le quotidien. La ligne de commande reste utile pour automatiser, par exemple pour contrôler chaque nuit toutes les livraisons reçues. Chaque outil est un fichier `.jar` qu'on lance avec Java.
+Chaque outil est un fichier `.jar` qu'on lance avec Java, dans un terminal. La ligne de commande a un avantage : elle s'automatise, par exemple pour contrôler chaque nuit toutes les livraisons reçues.
 
 ```sh terminal · aide-mémoire des commandes
 # 1. compiler (vérifier) un modèle
@@ -102,6 +102,120 @@ java -jar ili2pg.jar --schemaimport --dbhost localhost --dbdatabase geodata --db
 
 :::attention
 ili2db crée des tables et des colonnes dont les noms dérivent du modèle. Si vous modifiez ces tables à la main (renommer une colonne, changer un type), les exports vers XTF ne fonctionneront plus. Si le modèle change, recréez le schéma à partir du nouveau modèle.
+:::
+
+## Voir un fichier INTERLIS dans QGIS
+
+Pour **regarder** un fichier, pas besoin de base de données : QGIS lit les fichiers INTERLIS grâce à la bibliothèque GDAL qu'il contient. Téléchargez le fichier des arbres de Montavaux et glissez-le dans QGIS.
+</script>
+
+<div class="row" style="margin:0 0 6px">
+  <button class="btn primary" type="button" id="dlXtf">Télécharger arbres_montavaux.xtf</button>
+  <span class="small muted">5 arbres, 2 espèces · données fictives</span>
+</div>
+
+<script type="text/plain" id="xtfArbres">
+<?xml version="1.0" encoding="UTF-8"?>
+<TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+  <HEADERSECTION SENDER="Commune de Montavaux (fictive)" VERSION="2.3">
+    <MODELS>
+      <MODEL NAME="Arbres_Communaux_V1" VERSION="2026-09-30" URI="https://models.montavaux.ch"/>
+    </MODELS>
+  </HEADERSECTION>
+  <DATASECTION>
+    <Arbres_Communaux_V1.Inventaire BID="b1">
+      <Arbres_Communaux_V1.Inventaire.Espece TID="e1">
+        <NomLatin>Tilia cordata</NomLatin>
+        <NomFrancais>Tilleul à petites feuilles</NomFrancais>
+      </Arbres_Communaux_V1.Inventaire.Espece>
+      <Arbres_Communaux_V1.Inventaire.Espece TID="e2">
+        <NomLatin>Acer pseudoplatanus</NomLatin>
+        <NomFrancais>Érable sycomore</NomFrancais>
+      </Arbres_Communaux_V1.Inventaire.Espece>
+      <Arbres_Communaux_V1.Inventaire.Arbre TID="a41">
+        <NumeroInventaire>A-0041</NumeroInventaire>
+        <Etat>sain</Etat>
+        <Hauteur>18.0</Hauteur>
+        <AnneePlantation>1965</AnneePlantation>
+        <Position><COORD><C1>2538196.400</C1><C2>1152398.700</C2></COORD></Position>
+        <Espece REF="e1"/>
+      </Arbres_Communaux_V1.Inventaire.Arbre>
+      <Arbres_Communaux_V1.Inventaire.Arbre TID="a42">
+        <NumeroInventaire>A-0042</NumeroInventaire>
+        <Etat>affaibli</Etat>
+        <Controles>
+          <Arbres_Communaux_V1.Inventaire.Controle>
+            <Date>2026-05-12</Date>
+            <Remarque>Branche morte côté rue</Remarque>
+          </Arbres_Communaux_V1.Inventaire.Controle>
+        </Controles>
+        <Hauteur>12.5</Hauteur>
+        <AnneePlantation>1987</AnneePlantation>
+        <Position><COORD><C1>2538214.250</C1><C2>1152388.100</C2></COORD></Position>
+        <Espece REF="e1"/>
+      </Arbres_Communaux_V1.Inventaire.Arbre>
+      <Arbres_Communaux_V1.Inventaire.Arbre TID="a43">
+        <NumeroInventaire>A-0043</NumeroInventaire>
+        <Etat>sain</Etat>
+        <Hauteur>14.0</Hauteur>
+        <AnneePlantation>1979</AnneePlantation>
+        <Position><COORD><C1>2538241.600</C1><C2>1152387.300</C2></COORD></Position>
+        <Espece REF="e1"/>
+      </Arbres_Communaux_V1.Inventaire.Arbre>
+      <Arbres_Communaux_V1.Inventaire.Arbre TID="a44">
+        <NumeroInventaire>A-0044</NumeroInventaire>
+        <Etat>malade</Etat>
+        <Hauteur>9.5</Hauteur>
+        <AnneePlantation>2001</AnneePlantation>
+        <Position><COORD><C1>2538262.900</C1><C2>1152401.500</C2></COORD></Position>
+        <Espece REF="e2"/>
+      </Arbres_Communaux_V1.Inventaire.Arbre>
+      <Arbres_Communaux_V1.Inventaire.Arbre TID="a45">
+        <NumeroInventaire>A-0045</NumeroInventaire>
+        <Etat>mort</Etat>
+        <Hauteur>21.0</Hauteur>
+        <AnneePlantation>1932</AnneePlantation>
+        <Position><COORD><C1>2538270.300</C1><C2>1152372.800</C2></COORD></Position>
+        <Espece REF="e2"/>
+      </Arbres_Communaux_V1.Inventaire.Arbre>
+    </Arbres_Communaux_V1.Inventaire>
+  </DATASECTION>
+</TRANSFER>
+</script>
+
+<script type="text/markdown">
+1. Glissez `arbres_montavaux.xtf` dans QGIS. Il propose deux couches, une par classe : `…Inventaire.Arbre` et `…Inventaire.Espece`. Prenez les deux.
+2. Définissez le SCR de la couche des arbres sur **EPSG:2056** : le fichier XTF n'indique pas le système de référence.
+3. Étiquetez les arbres avec `NumeroInventaire`, et symbolisez-les selon `Etat`.
+
+| Ce que QGIS montre bien | Ce qu'il ne sait pas faire sans le modèle |
+|---|---|
+| les **géométries** : points, lignes, surfaces | le **système de référence** (EPSG:2056 à définir) |
+| les **noms des attributs**, puisque le XTF les écrit | les **types** : tout arrive en texte, même `Hauteur` |
+| une couche par classe | les **structures** : les contrôles de l'arbre A-0042 ne sont pas lus |
+| | les **associations** : l'espèce n'est qu'un TID (`e1`), à relier soi-même |
+
+Avec un fichier **ITF**, c'est plus pauvre encore : seules les tables de lignes s'affichent, car un ITF ne contient pas les noms des attributs (voir [La MO en INTERLIS 1](mo-itf.html)).
+
+Pour travailler **avec** le modèle (vrais types, structures, relations, surfaces reconstruites), on importe le fichier dans une base avec ili2db, puis on ouvre la base dans QGIS :
+
+```sh terminal
+# la base est créée d'après le modèle, puis remplie avec les données
+java -jar ili2gpkg.jar --import --doSchemaImport --dbfile arbres.gpkg --defaultSrsCode 2056 arbres_montavaux.xtf
+```
+
+Glissez ensuite `arbres.gpkg` dans QGIS : chaque classe est une table aux colonnes typées, la structure `Controle` a sa propre table, et l'espèce est une vraie clé étrangère.
+
+:::exo 15 min
+1. Ouvrez `arbres_montavaux.xtf` dans QGIS par glisser-déposer. Combien d'arbres sont malades ou morts ?
+2. Triez les arbres par hauteur dans la table attributaire. Qu'observez-vous ? Pourquoi ?
+3. Où est passée la remarque « Branche morte côté rue » ?
+
+??? Solution
+1. **Deux** : A-0044 (malade) et A-0045 (mort).
+2. Le tri est **alphabétique**, pas numérique (`9.5` se place après `21.0`). Sans le modèle, GDAL ne sait pas que `Hauteur` est un nombre : tout est du texte.
+3. Elle est dans la structure `Controles` de l'arbre A-0042, que la lecture sans modèle ignore. Il faut passer par ili2db, ou ouvrir le XTF dans un éditeur de texte, pour la retrouver.
+???
 :::
 
 ## Les dépôts de modèles
@@ -142,7 +256,9 @@ Les modèles officiels de la Confédération (modèles de géodonnées minimaux,
 | Modèles cantonaux et communaux | INTERLIS 2 | .xtf | Pour les besoins propres d'un canton ou d'une commune. Ils étendent souvent un MGDM (`EXTENDS`). |
 
 :::prof
-Si le temps le permet, démonstration en direct dans QGIS : Model Baker → créer un GeoPackage depuis `Arbres_Communaux_V1.ili` (celui du chapitre INTERLIS 2, ou le fichier téléchargé depuis l'atelier), saisir deux arbres, exporter, valider. 10 minutes suffisent et marquent les esprits.
+Démonstration conseillée : glisser `arbres_montavaux.xtf` dans QGIS au projecteur, montrer la table attributaire (tout en texte), puis, si Java est installé, lancer `ili2gpkg --import --doSchemaImport` et ouvrir le GeoPackage : comparer les deux tables attributaires. Le contraste fait comprendre le rôle du modèle.
+
+Vérifier avant le cours que Java est installé sur les postes de la salle (les outils `.jar` en ont besoin), et préparer un dossier avec ili2c, ili2gpkg et ilivalidator dans leurs versions actuelles.
 
 Calendrier DMAV vérifié en novembre 2026 (délai transitoire au 31.12.2027). Revoir l'état de la migration dans votre canton avant le cours.
 :::
@@ -173,13 +289,13 @@ const S = [
   {k:'tool', ic:'ili2db', b:'Créer la base', s:'--schemaimport',
    h:"ili2db : du modèle au schéma de base de données", d:"ili2db crée automatiquement les tables, colonnes, types, clés étrangères et listes de valeurs à partir du modèle. Il existe en plusieurs variantes : <code>ili2pg</code> (PostGIS), <code>ili2gpkg</code> (GeoPackage), <code>ili2fgdb</code> (FileGDB d'Esri)…",
    c:"java -jar ili2gpkg.jar --schemaimport --dbfile arbres.gpkg --defaultSrsCode 2056 Arbres_Communaux_V1.ili"},
-  {k:'tool', ic:'QGIS', b:'Saisir', s:'Model Baker',
-   h:"QGIS et Model Baker : saisir et mettre à jour", d:"Le plugin QGIS Model Baker pilote ili2db depuis QGIS. Il crée la base, puis génère un projet prêt à l'emploi : couches, formulaires avec listes déroulantes pour les énumérations, relations entre tables. On saisit les arbres comme dans n'importe quel projet QGIS.", c:null},
+  {k:'tool', ic:'QGIS', b:'Saisir', s:'dans la base',
+   h:"QGIS : saisir et mettre à jour", d:"On ouvre la base (GeoPackage ou PostGIS) dans QGIS et on saisit les arbres comme dans n'importe quel projet. Les tables créées par ili2db respectent le modèle. Le plugin QGIS Model Baker peut en plus générer un projet prêt à l'emploi, avec formulaires et listes déroulantes.", c:null},
   {k:'tool', ic:'ili2db', b:'Exporter', s:'--export',
-   h:"ili2db : de la base au fichier", d:"Le même outil exporte le contenu de la base dans un fichier XTF conforme au modèle. Dans Model Baker, c'est l'onglet d'export.",
+   h:"ili2db : de la base au fichier", d:"Le même outil exporte le contenu de la base dans un fichier XTF conforme au modèle.",
    c:"java -jar ili2gpkg.jar --export --dbfile arbres.gpkg --models Arbres_Communaux_V1 livraison.xtf"},
   {k:'tool', ic:'ilival.', b:'Contrôler', s:'ilivalidator',
-   h:"ilivalidator : le contrôle des données", d:"Avant d'envoyer le fichier, on le contrôle (chapitre Contrôler les données). ilivalidator vérifie les types, les obligatoires, les cardinalités, les références, l'unicité et les géométries. Model Baker l'intègre aussi, avec un panneau qui zoome sur chaque erreur.",
+   h:"ilivalidator : le contrôle des données", d:"Avant d'envoyer le fichier, on le contrôle (chapitre Contrôler les données). ilivalidator vérifie les types, les obligatoires, les cardinalités, les références, l'unicité, les contraintes et les géométries.",
    c:"java -jar ilivalidator.jar --log controle.log livraison.xtf"},
   {k:'file', ic:'.xtf', b:'Livrer', s:'au canton',
    h:"La livraison", d:"Le fichier XTF contrôlé part chez le destinataire : commune, canton ou plateforme d'agrégation. De son côté, le destinataire contrôle à nouveau, puis importe avec ses propres outils, qui peuvent être complètement différents. C'est tout l'intérêt : seul le modèle est commun.", c:null},
@@ -204,7 +320,17 @@ $('play').onclick = ()=>{
 };
 show(0);
 
-/* ---------- 7.3 recherche dans les dépôts ---------- */
+/* ---------- téléchargement du XTF d'exemple ---------- */
+$('dlXtf').onclick = ()=>{
+  const src = $('xtfArbres').textContent.replace(/^\s*\n/, '');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([src], {type:'application/xml'}));
+  a.download = 'arbres_montavaux.xtf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+};
+
+/* ---------- recherche dans les dépôts ---------- */
 const LOOK = [
   {w:'Le dossier courant', c:'.'},
   {w:'Le dépôt central, point d\'entrée du réseau', c:'models.interlis.ch/ilimodels.xml'},
@@ -236,14 +362,14 @@ document.querySelectorAll('#lkSeg button').forEach(b=>b.onclick = ()=>look(+b.da
 look(0);
 
 /* ---------- 7.5 associations situation / outil ---------- */
-const TOOLS = ['— choisir —','ili2c','ili2db --schemaimport','ili2db --import','ili2db --export','ilivalidator','QGIS Model Baker','dépôt de modèles'];
+const TOOLS = ['— choisir —','ili2c','ili2db --schemaimport','ili2db --import','ili2db --export','ilivalidator','QGIS (glisser-déposer)','dépôt de modèles'];
 const Q = [
   {s:"Vous venez d'écrire un modèle et voulez savoir s'il est correct.", ok:['ili2c'], fb:"ili2c contrôle les modèles. ilivalidator, lui, contrôle des données."},
-  {s:"Vous devez créer une base PostGIS vide, prête à recevoir des données conformes à un modèle.", ok:['ili2db --schemaimport','QGIS Model Baker'], fb:"ili2pg --schemaimport, ou Model Baker qui l'appelle pour vous."},
-  {s:"Le canton vous envoie un fichier .xtf, vous voulez le voir dans QGIS.", ok:['QGIS Model Baker','ili2db --import'], fb:"Model Baker (le plus simple), ou ili2gpkg --import puis ouverture du GeoPackage."},
-  {s:"Avant de livrer votre fichier, vous voulez être sûr qu'il sera accepté.", ok:['ilivalidator'], fb:"ilivalidator, directement ou via le panneau de validation de Model Baker."},
+  {s:"Vous devez créer une base PostGIS vide, prête à recevoir des données conformes à un modèle.", ok:['ili2db --schemaimport'], fb:"ili2pg --schemaimport crée les tables d'après le modèle."},
+  {s:"Le canton vous envoie un fichier .xtf, vous voulez le voir dans QGIS.", ok:['QGIS (glisser-déposer)','ili2db --import'], fb:"Pour regarder : glisser le fichier dans QGIS. Pour travailler avec les vrais types et relations : ili2gpkg --import, puis ouvrir le GeoPackage."},
+  {s:"Avant de livrer votre fichier, vous voulez être sûr qu'il sera accepté.", ok:['ilivalidator'], fb:"ilivalidator contrôle les données par rapport au modèle."},
   {s:"Vous cherchez le modèle officiel des zones d'affectation.", ok:['dépôt de modèles'], fb:"Il est publié dans le dépôt de la Confédération, accessible via models.interlis.ch."},
-  {s:"Votre base est à jour, vous devez produire le fichier de livraison.", ok:['ili2db --export','QGIS Model Baker'], fb:"ili2db --export, ou l'export de Model Baker."},
+  {s:"Votre base est à jour, vous devez produire le fichier de livraison.", ok:['ili2db --export'], fb:"ili2db --export écrit le fichier XTF d'après le modèle."},
 ];
 const tb = document.querySelector('#match tbody');
 tb.innerHTML = Q.map((q,i)=>`<tr><td>${q.s}</td><td><select aria-label="Outil pour la situation ${i+1}">${TOOLS.map(t=>`<option>${t}</option>`).join('')}</select></td><td class="fb"></td></tr>`).join('');
