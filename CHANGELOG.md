@@ -5,6 +5,9 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 ## [Non publié]
 
 ### Ajouté
+- Test de rendu `node tests/render.mjs` : chaque page est ouverte dans Edge ou Chrome sans fenêtre, toute erreur JavaScript fait échouer le test.
+- Quiz : six questions de plus (MO en ITF, XTF 2.4, IMPORTS, extension, contrainte, QGIS), seize au total.
+- Encadrés « Sur le terrain » complétés (MO) dans Modéliser, INTERLIS 1 et Contrôler.
 - Tests statiques `node tests/check.mjs` : pages de `config.js`, JavaScript inline, encadrés `:::` et `???`, liens internes, numérotation, absence de données internes.
 - Chapitre 5 **Importer et étendre** : modèles de base de la Confédération (`IMPORTS`), extension d'un modèle cantonal par une commune (`TOPIC … EXTENDS`, `CLASS … (EXTENDED)`), lecture polymorphique (composant « Un fichier, deux lectures »).
 - Chapitre 6 **Le modèle qui dit non** : `UNIQUE` sur plusieurs attributs, `MANDATORY CONSTRAINT` (traduire « si… alors… »), `EXISTENCE CONSTRAINT`, banc des contraintes interactif.

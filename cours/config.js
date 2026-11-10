@@ -187,9 +187,9 @@ var COURSE = {
 
     { file: 'quiz.html', num: '12', title: 'Quiz final',
       duration: '20 min', activity: 'auto-évaluation',
-      question: 'Dix questions, correction immédiate.',
-      lead: "Dix questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",
-      summary: "Dix questions pour vérifier l'essentiel, avec correction immédiate.",
+      question: 'Seize questions, correction immédiate.',
+      lead: "Seize questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",
+      summary: "Seize questions pour vérifier l'essentiel, avec correction immédiate.",
       tags: ['auto-évaluation'] },
 
     { file: 'aide-memoire.html', num: 'A', title: 'Aide-mémoire',

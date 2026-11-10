@@ -37,6 +37,9 @@
   {"q": "La couverture du sol découpe tout le territoire, sans trou ni chevauchement. Quel type de géométrie INTERLIS 1 convient ?",
    "o": ["SURFACE", "AREA", "COORD2", "POLYLINE"], "a": 1,
    "w": "AREA décrit une partition : chaque limite est stockée une seule fois, et les surfaces voisines partagent leurs limites.", "ch": "interlis1.html"},
+  {"q": "Dans un ITF de la mensuration officielle, la table Bien_fonds_Geometrie ne dit pas à quel bien-fonds appartient chaque ligne. Pourquoi ?",
+   "o": ["C'est une erreur fréquente des logiciels d'export", "Parce que les biens-fonds sont une AREA : chaque limite est écrite une seule fois, et les surfaces sont reconstruites avec le point de référence de chaque bien-fonds", "Parce que l'ITF ne sait pas écrire de références", "Parce que cette information se trouve dans la table Point_limite"], "a": 1,
+   "w": "Une limite commune à deux biens-fonds n'est stockée qu'une fois. Le logiciel reconstruit chaque surface à partir des lignes et du point de référence de la table Bien_fonds : ni trou ni chevauchement possible.", "ch": "mo-itf.html"},
   {"q": "Que signifie cette association ?",
    "code": ["ili", "ASSOCIATION ArbreEspece =\n  Arbre -- {0..*} Arbre;\n  Espece -- {1} Espece;\nEND ArbreEspece;"],
    "o": ["Chaque arbre a zéro, une ou plusieurs espèces", "Chaque espèce concerne exactement un arbre", "Chaque arbre a exactement une espèce", "Il doit exister exactement une espèce dans le fichier"], "a": 2,
@@ -44,12 +47,28 @@
   {"q": "Quelle est la différence entre une STRUCTURE et une CLASS en INTERLIS 2 ?",
    "o": ["Une structure n'a pas d'identifiant et vit à l'intérieur d'un attribut d'un objet", "Il n'y a aucune différence, ce sont des synonymes", "Une structure ne peut contenir que du texte", "Une structure est une classe abstraite"], "a": 0,
    "w": "Une structure n'a pas de TID et n'existe pas seule. Elle est utilisée dans un attribut, par exemple Controles : BAG {0..*} OF Controle.", "ch": "interlis2.html"},
+  {"q": "Dans un fichier XTF en INTERLIS 2.4 (comme ceux du DMAV), comment est écrit l'identifiant d'un objet ?",
+   "o": ["<Arbre TID=\"a42\">", "<Arbre ili:tid=\"a42\">", "<Arbre><TID>a42</TID>", "Il n'y a plus d'identifiant en 2.4"], "a": 1,
+   "w": "En 2.4, les balises et attributs propres à INTERLIS portent le préfixe ili: (ili:tid, ili:bid, ili:ref), et le nom de l'objet est raccourci au nom de la classe.", "ch": "interlis2.html"},
+  {"q": "Que permet cette ligne, placée au début d'un modèle ?",
+   "code": ["ili", "IMPORTS GeometryCHLV95_V1;"],
+   "o": ["Elle copie les données d'un autre fichier XTF", "Elle convertit les coordonnées de MN03 en MN95", "Elle rend disponibles les définitions d'un modèle de base de la Confédération, par exemple GeometryCHLV95_V1.Coord2", "Elle télécharge les données de la mensuration officielle"], "a": 2,
+   "w": "IMPORTS donne accès aux définitions d'un autre modèle. On les utilise avec leur nom complet, comme GeometryCHLV95_V1.Coord2. Les outils trouvent le modèle importé dans les dépôts de modèles.", "ch": "importer.html"},
+  {"q": "Une commune étend le modèle cantonal des arbres (TOPIC … EXTENDS, CLASS Arbre (EXTENDED)). Que peut-elle faire ?",
+   "o": ["Supprimer un attribut cantonal dont elle n'a pas besoin", "Rendre facultatif un attribut obligatoire du canton", "Ajouter un attribut communal à la classe Arbre", "Ajouter une valeur à n'importe quelle énumération du canton"], "a": 2,
+   "w": "Une extension peut ajouter ou resserrer, jamais retirer ni élargir. C'est ce qui permet au canton de lire les données de la commune avec son seul modèle.", "ch": "importer.html"},
+  {"q": "Comment écrire la règle « si l'arbre est mort, alors une date d'abattage doit être prévue » ?",
+   "o": ["MANDATORY CONSTRAINT Etat == #mort AND DEFINED(AbattagePrevu);", "MANDATORY CONSTRAINT Etat != #mort OR DEFINED(AbattagePrevu);", "MANDATORY CONSTRAINT DEFINED(AbattagePrevu);", "UNIQUE Etat, AbattagePrevu;"], "a": 1,
+   "w": "« Si A alors B » s'écrit « NOT (A) OR B ». La première réponse exigerait que tous les arbres soient morts ; la troisième, que tous aient une date.", "ch": "contraintes.html"},
   {"q": "Un fichier XTF contient <C1>538214.250</C1> pour un modèle en MN95. Le fichier est…",
    "o": ["valide : seul l'ordre de grandeur compte", "valide, mais la carte sera décalée", "bien formé, mais pas valide", "mal formé : le XML est incorrect"], "a": 2,
    "w": "Le XML est correct (bien formé), mais la valeur sort du domaine des coordonnées MN95. Le contrôle la refuse. C'est une coordonnée MN03.", "ch": "controler.html"},
   {"q": "Quel outil contrôle un fichier de données XTF par rapport à son modèle ?",
    "o": ["ili2c", "un éditeur XML", "ilivalidator", "ili2pg --schemaimport"], "a": 2,
    "w": "ilivalidator contrôle des données. ili2c contrôle le modèle lui-même.", "ch": "outils.html"},
+  {"q": "Vous glissez un fichier XTF dans QGIS, sans fournir le modèle. Que manque-t-il ?",
+   "o": ["Les géométries : rien ne s'affiche sur la carte", "Les noms des attributs", "Les types (tout est du texte) et le système de référence, à définir sur EPSG:2056", "Rien : QGIS lit tout le modèle dans le fichier"], "a": 2,
+   "w": "Le XTF porte les géométries et les noms des attributs, mais pas leurs types ni le système de référence. Les structures et les associations ne sont pas reconstituées. Pour cela, on importe le fichier avec ili2db.", "ch": "outils.html"},
   {"q": "Comment l'état « affaibli » est-il écrit dans un fichier XTF ?",
    "o": ["<Etat code=\"1\"/>", "Il n'apparaît pas : il est défini dans le modèle", "<Etat>1</Etat>", "<Etat>affaibli</Etat>"], "a": 3,
    "w": "En XTF, une énumération est écrite en toutes lettres. C'est l'ITF (INTERLIS 1) qui la code par un numéro.", "ch": "interlis2.html"}
@@ -58,7 +77,7 @@
 
 <script type="text/markdown">
 :::prof
-Le quiz peut se faire au beamer en mode projection (++P++), la classe votant à main levée avant chaque clic. Les questions 6 (cardinalités) et 8 (bien formé ou valide) sont les meilleures pour lancer une discussion.
+Le quiz peut se faire au beamer en mode projection (++P++), la classe votant à main levée avant chaque clic. Les questions 7 (cardinalités), 12 (contrainte) et 13 (bien formé ou valide) sont les meilleures pour lancer une discussion.
 :::
 </script>
 

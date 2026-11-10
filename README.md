@@ -41,7 +41,7 @@ Code coloré : `ili`, `ili1`, `itf`, `xtf`, `sh`, `sql`, `json`…
 
 ## Publier
 
-1. Vérifier la page dans le navigateur, puis lancer les tests : `node tests/check.mjs` (Node 18+, aucune installation).
+1. Vérifier la page dans le navigateur, puis lancer les tests : `node tests/check.mjs` (Node 18+, aucune installation), puis `node tests/render.mjs` (rendu de chaque page dans Edge ou Chrome, ignoré si aucun navigateur). Après un ajout ou un déplacement de chapitre : `node tests/renumber-figures.mjs`.
 2. `git pull`, puis `git commit` et `git push` sur `main`.
 3. Le site se met à jour tout seul (GitHub Actions).
 
