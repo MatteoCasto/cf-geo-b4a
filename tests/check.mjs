@@ -33,7 +33,7 @@ const numbered = C.chapters.filter(c => /^\d+$/.test(c.num || '')).map(c => +c.n
 numbered.forEach((n, i) => { if (n !== i + 1) fail('config.js', `numérotation non continue : ${n} en position ${i + 1}`); });
 
 // ---- pages
-const BOXES = new Set(['retenir', 'attention', 'terrain', 'exo', 'info', 'carte']);
+const BOXES = new Set(['retenir', 'attention', 'terrain', 'exo', 'info', 'carte', 'plus', 'fige']);
 const META = /\b\d+\s*(p[ée]riodes?)\b|\b\d+\s*x\s*45\s*min|Durée proposée/i;
 
 for (const f of [...files].sort()) {
@@ -62,6 +62,7 @@ for (const f of [...files].sort()) {
       if (t === ':::') { open--; if (open < 0) { fail(f, `::: fermant en trop (« ${lines[i - 1]?.trim()} »)`); open = 0; } return; }
       const b = t.match(/^:::(\w+)/);
       if (b) { if (!BOXES.has(b[1])) fail(f, `encadré inconnu :::${b[1]}`); open++; return; }
+      if (/^-{3,}$/.test(t) && open) fail(f, `coupure de diapo --- dans un encadré (sans effet) : la placer entre deux blocs`);
       if (t.startsWith('???')) sol = t === '???' ? sol - 1 : sol + 1;
       if (/^>\s/.test(t)) fail(f, `citation « > » non gérée par le moteur Markdown`);
     });

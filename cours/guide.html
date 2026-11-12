@@ -133,6 +133,39 @@ Langages colorés : `ili` (INTERLIS 2), `ili1` (INTERLIS 1), `itf`, `xtf` (ou `x
 <script type="text/markdown">
 Pour une image : placer le fichier dans le dossier `cours/` (ou un sous-dossier) et écrire `![Légende de la figure](images/mon-image.png)` sur une ligne seule.
 
+## Un document, trois usages
+
+Chaque page sert à la **lecture** (écran), au **diaporama** (beamer, bouton « Diaporama » ou touche ++D++) et à la **version étendue** (bouton « Version étendue (PDF) » : impression, puis « Enregistrer au format PDF »). Le principe complet est dans `PRINCIPE-MULTI-ROLES.md`, à la racine du dépôt.
+
+| Bloc | Lecture | Diaporama | Version étendue (impression) |
+|---|---|---|---|
+| texte, encadrés, figures | oui | oui | oui |
+| `:::plus` (Théorie +) | oui | **non** | oui |
+| `:::fige` (version figée) | **non** | **non** | oui |
+| composant marqué `ecran` | oui | oui | **non** |
+
+- **Une section `##` = une diapositive**, le plus souvent possible. Une ligne `---` seule coupe une section trop longue (nouvelle diapo, même numéro de section). Elle se place entre deux blocs, jamais dans un encadré.
+- Sur la diapo, l'essentiel ; les explications longues, exemples supplémentaires et références vont dans `:::plus`.
+- **Chaque composant interactif a une version figée** : on ajoute `ecran` à sa classe (`<figure class="fig ecran">`) et on écrit juste après un bloc `:::fige` (tableau, liste) qui dit la même chose sur papier. Si les données sont dans le script de la page, le script peut remplir un `<div class="fige" id="…">` (exemple : la frise de [Pourquoi INTERLIS ?](pourquoi.html)).
+- Une diapo trop longue est réduite automatiquement à l'écran ; `node tests/render.mjs` liste celles qui restent trop longues.
+- Imprimer depuis le diaporama donne une diapo par page, en paysage, sans « Théorie + ».
+</script>
+
+<script type="text/markdown" data-demo="Coupure de diapo, Théorie +, version figée">
+Le texte vu partout, aussi sur la diapo.
+
+---
+
+:::plus Pour aller plus loin
+Visible à la lecture et à l'impression, caché en diaporama.
+:::
+
+:::fige
+**Version figée de l'animation.** Visible seulement à l'impression (montrée ici pour l'exemple).
+:::
+</script>
+
+<script type="text/markdown">
 ## Quiz
 
 Le quiz est décrit en JSON dans la page (voir `quiz.html`) ; la correction, le score et les liens « Revoir » sont gérés automatiquement.
@@ -229,6 +262,7 @@ Survoler un mot le surligne dans tous les blocs du même groupe : pratique pour 
 - Numéros de figures : `Fig. N.x`, N = numéro du chapitre. Après un ajout ou un déplacement de chapitre, lancer `node tests/renumber-figures.mjs`.
 - Ne jamais indiquer de nombre de périodes ni d'élèves, ni de durée de chapitre (données internes) : pas de champ `duration` dans `config.js`. Les durées indicatives d'exercice (`:::exo 10 min`) restent permises.
 - Données d'un composant (fichier ITF, XTF à télécharger…) : dans un `<script type="text/plain" id="…">`, lu par le script de la page.
+- Un composant interactif sans version figée (`:::fige`) est imprimé tel quel, dans son état initial : à éviter dans les nouveaux chapitres.
 - Après une modification : ouvrir la page dans le navigateur, lancer `node tests/check.mjs` et `node tests/render.mjs`, puis `git commit` et `git push` : le site en ligne se met à jour tout seul.
 </script>
 

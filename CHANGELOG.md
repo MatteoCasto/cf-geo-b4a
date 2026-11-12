@@ -6,6 +6,17 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ### Ajouté
 - Principe « un document, trois usages » (lecture, diaporama, version étendue imprimée) : `PRINCIPE-MULTI-ROLES.md`.
+- **Diaporama** : bouton dans le menu et dans l'en-tête de chaque chapitre, touche `D`. Une diapositive 16:9 par section `##`, mise à l'échelle de l'écran, réduite automatiquement si elle est trop longue. Flèches, espace, Page précédente / suivante ; enchaîne sur le chapitre suivant ou précédent ; `Échap` revient à la lecture, à l'endroit de la diapo. Adresse directe d'une diapo : `page.html#diapo-3`. Barre discrète en bas à droite (précédente, suivante, imprimer les diapos, quitter).
+- **Version étendue (PDF)** : bouton dans l'en-tête de chaque chapitre ; ouvre l'impression (« Enregistrer au format PDF »), avec un nom de fichier parlant. Les solutions des exercices sont imprimées ouvertes.
+- **Imprimer les diapos** (depuis le diaporama) : une diapo par page, en paysage 16:9, sans les compléments « Théorie + ».
+- Nouveaux blocs de syntaxe (aucune syntaxe existante modifiée) :
+  - `---` (ligne seule) : nouvelle diapositive dans la même section ;
+  - encadré `:::plus [titre]` « Théorie + » : visible à la lecture et à l'impression, caché en diaporama ;
+  - encadré `:::fige` : version figée d'une animation, visible seulement à l'impression ;
+  - classes HTML `ecran` (pas imprimé), `plus` et `fige` pour les composants.
+- Chapitre Pourquoi INTERLIS ? : premier chapitre au format complet (coupures de diapos, Théorie + « Les géodonnées de base et leurs modèles », versions figées du jeu du téléphone, du schéma « un modèle, quatre produits » et de la frise).
+- Guide de rédaction : section « Un document, trois usages » avec démo ; `modele.html` montre `:::plus`.
+- Tests : `check.mjs` connaît `:::plus` et `:::fige` et refuse `---` dans un encadré ; `render.mjs` ouvre aussi chaque page en diaporama et liste les diapos trop longues.
 
 ### Modifié
 - README : version à jour, libellé « Au bureau », navigation au clavier et menu redimensionnable. TODO : points classés (à faire, en cours, fait, abandonné).

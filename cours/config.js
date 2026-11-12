@@ -23,6 +23,8 @@ var COURSE = {
     terrain:   'Au bureau',
     exo:       'Exercice',
     solution:  'Solution',
+    plus:      'Théorie +',          // :::plus : lecture et impression, caché en diaporama
+    fige:      'Version figée',      // :::fige : imprimé seulement (remplace une animation)
   },
 
   /* Chapitres, dans l'ordre du menu.

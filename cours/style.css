@@ -158,6 +158,14 @@ strong{font-weight:650}
 .box.exo{border-style:dashed;border-color:var(--accent)}
 .box.exo > .lab{background:var(--accent);color:var(--accent-ink)}
 
+/* « Théorie + » (:::plus) : complément de lecture, caché en diaporama */
+.box.plus{border-color:var(--code-tag);border-left-width:4px;background:var(--code-bg)}
+.box.plus > .lab{background:var(--code-tag);color:var(--sheet)}
+/* version figée d'une animation (:::fige ou class="fige") : imprimée seulement */
+.fige{display:none}
+hr.slide-break{display:none}
+.chap-act{margin-top:1.1rem}
+
 /* ---------- figures ---------- */
 .fig{margin:1.8rem auto;background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:18px;box-shadow:var(--shadow)}
 .fig > figcaption,.fig .cap{font:500 .78rem/1.45 var(--f-mono);color:var(--muted);margin-top:12px}
@@ -272,7 +280,48 @@ details > :not(summary){margin-top:.6rem}
   h2{break-after:avoid}
   details{display:block}
   details > *{display:block}
+  /* version étendue : compléments et versions figées visibles, composants interactifs cachés */
+  .ecran,.pres-bar{display:none!important}
+  .fige{display:block}
+  .box.fige,.box.plus{break-inside:auto}
+  .box.fige{border:0;background:none;padding:0;margin:1.2rem auto}
+  .box.fige > .lab{display:none}
+  /* diapos imprimées (depuis le diaporama) : une diapo par page, sans « Théorie + » */
+  html.print-slides .plus{display:none!important}
+  html.print-slides .doc > .s-first:not([data-s="0"]){break-before:page}
+  html.print-slides .doc > .s-first{margin-top:0}
 }
+
+/* ---------- diaporama (touche D) : une diapositive 16:9, mise à l'échelle de l'écran ---------- */
+.pres-bar{display:none}
+@media screen{
+  html.pres{font-size:19px}
+  html.pres body{overflow:hidden;background:#05080a}
+  html.pres .toc,html.pres .toc-resize,html.pres .annot-add{display:none!important}
+  html.pres .site{display:block}
+  html.pres .doc{position:fixed;left:50%;top:50%;width:calc(1280px / var(--fit,1));height:calc(720px / var(--fit,1));
+    transform:translate(-50%,-50%) scale(var(--sc,1));transform-origin:center;background:var(--paper);
+    padding:40px 60px;overflow:hidden;box-shadow:0 0 0 1px var(--rule);
+    display:flex;flex-direction:column;justify-content:safe center}
+  html.pres .fig svg{max-height:420px;margin-inline:auto}
+  html.pres .doc.s-over{overflow-y:auto}
+  html.pres .doc > *{max-width:none}
+  html.pres .doc > .s-off,html.pres .doc > :not([data-s]),html.pres .doc .plus,html.pres .doc .fige{display:none!important}
+  html.pres .doc > .s-first{margin-top:0}
+  html.pres .chap{border-bottom:0;min-height:calc(720px / var(--fit,1) - 80px);align-content:center}
+  html.pres .chap-act{display:none}
+  html.pres .pres-bar{display:flex;position:fixed;right:14px;bottom:12px;z-index:40;gap:4px;align-items:center;
+    background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:4px;opacity:.35;transition:opacity .2s}
+  html.pres .pres-bar:hover,html.pres .pres-bar:focus-within{opacity:1}
+  .pres-bar button{border:0;background:none;color:var(--ink-2);font:600 .72rem var(--f-mono);padding:5px 8px;border-radius:4px;cursor:pointer}
+  .pres-bar button:hover{background:var(--paper);color:var(--accent)}
+  .pres-bar button[data-a="prev"],.pres-bar button[data-a="next"]{font-size:1rem;line-height:1}
+  .pres-n{font:600 .72rem var(--f-mono);color:var(--muted);min-width:4.5em;text-align:center}
+}
+/* guide de rédaction : on montre les blocs de l'impression et les coupures de diapo */
+.demo .fige{display:block}
+.demo hr.slide-break{display:block;border:0;border-top:2px dashed var(--accent);margin:1.4rem 0;overflow:visible;position:relative}
+.demo hr.slide-break::after{content:"nouvelle diapositive";position:absolute;right:0;top:-.8em;background:var(--paper);padding:0 6px;font:600 .66rem var(--f-mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}

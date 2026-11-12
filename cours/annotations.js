@@ -40,7 +40,7 @@ function label(el){
 }
 const meta = new Map();                     // élément → {key, sec, excerpt}
 {
-  const list = [...doc.children].filter(el => !el.matches('script, style, .pager, .colophon, .annots, .annots-orph'));
+  const list = [...doc.children].filter(el => !el.matches('script, style, .pager, .colophon, .annots, .annots-orph, hr.slide-break'));
   doc.querySelectorAll(NESTED).forEach(el => { if(el.parentElement !== doc) list.push(el); });
   list.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
   let sec = '', seen = {};

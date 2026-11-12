@@ -65,7 +65,7 @@ Cliquez sur *Transmettre* et regardez ce qui arrive à la fiche de l'arbre.
 </script>
 
 <!-- composant interactif : jeu du téléphone -->
-<figure class="fig tel" id="tel">
+<figure class="fig tel ecran" id="tel">
   <div class="row" style="justify-content:space-between">
     <div class="seg" role="group" aria-label="Mode d'échange">
       <button type="button" data-mode="formats" aria-pressed="true">Formats au fil de l'eau</button>
@@ -86,6 +86,22 @@ Cliquez sur *Transmettre* et regardez ce qui arrive à la fiche de l'arbre.
 </figure>
 
 <script type="text/markdown">
+:::fige
+**Le jeu du téléphone : la fiche de l'arbre A-0042 à chaque étape.**
+
+| Attribut saisi par la commune | après le Shapefile (bureau) | après le DXF (canton) | après le CSV (service des parcs) |
+|---|---|---|---|
+| `NumeroInventaire` A-0042 | nom coupé : `NumeroInve` | idem | idem |
+| `Espece` Tilia cordata | intact | intact | intact |
+| `NomFrancais` Tilleul à petites feuilles | accents illisibles : `Tilleul Ã  petites feuilles` | **perdu** | perdu |
+| `Hauteur` 12.5 m | unité perdue : `12.5` | idem | du texte : `12,5` |
+| `AnneePlantation` 1987 | nom coupé : `AnneePlant` | **perdu** | perdu |
+| `Etat` affaibli | intact | **perdu** (n'était qu'une couleur de calque) | perdu |
+| `Position` 2538214.250 / 1152388.100 | intact | intact | **perdu** : `2.54E+06 / 1.15E+06` |
+
+Bilan : **1 attribut intact sur 7, 4 perdus**. Avec un modèle INTERLIS, chaque partenaire lit et écrit le même modèle (fichier XTF contrôlé) : les sept attributs arrivent intacts au service des parcs.
+:::
+
 :::retenir
 Un format de fichier (Shapefile, DXF, CSV) transporte des **valeurs**. Il ne dit presque rien de leur **sens** : unité, liste de valeurs permises, caractère obligatoire, lien avec d'autres objets. Chaque conversion oblige à deviner ce sens, et chaque devinette peut se tromper.
 :::
@@ -98,7 +114,7 @@ Tout le reste se **déduit automatiquement** du modèle. Cliquez sur les boîtes
 </script>
 
 <!-- composant interactif : un modèle, quatre produits -->
-<figure class="fig gridbg">
+<figure class="fig gridbg ecran">
   <svg id="mbd" viewBox="0 0 720 300" role="img" aria-label="Un modèle INTERLIS au centre, dont on déduit le format de transfert, le schéma de base de données, les contrôles et la documentation">
     <g class="bx main">
       <rect x="250" y="20" width="220" height="70" rx="4"/>
@@ -119,6 +135,17 @@ Tout le reste se **déduit automatiquement** du modèle. Cliquez sur les boîtes
 </figure>
 
 <script type="text/markdown">
+:::fige
+**Un seul modèle INTERLIS (`Arbres_Communaux_V1.ili`), quatre produits dérivés automatiquement.**
+
+- **Format de transfert.** Les règles d'encodage d'INTERLIS disent comment écrire chaque classe et chaque attribut dans un fichier XTF (ou ITF en INTERLIS 1). Personne n'a à inventer un format.
+- **Base de données.** L'outil ili2db lit le modèle et crée les tables, les colonnes, les types et les clés étrangères, par exemple dans PostGIS ou un GeoPackage.
+- **Contrôles.** Tout ce que dit le modèle se vérifie automatiquement : valeur obligatoire, plage de 0 à 60 m, liste d'états permis, coordonnées en MN95. C'est le rôle d'ilivalidator (voir [Contrôler les données](controler.html)).
+- **Documentation.** Le modèle se traduit en diagramme de classes UML et en catalogue d'objets. La documentation ne peut pas être « en retard » sur les données.
+:::
+
+---
+
 :::retenir
 **INTERLIS, c'est deux choses :**
 
@@ -127,6 +154,8 @@ Tout le reste se **déduit automatiquement** du modèle. Cliquez sur les boîtes
 
 Le modèle est indépendant de tout logiciel. Un SIG, une DAO ou une base de données peuvent tous lire et écrire selon le même modèle.
 :::
+
+---
 
 Voici à quoi ressemble le début du modèle de Montavaux. Pas besoin de tout comprendre maintenant : on le construira pas à pas dans les chapitres INTERLIS 1 et INTERLIS 2.
 
@@ -153,13 +182,25 @@ Concrètement : la mensuration officielle, le cadastre RDPPF, les zones d'affect
 </script>
 
 <!-- composant interactif : frise chronologique -->
-<figure class="fig">
+<figure class="fig ecran">
   <div class="frise" id="frise" role="group" aria-label="Frise chronologique"></div>
   <div class="frise-detail" id="friseD" aria-live="polite"></div>
   <figcaption>Fig. 1.3 · Quelques jalons. Cliquez sur une date.</figcaption>
 </figure>
+<!-- version figée de la frise : le tableau est rempli par le script de la page, depuis les mêmes données -->
+<div class="fige" id="friseFige"></div>
 
 <script type="text/markdown">
+:::plus Les géodonnées de base et leurs modèles
+Une **géodonnée de base** est une géodonnée qui repose sur un acte législatif fédéral, cantonal ou communal (LGéo, art. 3). Pour le droit fédéral, l'annexe 1 de l'OGéo en dresse le catalogue. Pour chaque jeu de données, elle désigne le service fédéral compétent, qui publie le **modèle de géodonnées minimal**.
+
+Un modèle minimal fixe le contenu commun à toute la Suisse. Un canton peut l'**étendre** pour ses propres besoins, sans casser l'échange avec la Confédération (voir [Importer et étendre](importer.html)).
+
+Les modèles officiels sont publiés dans des **dépôts de modèles** en ligne, par exemple `models.interlis.ch` et `models.geo.admin.ch`. Les outils (ili2db, ilivalidator) y cherchent un modèle à partir de son seul nom : pas besoin de connaître l'adresse du fichier.
+:::
+
+---
+
 :::terrain
 Comme géomaticienne ou géomaticien, vous livrerez des mises à jour de la mensuration officielle au canton sous forme de fichier INTERLIS. Vous téléchargerez des données cantonales (zones à bâtir, cadastre des sites pollués…) au format XTF. Vous ouvrirez aussi ces fichiers dans QGIS pour les visualiser (voir [Outils et pratique](outils.html)).
 :::
@@ -294,6 +335,9 @@ Citez trois informations sur un arbre qui risquent de se perdre si la commune l'
   };
   fr.querySelectorAll('button').forEach(b => b.onclick = () => show(+b.dataset.i));
   show(0);
+  // version figée (impression) : tous les jalons en tableau
+  $('friseFige').innerHTML = `<p><strong>Quelques jalons d'INTERLIS.</strong></p><div class="tbl"><table><thead><tr><th>Date</th><th>Jalon</th><th>Ce qui change</th></tr></thead><tbody>` +
+    EV.map(e => `<tr><td>${e.y}</td><td>${e.h}</td><td>${e.d}</td></tr>`).join('') + `</tbody></table></div>`;
 })();
 </script>
 </body>

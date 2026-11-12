@@ -36,7 +36,8 @@ La solution.
 :::
 ```
 
-Encadrés : `retenir`, `attention`, `terrain` (libellé « Au bureau »), `exo`, `info`, `carte`.
+Encadrés : `retenir`, `attention`, `terrain` (libellé « Au bureau »), `exo`, `info`, `carte`,
+`plus` (Théorie +, caché en diaporama), `fige` (version imprimée d'une animation). Une ligne `---` seule commence une nouvelle diapositive.
 Code coloré : `ili`, `ili1`, `itf`, `xtf`, `sh`, `sql`, `json`…
 
 ## Publier
@@ -63,6 +64,8 @@ voir [`PRINCIPE-MULTI-ROLES.md`](PRINCIPE-MULTI-ROLES.md).
 
 - **Annotations** : touche `N`, puis `+` sur un bloc. Stockées dans le navigateur, exportables / importables en JSON (menu *Annotations*).
 - **Hors ligne** : le site s'installe comme une application et fonctionne ensuite sans connexion.
+- **Diaporama** : touche `D` ou bouton « Diaporama » ; une diapositive 16:9 par section, flèches pour avancer, `Échap` pour revenir.
+- **Version étendue** : bouton « Version étendue (PDF) » de chaque chapitre (impression, puis « Enregistrer au format PDF »), avec les compléments « Théorie + » et les versions figées des animations.
 - **Projection** : touche `P` agrandit le texte pour le beamer.
 - **Navigation** : flèches `←` `→` pour le chapitre précédent / suivant ; menu de gauche redimensionnable (poignée au bord droit, largeur mémorisée).
 

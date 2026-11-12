@@ -4,6 +4,7 @@
 - progression de sauvegarde des notes (p.ex. temps depuis la dernière sauvegarde) + bouton simple pour télécharger les notes
 
 EN COURS
+- un document, trois usages (lecture, diaporama, version étendue) : moteur en place, chapitre « Pourquoi INTERLIS ? » terminé. Reste, chapitre par chapitre : couper les sections trop longues (---), déplacer le détail dans :::plus, marquer les composants interactifs « ecran » et écrire leur version :::fige. node tests/render.mjs liste les diapos encore trop longues.
 - rendre facile l'édition du contenu de texte pour les développeurs : Markdown dans les pages, config.js, guide de rédaction (guide.html), modele.html ; à compléter au besoin
 
 FAIT

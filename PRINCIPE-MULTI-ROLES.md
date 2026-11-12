@@ -55,6 +55,13 @@ En HTML (composants) : `class="ecran"` (pas imprimé), `class="plus"` (caché en
 - La version figée est écrite à la main : c'est un petit travail de plus par composant, mais c'est le prix d'un support papier lisible.
 - Les chapitres existants seront découpés en diapos progressivement ; en attendant, une section trop longue est simplement réduite à l'écran.
 
+## État de la mise en place
+
+- **Moteur** (`app.js`, `style.css`) : diaporama, blocs `---`, `:::plus`, `:::fige`, classes `ecran` / `plus` / `fige`, boutons « Diaporama » et « Version étendue (PDF) » dans l'en-tête de chaque chapitre, impression des diapos.
+- **Chapitre modèle** : [Pourquoi INTERLIS ?](cours/pourquoi.html) applique le principe en entier (coupures `---`, un bloc Théorie +, version figée de ses trois composants).
+- **Tests** : `node tests/check.mjs` connaît les nouveaux blocs ; `node tests/render.mjs` ouvre chaque page aussi en diaporama et liste les diapos encore trop longues.
+- **À faire, chapitre par chapitre** : découper les sections trop longues, déplacer le détail dans `:::plus`, écrire les versions figées des composants interactifs (voir `TODO.txt`).
+
 ## Rétrocompatibilité
 
 Les pages actuelles restent valables sans modification : sans `---`, `:::plus` ni `:::fige`, une page s'affiche en lecture comme avant, et le diaporama coupe simplement à chaque `##`. Les annotations personnelles (JSON) restent rattachées aux mêmes blocs.

@@ -150,6 +150,9 @@ document.addEventListener('mouseout',  e => { const t = e.target.closest && e.ta
    :::info Titre libre … :::               encadré avec titre au choix
    :::carte Titre … :::                    carte (aide-mémoire), regroupées en grille
    ??? Solution … ???                      bloc dépliable (dans un exercice)
+   :::plus [titre] … :::                   « Théorie + » : lecture et impression, caché en diaporama
+   :::fige … :::                           version figée d'une animation : imprimée seulement
+   ---                                     (ligne seule) nouvelle diapositive dans la même section
    Une ligne qui commence par < est du HTML, recopié tel quel. */
 function frenchSpaces(s){ return s.replace(/ ([:;?!»])/g, '&nbsp;$1').replace(/« /g, '«&nbsp;'); }
 function inline(s){
@@ -164,10 +167,11 @@ function inline(s){
 function markdown(src){
   const lines = dedent(src).split('\n'), codes = [];
   let i = 0;
-  const START = /^\s*(#{2,4}\s|```|:::|\?\?\?|\$\$|\||[-*]\s|\d+\.\s|!\[|<)/;
+  const START = /^\s*(#{2,4}\s|```|:::|\?\?\?|\$\$|\||[-*]\s|\d+\.\s|!\[|<|-{3,}\s*$)/;
   function box(type, title, body){
     if(type === 'carte') return `<div class="card">${title ? `<h3>${inline(title)}</h3>` : ''}${body}</div>`;
-    const lab = type === 'info' ? (title || 'Info') : (C.labels[type] || type) + (title ? ' · ' + title : '');
+    const DEF = {plus: 'Théorie +', fige: 'Version figée'};
+    const lab = type === 'info' ? (title || 'Info') : (C.labels[type] || DEF[type] || type) + (title ? ' · ' + title : '');
     return `<div class="box ${esc(type)}"><span class="lab">${inline(lab)}</span>${body}</div>`;
   }
   function parse(end){
@@ -185,6 +189,7 @@ function markdown(src){
       }
       if((m = t.match(/^:::\s*(\w+)\s*(.*)$/))){ i++; out += box(m[1], m[2], parse(/^:::\s*$/)); continue; }
       if((m = t.match(/^\?\?\?\s+(.+)$/))){ i++; out += `<details><summary>${inline(m[1])}</summary>${parse(/^\?\?\?\s*$/)}</details>`; continue; }
+      if(/^-{3,}$/.test(t)){ out += '<hr class="slide-break">'; i++; continue; }   // nouvelle diapositive
       if(/^\$\$.+\$\$$/.test(t)){ out += `<div class="formula">${t.slice(2, -2).trim()}</div>`; i++; continue; }
       if((m = t.match(/^!\[(.*?)\]\((.+?)\)$/))){ out += `<figure class="fig"><img src="${esc(m[2])}" alt="${esc(m[1])}"><figcaption>${inline(m[1])}</figcaption></figure>`; i++; continue; }
       if(t.startsWith('|')){
@@ -252,10 +257,13 @@ function buildHeader(doc){
   const q = CH.question;
   const h = document.createElement('header');
   h.className = 'chap';
-  h.innerHTML = `<div><div class="kicker">${esc(kicker)}</div><h1>${esc(CH.title)}</h1>${CH.lead ? `<p class="lead">${inline(esc(CH.lead))}</p>` : ''}</div>
+  h.innerHTML = `<div><div class="kicker">${esc(kicker)}</div><h1>${esc(CH.title)}</h1>${CH.lead ? `<p class="lead">${inline(esc(CH.lead))}</p>` : ''}
+    <div class="row chap-act"><button class="btn sm" type="button" data-a="pres" title="Présenter ce chapitre en diapositives (touche D)">▶ Diaporama</button><button class="btn sm" type="button" data-a="etendu" title="Ouvre l'impression : choisir « Enregistrer au format PDF »">⤓ Version étendue (PDF)</button></div></div>
     <div class="cartouche">${cells.map((c, k) => {
       const lastCell = k === cells.length - 1, cls = [lastCell && cells.length % 2 ? 'full' : '', lastCell && !q ? 'last' : ''].filter(Boolean).join(' ');
       return `<div${cls ? ` class="${cls}"` : ''}><i>${c[0]}</i><b>${esc(c[1])}</b></div>`; }).join('')}${q ? `<div class="full last"><i>Question clé</i><b>${esc(q)}</b></div>` : ''}</div>`;
+  h.querySelector('[data-a="pres"]').onclick = () => setPres(true, 0);
+  h.querySelector('[data-a="etendu"]').onclick = printExtended;
   doc.prepend(h);
   // CH.goals (objectifs) reste dans config.js comme référence pour les auteurs : il n'est plus affiché.
   document.title = CH.title + ' · ' + C.title;
@@ -327,9 +335,10 @@ function buildToc(){
       <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span></a></li>`).join('')}</ol></nav>
     <div class="toc-tools">
       <button class="tool" type="button" id="tTheme">Thème <span class="st"></span></button>
+      <button class="tool" type="button" id="tPres">Diaporama <span class="st">D</span></button>
       <button class="tool" type="button" id="tProj">Mode projection <span class="st"></span></button>
       <button class="tool" type="button" id="tApp" hidden>Installer l'appli <span class="st">hors ligne</span></button>
-      <div class="toc-keys">← → chapitre · P projection</div>
+      <div class="toc-keys">← → chapitre · P projection · D diaporama</div>
       <div class="toc-keys" id="tOff"></div>
     </div>`;
   const q = s => toc.querySelector(s);
@@ -340,6 +349,7 @@ function buildToc(){
   };
   q('#tTheme').onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; applyTheme(theme); store.set('theme', theme); paint(); };
   q('#tProj').onclick = () => { store.set('proj', root.classList.toggle('proj')); paint(); };
+  q('#tPres').onclick = () => setPres(true);
   q('.toc-toggle').onclick = e => { const o = toc.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', o); };
   addEventListener('geo:proj', paint);
   paint();
@@ -439,14 +449,144 @@ document.addEventListener('DOMContentLoaded', () => {
   let k = 0;
   doc.querySelectorAll(':scope > h2').forEach(h => { k++; h.insertAdjacentHTML('afterbegin', `<span class="sn">${CH.num || '0'}.${k}</span>`); });
   buildPager(doc);
+  buildSlides(doc);
   document.dispatchEvent(new Event('cours:ready'));
+  const h = location.hash.match(/^#diapo-(\d+|fin)$/);
+  if(h || sess.get()) setPres(true, h ? (h[1] === 'fin' ? SLIDES.length - 1 : +h[1] - 1) : 0);
 });
+
+// ---------------------------------------------------------------- 5c. diaporama et version étendue
+/* Une page, trois usages (voir PRINCIPE-MULTI-ROLES.md) :
+   - lecture : tout est visible, sauf les versions figées (.fige) ;
+   - diaporama : une diapositive 16:9 à la fois ; chaque ## ou --- commence une diapo ;
+     les compléments « Théorie + » (.plus) et les versions figées sont cachés ;
+   - impression : version étendue (.plus et .fige visibles, composants .ecran cachés) ;
+     depuis le diaporama, une diapo par page en paysage (sans .plus).
+   Les éléments ne sont jamais déplacés (les annotations restent rattachées) : chaque enfant
+   de main.doc reçoit data-s = numéro de sa diapo, et les autres sont masqués. */
+const SLIDE_W = 1280, SLIDE_H = 720, FIT_MIN = .6;
+const sess = {                                      // le diaporama ne dure que le temps de la session
+  get(){ try{ return sessionStorage.getItem('geo.pres') === '1'; }catch(e){ return false; } },
+  set(v){ try{ sessionStorage.setItem('geo.pres', v ? '1' : '0'); }catch(e){} }
+};
+if(/^#diapo-/.test(location.hash) || sess.get()) root.classList.add('pres');
+let SLIDES = [], CUR = 0;
+const docEl = () => document.querySelector('main.doc');
+const onSlide = el => !el.matches('.plus, .fige');
+
+function buildSlides(doc){
+  const groups = [[]]; let used = false;
+  [...doc.children].forEach(el => {
+    if(el.matches('script, style, .pager, .colophon')) return;
+    const brk = el.matches('hr.slide-break');
+    if((brk || el.tagName === 'H2') && used){ groups.push([]); used = false; }
+    if(brk) return;
+    groups[groups.length - 1].push(el);
+    if(onSlide(el)) used = true;
+  });
+  SLIDES = groups.filter(g => g.some(onSlide));
+  if(!SLIDES.length) SLIDES = [groups.flat()];
+  SLIDES.forEach((g, i) => { g.forEach(el => el.dataset.s = i); const f = g.find(onSlide); if(f) f.classList.add('s-first'); });
+  document.body.insertAdjacentHTML('beforeend', `<div class="pres-bar" role="toolbar" aria-label="Diaporama">
+    <button type="button" data-a="prev" aria-label="Diapositive précédente">‹</button><span class="pres-n" aria-live="polite"></span>
+    <button type="button" data-a="next" aria-label="Diapositive suivante">›</button>
+    <button type="button" data-a="print" title="Une diapositive par page, en paysage">Imprimer les diapos</button>
+    <button type="button" data-a="exit" title="Revenir à la lecture (Échap)">Quitter</button></div>`);
+  const bar = document.querySelector('.pres-bar');
+  bar.querySelector('[data-a="prev"]').onclick = () => go(-1);
+  bar.querySelector('[data-a="next"]').onclick = () => go(1);
+  bar.querySelector('[data-a="print"]').onclick = () => print();
+  bar.querySelector('[data-a="exit"]').onclick = () => setPres(false);
+  addEventListener('resize', () => { if(root.classList.contains('pres')) fitSlide(); });
+  if(document.fonts) document.fonts.ready.then(() => { if(root.classList.contains('pres')) fitSlide(); });
+}
+// réduit la diapo (comme l'ajustement automatique de PowerPoint) : la page est mise en page
+// plus large, puis l'ensemble est réduit pour tenir dans l'écran. Renvoie false si elle déborde encore.
+function fitSlide(){
+  const doc = docEl(); let f = 1;
+  for(;;){
+    root.style.setProperty('--fit', f);
+    if(doc.scrollHeight <= Math.ceil(SLIDE_H / f) + 1 || f <= FIT_MIN) break;
+    f = Math.max(FIT_MIN, Math.round((f - .05) * 100) / 100);
+  }
+  const over = doc.scrollHeight > Math.ceil(SLIDE_H / f) + 1;
+  doc.classList.toggle('s-over', over);           // encore trop longue : on peut faire défiler
+  root.style.setProperty('--sc', Math.min(innerWidth / SLIDE_W, innerHeight / SLIDE_H) * f);
+  return !over;
+}
+function showSlide(n){
+  CUR = Math.max(0, Math.min(SLIDES.length - 1, n));
+  SLIDES.forEach((g, i) => g.forEach(el => el.classList.toggle('s-off', i !== CUR)));
+  docEl().scrollTop = 0;
+  const ok = fitSlide();
+  document.querySelector('.pres-n').textContent = `${CUR + 1} / ${SLIDES.length}`;
+  try{ history.replaceState(null, '', '#diapo-' + (CUR + 1)); }catch(e){}
+  return ok;
+}
+function go(d){
+  const n = CUR + d;
+  if(n >= SLIDES.length){ if(NIDX >= 0 && NAV[NIDX + 1]) location.href = NAV[NIDX + 1].file + '#diapo-1'; }
+  else if(n < 0){ if(NIDX > 0) location.href = NAV[NIDX - 1].file + '#diapo-fin'; }
+  else showSlide(n);
+}
+function setPres(on, start){
+  if(!SLIDES.length) return;
+  if(on && start === undefined){                   // depuis la lecture : la diapo de ce qu'on regarde
+    const el = SLIDES.flat().find(x => onSlide(x) && x.getBoundingClientRect().bottom > 80);
+    start = el ? +el.dataset.s : 0;
+  }
+  root.classList.toggle('pres', on); sess.set(on);
+  if(on){
+    // diapos trop longues, même réduites : signalées pour les auteurs (tests/render.mjs)
+    const over = SLIDES.map((_, i) => showSlide(i) ? 0 : i + 1).filter(Boolean);
+    root.dataset.overflow = over.join(',');
+    showSlide(start);
+  } else {
+    SLIDES.flat().forEach(el => el.classList.remove('s-off'));
+    docEl().classList.remove('s-over');
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+    const first = SLIDES[CUR] && SLIDES[CUR].find(onSlide);
+    if(first) requestAnimationFrame(() => first.scrollIntoView());
+  }
+  const b = document.getElementById('tPres'); if(b) b.setAttribute('aria-pressed', on);
+}
+// version étendue : impression du navigateur (« Enregistrer au format PDF »), nom de fichier parlant
+function printExtended(){
+  if(root.classList.contains('pres')) setPres(false);
+  const t = document.title;
+  document.title = `${C.title} - ${CH.num ? CH.num + '. ' : ''}${CH.title} (version étendue)`;
+  addEventListener('afterprint', () => document.title = t, {once: true});
+  print();
+}
+const pageStyle = document.createElement('style');
+document.head.append(pageStyle);
+let opened = [];
+addEventListener('beforeprint', () => {
+  const slides = root.classList.contains('pres');
+  root.classList.toggle('print-slides', slides);
+  pageStyle.textContent = slides ? '@page{size:297mm 167mm;margin:8mm 12mm}' : '@page{size:A4;margin:16mm 15mm}';
+  // version étendue : les solutions et blocs dépliables sont imprimés ouverts
+  if(!slides){ opened = [...document.querySelectorAll('main.doc details:not([open])')]; opened.forEach(d => d.open = true); }
+});
+addEventListener('afterprint', () => { root.classList.remove('print-slides'); opened.forEach(d => d.open = false); opened = []; });
 
 // ---------------------------------------------------------------- 5b. clavier
 addEventListener('keydown', e => {
   if(e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable) return;
-  if(e.key === 'ArrowRight' && NIDX >= 0 && NAV[NIDX + 1]) location.href = NAV[NIDX + 1].file;
+  if(root.classList.contains('pres')){             // diaporama
+    const k = e.key, onCtrl = /BUTTON|^A$|SUMMARY/.test(e.target.tagName);
+    if(k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !onCtrl)) go(1);
+    else if(k === 'ArrowLeft' || k === 'PageUp') go(-1);
+    else if(k === 'Home') showSlide(0);
+    else if(k === 'End') showSlide(SLIDES.length - 1);
+    else if(k === 'Escape' || k === 'd' || k === 'D') setPres(false);
+    else if(k === 'p' || k === 'P'){ store.set('proj', root.classList.toggle('proj')); dispatchEvent(new Event('geo:proj')); return; }
+    else return;
+    e.preventDefault(); return;
+  }
+  if(e.key === 'd' || e.key === 'D') setPres(true);
+  else if(e.key === 'ArrowRight' && NIDX >= 0 && NAV[NIDX + 1]) location.href = NAV[NIDX + 1].file;
   else if(e.key === 'ArrowLeft' && NIDX > 0) location.href = NAV[NIDX - 1].file;
   else if(e.key === 'p' || e.key === 'P'){ store.set('proj', root.classList.toggle('proj')); dispatchEvent(new Event('geo:proj')); }
 });
