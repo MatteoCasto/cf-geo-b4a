@@ -20,7 +20,7 @@ var COURSE = {
   labels: {
     retenir:   'À retenir',
     attention: 'Attention',
-    terrain:   'Sur le terrain',
+    terrain:   'Au bureau',
     exo:       'Exercice',
     solution:  'Solution',
   },

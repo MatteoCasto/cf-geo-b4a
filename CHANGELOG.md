@@ -9,6 +9,7 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 - Numéro de version du cours affiché à côté du titre, en haut du menu (tiré de `config.js`).
 
 ### Modifié
+- Encadrés `:::terrain` : libellé « Sur le terrain » remplacé par « Au bureau » (`config.js`). La syntaxe `:::terrain` ne change pas.
 - Titres (accueil, chapitres, sections, menu) dans la même police que le texte, IBM Plex Sans ; la police Archivo n'est plus chargée.
 
 ### Supprimé
