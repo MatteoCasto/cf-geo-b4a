@@ -144,10 +144,14 @@ Chaque page sert à la **lecture** (écran), au **diaporama** (beamer, bouton «
 | `:::fige` (version figée) | **non** | **non** | oui |
 | composant marqué `ecran` | oui | oui | **non** |
 
-- **Une section `##` = une diapositive**, le plus souvent possible. Une ligne `---` seule coupe une section trop longue (nouvelle diapo, même numéro de section). Elle se place entre deux blocs, jamais dans un encadré.
+- **Une section `##` = une diapositive**, quand c'est possible et adapté. Une ligne `---` seule coupe une section trop longue (nouvelle diapo, même numéro de section). Elle se place entre deux blocs, jamais dans un encadré.
+- **Deux modes de diapo**, à choisir selon ce que la section fait :
+  - `{bloc}` (par défaut) : la diapo tient dans l'écran, réduite si besoin. Pour un exposé : une idée, une figure, un encadré.
+  - `{continu}` : la diapo **défile** comme une page web (molette, flèches ↑ ↓, espace). Pour un atelier, un composant interactif haut, une longue liste, un exercice guidé. Le compteur affiche ↕.
+  - Pour une section : `## Titre {continu}`. Pour une coupure : `--- {continu}`. Pour toute la page : `diapo: 'continu'` dans `config.js` (cas du quiz et de l'aide-mémoire) ; `{bloc}` force alors une section à tenir dans l'écran.
 - Sur la diapo, l'essentiel ; les explications longues, exemples supplémentaires et références vont dans `:::plus`.
 - **Chaque composant interactif a une version figée** : on ajoute `ecran` à sa classe (`<figure class="fig ecran">`) et on écrit juste après un bloc `:::fige` (tableau, liste) qui dit la même chose sur papier. Si les données sont dans le script de la page, le script peut remplir un `<div class="fige" id="…">` (exemple : la frise de [Pourquoi INTERLIS ?](pourquoi.html)).
-- Une diapo trop longue est réduite automatiquement à l'écran ; `node tests/render.mjs` liste celles qui restent trop longues.
+- Une diapo `{bloc}` trop longue est réduite automatiquement à l'écran ; `node tests/render.mjs` liste celles qui restent trop longues : les couper, alléger avec `:::plus`, ou les passer en `{continu}` si c'est plus adapté.
 - Imprimer depuis le diaporama donne une diapo par page, en paysage, sans « Théorie + ».
 </script>
 
@@ -163,6 +167,32 @@ Visible à la lecture et à l'impression, caché en diaporama.
 :::fige
 **Version figée de l'animation.** Visible seulement à l'impression (montrée ici pour l'exemple).
 :::
+</script>
+
+<script type="text/markdown">
+## Modifier dans le navigateur (mode édition)
+
+Le mode édition permet de corriger et compléter une page **sans éditeur de code**, directement dans le navigateur. C'est le premier pas vers un outil de maintenance du cours utilisable par l'équipe seule.
+
+1. En bas du menu, cliquer dans la petite console noire `C:\cours>` et taper le mot de passe de l'équipe, puis ++Entrée++. (`aide` liste les commandes.)
+2. Une barre bleue apparaît en haut : la page montre aussi ce qui est d'habitude caché (versions figées, coupures `---`, modes `{continu}`, composants `ecran`).
+3. Chaque bloc a un bouton **✎ Modifier le bloc N** : le texte source s'ouvre à droite, la page se met à jour en direct. Les boutons d'insertion ajoutent les briques de la charte (Théorie +, Version figée, À retenir…). La syntaxe reste celle de ce guide.
+4. **Enregistrer la page** (ou ++Ctrl+S++) réécrit le fichier `.html` : seuls les blocs modifiés changent, le reste du fichier (scripts, composants) est conservé tel quel.
+5. Publier comme d'habitude : `git pull`, `node tests/check.mjs`, puis commit et push.
+
+Où va le fichier enregistré :
+
+- **Chrome / Edge** : choisir le fichier `cours/…html` du dépôt la première fois, il est ensuite réécrit directement.
+- **Autres navigateurs** : le fichier est téléchargé, à copier dans `cours/`.
+- **Copier + GitHub** : le fichier complet est copié dans le presse-papiers et l'éditeur de GitHub s'ouvre ; tout sélectionner, coller, valider (*Commit changes*).
+
+Les modifications non enregistrées restent dans l'onglet (brouillon) jusqu'à sa fermeture ; **Quitter** les abandonne après confirmation. Le diaporama est désactivé pendant l'édition.
+
+:::attention
+Le mot de passe n'est **pas** une protection : le site est statique et public, seule son empreinte est dans `config.js`. Il évite seulement qu'un étudiant tombe par hasard sur le mode édition. Rien ne peut être modifié en ligne : on obtient un fichier, qu'il faut publier.
+:::
+
+Changer le mot de passe : `node tests/empreinte.mjs "nouveau mot de passe"`, puis coller la ligne obtenue dans `config.js` (champ `admin`). Ne jamais écrire le mot de passe lui-même dans le dépôt.
 </script>
 
 <script type="text/markdown">

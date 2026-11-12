@@ -46,7 +46,7 @@ Un modèle de données est une **simplification volontaire** de la réalité, fa
 </script>
 
 <!-- composant interactif : croquis en quatre étapes -->
-<figure class="fig gridbg">
+<figure class="fig gridbg ecran">
   <div class="steps" id="steps" role="group" aria-label="Étapes de modélisation">
     <button type="button" data-s="0" aria-pressed="true"><b>0</b>Le terrain</button>
     <button type="button" data-s="1" aria-pressed="false"><b>1</b>Choisir</button>
@@ -105,6 +105,9 @@ Un modèle de données est une **simplification volontaire** de la réalité, fa
   <figcaption>Fig. 2.1 · Choisir, abstraire, décrire. Utilisez les boutons ou les touches 0 à 3.</figcaption>
 </figure>
 
+<!-- version figée du croquis : remplie par le script de la page, depuis les mêmes textes -->
+<div class="fige" id="stepsFige"></div>
+
 <script type="text/markdown">
 :::retenir
 1. **Choisir** ce qui est utile pour le mandat, et laisser le reste.
@@ -128,6 +131,8 @@ Ces mots reviendront dans tous les chapitres. Ils sont les mêmes en INTERLIS 1 
 | **Identifiant** | Un attribut (ou une combinaison) qui distingue chaque objet. | `NumeroInventaire` |
 | **Relation** <span class="muted small">(association)</span> | Un lien entre objets de deux classes. | un arbre est d'une espèce |
 
+---
+
 <div class="two">
   <div class="box"><span class="lab">Classe</span><p>La fiche vierge : « un arbre a un numéro, une espèce, une hauteur, un état, une position ».</p></div>
   <div class="box"><span class="lab">Objet</span><p>Une fiche remplie : « A-0042, <i>Tilia cordata</i>, 12.5 m, affaibli, 2538214.250 / 1152388.100 ».</p></div>
@@ -137,17 +142,25 @@ Ces mots reviendront dans tous les chapitres. Ils sont les mêmes en INTERLIS 1 
 Le modèle ne contient **aucune donnée**. Il ne dit pas qu'il existe un arbre A-0042. Il dit à quoi doit ressembler la fiche de *n'importe quel* arbre. Les données sont dans le fichier de transfert.
 :::
 
+:::plus Deux sortes d'identifiants
+Dans un fichier de transfert, chaque objet porte un **identifiant technique** (le `TID` en INTERLIS) : il sert seulement à relier les objets entre eux dans le fichier, par exemple un arbre à son espèce. Il n'a pas de sens pour un humain et peut changer d'une livraison à l'autre.
+
+L'**identifiant métier**, lui, fait partie des attributs du modèle : `NumeroInventaire` pour un arbre, le numéro d'un bien-fonds pour la mensuration officielle. C'est lui qu'on écrit sur une plaquette, dans un rapport ou au téléphone. Le modèle peut exiger qu'il soit unique (voir [Le modèle qui dit non](contraintes.html)).
+:::
+
 ## Quel type pour quel attribut ?
 
 Pour chaque attribut, choisissez le type le plus adapté. La correction s'affiche tout de suite.
 </script>
 
 <!-- composant interactif : choix des types -->
-<div class="tbl typ" id="typ"><table>
+<div class="tbl typ ecran" id="typ"><table>
   <thead><tr><th>Attribut</th><th>Exemple de valeur</th><th style="width:13em">Type</th><th>Correction</th></tr></thead>
   <tbody></tbody>
 </table></div>
-<p class="small muted" id="typScore"></p>
+<p class="small muted ecran" id="typScore"></p>
+<!-- version figée de l'exercice : remplie par le script, avec la bonne réponse et son explication -->
+<div class="fige" id="typFige"></div>
 
 <script type="text/markdown">
 ## Obligatoire ou facultatif ?
@@ -158,7 +171,9 @@ Ce choix a une conséquence directe. Un attribut obligatoire vide rendra le fich
 
 :::terrain
 Avant de créer un modèle, cherchez s'il en existe déjà un. La Confédération publie les modèles de géodonnées minimaux, et de nombreux cantons publient leurs propres modèles. Réutiliser un modèle existant, c'est gagner du temps et pouvoir échanger avec d'autres dès le premier jour.
+:::
 
+:::plus Choisir, dans la mensuration officielle
 La mensuration officielle montre bien ce que « choisir » veut dire : un point limite y est décrit par sa position, sa précision, sa fiabilité et sa matérialisation (borne, cheville, croix…). Ni la couleur ni l'état de la borne ne sont enregistrés : ce n'est pas utile au registre foncier.
 :::
 
@@ -185,6 +200,8 @@ Le service de la voirie de Montavaux veut inventorier ses **bancs publics** pour
 Le point suffit : un banc mesure 2 m, c'est négligeable à l'échelle d'un plan d'entretien. L'orientation est un bon exemple d'attribut qu'on oublie souvent, et qu'on regrette à l'heure de dessiner le symbole sur le plan.
 ???
 :::
+
+---
 
 :::exo discussion · 5 min
 Dans la classe `Arbre`, on a mis `Espece : texte`. Que se passe-t-il si une personne saisit « Tilia cordata », une autre « tilia cordata » et une troisième « Tilleul » ? Proposez une meilleure solution.
@@ -219,6 +236,9 @@ On obtient trois espèces différentes pour un seul arbre réel, et les statisti
     if(/^[0-3]$/.test(e.key)) go(+e.key);
   });
   go(0);
+  // version figée (impression) : les quatre étapes, avec les mêmes textes
+  document.getElementById('stepsFige').innerHTML = '<p><strong>Choisir, abstraire, décrire : un bout de Montavaux, du terrain à la classe Arbre.</strong></p><ol start="0">' +
+    TXT.map(t => `<li>${t}</li>`).join('') + '</ol>';
 
   /* ---------- choix des types ---------- */
   const TYPES = ['— choisir —','Texte','Nombre entier','Nombre décimal + unité','Énumération','Coordonnée (point)','Date'];
@@ -254,6 +274,9 @@ On obtient trois espèces différentes pour un seul arbre réel, et les statisti
     const n = tb.querySelectorAll('tr.good').length, d = tb.querySelectorAll('tr.good,tr.bad').length;
     document.getElementById('typScore').textContent = d ? `${n} bonne${n>1?'s':''} réponse${n>1?'s':''} sur ${Q.length}.` : '';
   };
+  // version figée (impression) : la bonne réponse pour chaque attribut, avec son explication
+  document.getElementById('typFige').innerHTML = '<p><strong>Quel type pour quel attribut ? Les réponses.</strong></p><div class="tbl"><table><thead><tr><th>Attribut</th><th>Exemple</th><th>Type adapté</th><th>Pourquoi</th></tr></thead><tbody>' +
+    Q.map(q => `<tr><td><code>${q.a}</code></td><td>${GEO.esc(q.v)}</td><td>${q.ok}</td><td>${GEO.esc(q.fb[q.ok].replace(/^Oui[.,]\s*/, '').replace(/^./, c => c.toUpperCase()))}</td></tr>`).join('') + '</tbody></table></div>';
   tb.querySelectorAll('tr').forEach(tr => {
     const q = Q[+tr.dataset.i], sel = tr.querySelector('select'), fb = tr.querySelector('.fb');
     sel.onchange = () => {

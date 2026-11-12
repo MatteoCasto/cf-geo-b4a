@@ -17,6 +17,8 @@ Une suite de chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres
 
 Menu, en-têtes, numérotation et liens précédent / suivant sont générés automatiquement.
 
+**Sans éditeur de code** : le *mode édition* du navigateur (console `C:\cours>` en bas du menu, mot de passe de l'équipe) montre la Théorie + et les versions figées, permet de modifier chaque bloc avec un aperçu en direct, puis réécrit le fichier de la page (ou l'envoie dans l'éditeur de GitHub). Mode d'emploi dans le guide de rédaction. Le mot de passe n'est pas une protection (site statique) : seule son empreinte est dans `config.js`, à changer avec `node tests/empreinte.mjs "…"`.
+
 La syntaxe complète, avec le rendu de chaque bloc, est dans le **guide de rédaction** :
 [`cours/guide.html`](cours/guide.html) (hors menu, accessible par son adresse uniquement).
 

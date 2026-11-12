@@ -27,7 +27,8 @@ document.write(`
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="annotations.js"><\/script>`);
+<script src="annotations.js"><\/script>
+<script src="edition.js"><\/script>`);
 
 // ---------------------------------------------------------------- 2. outils
 const store = {
@@ -153,6 +154,7 @@ document.addEventListener('mouseout',  e => { const t = e.target.closest && e.ta
    :::plus [titre] … :::                   « Théorie + » : lecture et impression, caché en diaporama
    :::fige … :::                           version figée d'une animation : imprimée seulement
    ---                                     (ligne seule) nouvelle diapositive dans la même section
+   ## Titre {continu} · --- {continu}       diapo en défilement continu (défaut : {bloc}, voir config.js « diapo »)
    Une ligne qui commence par < est du HTML, recopié tel quel. */
 function frenchSpaces(s){ return s.replace(/ ([:;?!»])/g, '&nbsp;$1').replace(/« /g, '«&nbsp;'); }
 function inline(s){
@@ -167,7 +169,7 @@ function inline(s){
 function markdown(src){
   const lines = dedent(src).split('\n'), codes = [];
   let i = 0;
-  const START = /^\s*(#{2,4}\s|```|:::|\?\?\?|\$\$|\||[-*]\s|\d+\.\s|!\[|<|-{3,}\s*$)/;
+  const START = /^\s*(#{2,4}\s|```|:::|\?\?\?|\$\$|\||[-*]\s|\d+\.\s|!\[|<|-{3,}\s*(\{\w+\}\s*)?$)/;
   function box(type, title, body){
     if(type === 'carte') return `<div class="card">${title ? `<h3>${inline(title)}</h3>` : ''}${body}</div>`;
     const DEF = {plus: 'Théorie +', fige: 'Version figée'};
@@ -180,7 +182,8 @@ function markdown(src){
       const l = lines[i], t = l.trim(); let m;
       if(end && end.test(t)){ i++; return out; }
       if(!t){ i++; continue; }
-      if((m = t.match(/^(#{2,4})\s+(.*)$/))){ const n = m[1].length; out += `<h${n}>${inline(m[2])}</h${n}>`; i++; continue; }
+      if((m = t.match(/^(#{2,4})\s+(.*?)(?:\s+\{(bloc|continu)\})?$/))){         // ## Titre {continu} : mode de la diapo
+        const n = m[1].length; out += `<h${n}${m[3] ? ` data-diapo="${m[3]}"` : ''}>${inline(m[2])}</h${n}>`; i++; continue; }
       if((m = t.match(/^```(\w*)\s*(.*)$/))){
         i++; const buf = [];
         while(i < lines.length && !/^\s*```\s*$/.test(lines[i])) buf.push(lines[i++]);
@@ -189,7 +192,8 @@ function markdown(src){
       }
       if((m = t.match(/^:::\s*(\w+)\s*(.*)$/))){ i++; out += box(m[1], m[2], parse(/^:::\s*$/)); continue; }
       if((m = t.match(/^\?\?\?\s+(.+)$/))){ i++; out += `<details><summary>${inline(m[1])}</summary>${parse(/^\?\?\?\s*$/)}</details>`; continue; }
-      if(/^-{3,}$/.test(t)){ out += '<hr class="slide-break">'; i++; continue; }   // nouvelle diapositive
+      if((m = t.match(/^-{3,}(?:\s*\{(bloc|continu)\})?$/))){                      // --- [{continu}] : nouvelle diapositive
+        out += `<hr class="slide-break"${m[1] ? ` data-diapo="${m[1]}"` : ''}>`; i++; continue; }
       if(/^\$\$.+\$\$$/.test(t)){ out += `<div class="formula">${t.slice(2, -2).trim()}</div>`; i++; continue; }
       if((m = t.match(/^!\[(.*?)\]\((.+?)\)$/))){ out += `<figure class="fig"><img src="${esc(m[2])}" alt="${esc(m[1])}"><figcaption>${inline(m[1])}</figcaption></figure>`; i++; continue; }
       if(t.startsWith('|')){
@@ -227,7 +231,27 @@ function markdown(src){
   return tpl.content;
 }
 
-window.GEO = {store, esc, dedent, fmtCH, hl, makeCodeBlock, linkify, markdown, inline, CHAPTERS, COURSE: C, FILE};
+// cartes consécutives → grille
+function groupCards(doc){
+  doc.querySelectorAll('.card').forEach(c => {
+    if(c.parentElement.classList.contains('cards')) return;
+    const grid = document.createElement('div'); grid.className = 'cards';
+    if(c.dataset.md) grid.dataset.md = c.dataset.md;
+    c.before(grid);
+    let n = c; while(n && n.classList && n.classList.contains('card')){ const next = n.nextElementSibling; grid.append(n); n = next; }
+  });
+}
+// numérotation des sections : 3.1, 3.2… (refaite après une modification en mode édition)
+function numberSections(doc){
+  let k = 0;
+  doc.querySelectorAll(':scope > h2').forEach(h => {
+    k++; h.querySelectorAll(':scope > .sn').forEach(x => x.remove());
+    h.insertAdjacentHTML('afterbegin', `<span class="sn">${CH.num || '0'}.${k}</span>`);
+  });
+}
+const MD_SRC = [];
+window.GEO = {store, esc, dedent, fmtCH, hl, makeCodeBlock, linkify, markdown, inline, CHAPTERS, COURSE: C, FILE,
+  MD_SRC, groupCards, numberSections, CH};
 
 // ---------------------------------------------------------------- 5a. thème (avant affichage)
 const THEMES = ['système', 'clair', 'sombre'];
@@ -416,8 +440,10 @@ document.addEventListener('DOMContentLoaded', () => {
     <marker id="tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="13" markerHeight="13" orient="auto"><path d="M1 1L11 6L1 11z" class="fillsheet strokeink" stroke-width="1.2"/></marker>
     <marker id="dia" viewBox="0 0 14 10" refX="1" refY="5" markerWidth="15" markerHeight="11" orient="auto"><path d="M1 5L7 1L13 5L7 9z" class="fillsheet strokeink" stroke-width="1.2"/></marker></defs></svg>`);
 
-  // contenu Markdown
-  doc.querySelectorAll('script[type="text/markdown"]').forEach(s => {
+  // contenu Markdown ; chaque élément produit garde le numéro de son bloc (data-md) et la source
+  // est conservée (MD_SRC) : le mode édition (edition.js) s'en sert pour modifier puis réécrire la page.
+  doc.querySelectorAll('script[type="text/markdown"]').forEach((s, k) => {
+    MD_SRC[k] = s.textContent;
     if(s.dataset.demo !== undefined){              // démo du guide : rendu + source
       const d = document.createElement('div');
       d.className = 'demo';
@@ -425,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
       d.querySelector('.demo-body').append(markdown(s.textContent));
       d.append(makeCodeBlock(dedent(s.textContent), 'md', 'à écrire dans la page'));
       s.replaceWith(d);
-    } else s.replaceWith(markdown(s.textContent));
+    } else { const f = markdown(s.textContent); [...f.children].forEach(el => el.dataset.md = k); s.replaceWith(f); }
   });
   // blocs de code écrits en HTML : <script type="text/x-code" data-lang="sql" data-file="x.sql">
   doc.querySelectorAll('script[type="text/x-code"]').forEach(s => {
@@ -435,19 +461,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(s.dataset.links) linkify(fig.querySelector('code'), s.dataset.links.split(','), s.dataset.group || 'g');
     s.replaceWith(fig);
   });
-  // cartes consécutives → grille
-  doc.querySelectorAll('.card').forEach(c => {
-    if(c.parentElement.classList.contains('cards')) return;
-    const grid = document.createElement('div'); grid.className = 'cards';
-    c.before(grid);
-    let n = c; while(n && n.classList && n.classList.contains('card')){ const next = n.nextElementSibling; grid.append(n); n = next; }
-  });
+  groupCards(doc);
   buildHeader(doc);
   buildPlan(doc);
   buildQuiz(doc);
-  // numérotation des sections : 3.1, 3.2…
-  let k = 0;
-  doc.querySelectorAll(':scope > h2').forEach(h => { k++; h.insertAdjacentHTML('afterbegin', `<span class="sn">${CH.num || '0'}.${k}</span>`); });
+  numberSections(doc);
   buildPager(doc);
   buildSlides(doc);
   document.dispatchEvent(new Event('cours:ready'));
@@ -474,18 +492,26 @@ let SLIDES = [], CUR = 0;
 const docEl = () => document.querySelector('main.doc');
 const onSlide = el => !el.matches('.plus, .fige');
 
+// Mode d'une diapo : « bloc » (tient dans l'écran, réduite si besoin) ou « continu » (défilement,
+// pour un atelier, une longue liste, le quiz…). Défaut de la page : config.js « diapo » ; pour une
+// section : ## Titre {continu} ; pour une coupure : --- {continu}.
+const PAGE_MODE = CH.diapo === 'continu' ? 'continu' : 'bloc';
+let MODES = [];
 function buildSlides(doc){
-  const groups = [[]]; let used = false;
+  const groups = [[]], modes = [PAGE_MODE]; let used = false;
   [...doc.children].forEach(el => {
     if(el.matches('script, style, .pager, .colophon')) return;
-    const brk = el.matches('hr.slide-break');
-    if((brk || el.tagName === 'H2') && used){ groups.push([]); used = false; }
+    const brk = el.matches('hr.slide-break'), start = brk || el.tagName === 'H2';
+    if(start && used){ groups.push([]); modes.push(PAGE_MODE); used = false; }
+    if(start && el.dataset.diapo) modes[modes.length - 1] = el.dataset.diapo;
     if(brk) return;
     groups[groups.length - 1].push(el);
     if(onSlide(el)) used = true;
   });
-  SLIDES = groups.filter(g => g.some(onSlide));
-  if(!SLIDES.length) SLIDES = [groups.flat()];
+  const keep = groups.map(g => g.some(onSlide));
+  SLIDES = groups.filter((_, i) => keep[i]);
+  MODES = modes.filter((_, i) => keep[i]);
+  if(!SLIDES.length){ SLIDES = [groups.flat()]; MODES = [PAGE_MODE]; }
   SLIDES.forEach((g, i) => { g.forEach(el => el.dataset.s = i); const f = g.find(onSlide); if(f) f.classList.add('s-first'); });
   document.body.insertAdjacentHTML('beforeend', `<div class="pres-bar" role="toolbar" aria-label="Diaporama">
     <button type="button" data-a="prev" aria-label="Diapositive précédente">‹</button><span class="pres-n" aria-live="polite"></span>
@@ -504,6 +530,14 @@ function buildSlides(doc){
 // plus large, puis l'ensemble est réduit pour tenir dans l'écran. Renvoie false si elle déborde encore.
 function fitSlide(){
   const doc = docEl(); let f = 1;
+  const cont = MODES[CUR] === 'continu';
+  root.classList.toggle('pres-continu', cont);
+  if(cont){                                        // défilement : taille normale, on fait défiler
+    root.style.setProperty('--fit', 1);
+    doc.classList.add('s-over');
+    root.style.setProperty('--sc', Math.min(innerWidth / SLIDE_W, innerHeight / SLIDE_H));
+    return true;
+  }
   for(;;){
     root.style.setProperty('--fit', f);
     if(doc.scrollHeight <= Math.ceil(SLIDE_H / f) + 1 || f <= FIT_MIN) break;
@@ -519,9 +553,18 @@ function showSlide(n){
   SLIDES.forEach((g, i) => g.forEach(el => el.classList.toggle('s-off', i !== CUR)));
   docEl().scrollTop = 0;
   const ok = fitSlide();
-  document.querySelector('.pres-n').textContent = `${CUR + 1} / ${SLIDES.length}`;
+  document.querySelector('.pres-n').textContent = `${CUR + 1} / ${SLIDES.length}` + (MODES[CUR] === 'continu' ? ' ↕' : '');
   try{ history.replaceState(null, '', '#diapo-' + (CUR + 1)); }catch(e){}
   return ok;
+}
+// page : en défilement continu, Page suivante / espace font d'abord défiler la diapo, puis changent de diapo
+function page(d){
+  const doc = docEl();
+  if(MODES[CUR] === 'continu'){
+    const atEnd = d > 0 ? doc.scrollTop + doc.clientHeight >= doc.scrollHeight - 2 : doc.scrollTop <= 1;
+    if(!atEnd){ doc.scrollBy({top: d * doc.clientHeight * .85, behavior: 'smooth'}); return; }
+  }
+  go(d);
 }
 function go(d){
   const n = CUR + d;
@@ -531,6 +574,7 @@ function go(d){
 }
 function setPres(on, start){
   if(!SLIDES.length) return;
+  if(on && root.classList.contains('edit')){ alert("Quittez d'abord le mode édition (commande « quitter » dans la console du menu)."); return; }
   if(on && start === undefined){                   // depuis la lecture : la diapo de ce qu'on regarde
     const el = SLIDES.flat().find(x => onSlide(x) && x.getBoundingClientRect().bottom > 80);
     start = el ? +el.dataset.s : 0;
@@ -542,6 +586,7 @@ function setPres(on, start){
     root.dataset.overflow = over.join(',');
     showSlide(start);
   } else {
+    root.classList.remove('pres-continu');
     SLIDES.flat().forEach(el => el.classList.remove('s-off'));
     docEl().classList.remove('s-over');
     try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
@@ -576,8 +621,11 @@ addEventListener('keydown', e => {
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable) return;
   if(root.classList.contains('pres')){             // diaporama
     const k = e.key, onCtrl = /BUTTON|^A$|SUMMARY/.test(e.target.tagName);
-    if(k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !onCtrl)) go(1);
-    else if(k === 'ArrowLeft' || k === 'PageUp') go(-1);
+    if(k === 'ArrowRight') go(1);
+    else if(k === 'ArrowLeft') go(-1);
+    else if(k === 'PageDown' || (k === ' ' && !e.shiftKey && !onCtrl)) page(1);
+    else if(k === 'PageUp' || (k === ' ' && e.shiftKey && !onCtrl)) page(-1);
+    else if((k === 'ArrowDown' || k === 'ArrowUp') && MODES[CUR] === 'continu') docEl().scrollBy({top: k === 'ArrowDown' ? 60 : -60});
     else if(k === 'Home') showSlide(0);
     else if(k === 'End') showSlide(SLIDES.length - 1);
     else if(k === 'Escape' || k === 'd' || k === 'D') setPres(false);

@@ -305,6 +305,7 @@ details > :not(summary){margin-top:.6rem}
     display:flex;flex-direction:column;justify-content:safe center}
   html.pres .fig svg{max-height:420px;margin-inline:auto}
   html.pres .doc.s-over{overflow-y:auto}
+  html.pres-continu .doc{justify-content:flex-start}          /* diapo {continu} : une page qui défile */
   html.pres .doc > *{max-width:none}
   html.pres .doc > .s-off,html.pres .doc > :not([data-s]),html.pres .doc .plus,html.pres .doc .fige{display:none!important}
   html.pres .doc > .s-first{margin-top:0}
@@ -318,6 +319,57 @@ details > :not(summary){margin-top:.6rem}
   .pres-bar button[data-a="prev"],.pres-bar button[data-a="next"]{font-size:1rem;line-height:1}
   .pres-n{font:600 .72rem var(--f-mono);color:var(--muted);min-width:4.5em;text-align:center}
 }
+/* ---------- console (imitation de l'invite de commandes) et mode édition (edition.js) ---------- */
+.cmd{margin-top:6px;background:#0c0c0c;color:#cccccc;border:1px solid #2a2a2a;border-radius:4px;padding:5px 8px;font:400 .7rem/1.45 "Cascadia Mono",Consolas,var(--f-mono)}
+.cmd-out div{white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd-line{display:flex;align-items:center;gap:2px;cursor:text}
+.cmd-ps{flex:none}
+.cmd input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#f2f2f2;font:inherit;padding:0;caret-color:#f2f2f2;-webkit-text-security:disc}
+.cmd:focus-within{border-color:#555}
+.ed-bar{display:none}
+html.edit .ed-bar{display:flex;position:fixed;top:0;left:var(--toc-w);right:0;z-index:45;align-items:center;gap:6px 14px;flex-wrap:wrap;
+  padding:7px 16px;background:var(--code-tag);color:#fff;font:500 .8rem var(--f-body)}
+html.edit .ed-bar .ed-st{font:500 .72rem var(--f-mono);opacity:.9}
+html.edit .ed-bar.dirty .ed-st{background:#fff;color:var(--code-tag);border-radius:3px;padding:0 6px;opacity:1}
+.ed-bar .ed-act{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+html.edit .doc{padding-top:84px}
+.ed-btn{display:block;margin:1.4rem auto .2rem;border:1px dashed var(--code-tag);background:var(--sheet);color:var(--code-tag);border-radius:4px;
+  font:600 .72rem var(--f-mono);padding:4px 10px;cursor:pointer;text-align:left}
+.ed-btn:hover{background:var(--code-tag);color:#fff}
+.ed-btn.mod{border-style:solid;background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+html.edit .doc > [data-md]{box-shadow:-16px 0 0 -14px var(--rule)}
+html.edit .doc > .ed-on{box-shadow:-16px 0 0 -13px var(--code-tag)}
+/* tout ce que la lecture cache devient visible */
+html.edit .fige{display:block;outline:2px dashed var(--code-tag);outline-offset:6px}
+html.edit .fige:not(.box)::before{content:"Version figée · imprimée seulement";display:block;margin-bottom:6px;font:600 .66rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--code-tag)}
+html.edit .box.fige::after{content:"imprimée seulement";position:absolute;top:-.72em;right:12px;background:var(--paper);padding:0 6px;font:600 .62rem var(--f-mono);color:var(--code-tag);text-transform:uppercase}
+html.edit hr.slide-break{display:block;border:0;border-top:2px dashed var(--accent);margin:1.6rem auto;overflow:visible;position:relative}
+html.edit hr.slide-break::after{content:"nouvelle diapositive";position:absolute;right:0;top:-.8em;background:var(--paper);padding:0 6px;font:600 .66rem var(--f-mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+html.edit hr.slide-break[data-diapo="continu"]::after{content:"nouvelle diapositive · défilement continu"}
+html.edit h2[data-diapo]::after{content:"diapo " attr(data-diapo);margin-left:auto;align-self:center;font:600 .62rem var(--f-mono);color:var(--accent);border:1px solid currentColor;border-radius:3px;padding:0 6px;text-transform:uppercase;letter-spacing:.06em}
+html.edit .ecran{outline:1px dashed var(--muted);outline-offset:4px}
+/* panneau de l'éditeur, à droite */
+.ed-panel{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(560px,46vw);display:flex;flex-direction:column;gap:8px;padding:12px 14px;
+  background:var(--sheet);border-left:2px solid var(--code-tag);box-shadow:var(--shadow)}
+.ed-panel[hidden]{display:none}
+html.ed-open .site{margin-right:min(560px,46vw)}
+html.ed-open .ed-bar{right:min(560px,46vw)}
+.ed-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ed-hd b{display:block;font:700 1rem var(--f-display)}
+.ed-hd small{font:500 .72rem var(--f-mono);color:var(--muted)}
+.ed-tools{display:flex;flex-wrap:wrap;gap:4px}
+.ed-tools button{border:1px solid var(--rule);background:var(--paper);color:var(--ink-2);border-radius:4px;padding:3px 7px;font:600 .7rem var(--f-mono);cursor:pointer}
+.ed-tools button:hover{border-color:var(--code-tag);color:var(--code-tag)}
+.ed-panel textarea{flex:1;width:100%;resize:none;font:400 .82rem/1.55 var(--f-mono);padding:10px;border:1px solid var(--rule);border-radius:4px;background:var(--code-bg);color:var(--code-fg);tab-size:2}
+.ed-ft{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:920px){
+  html.edit .ed-bar{left:0}
+  .ed-panel{width:100%;top:auto;height:55vh;border-left:0;border-top:2px solid var(--code-tag)}
+  html.ed-open .site{margin-right:0;margin-bottom:55vh}
+  html.ed-open .ed-bar{right:0}
+}
+@media print{ .cmd,.ed-bar,.ed-panel,.ed-btn{display:none!important} html.edit .doc{padding-top:0} html.edit .doc > [data-md]{box-shadow:none} }
+
 /* guide de rédaction : on montre les blocs de l'impression et les coupures de diapo */
 .demo .fige{display:block}
 .demo hr.slide-break{display:block;border:0;border-top:2px dashed var(--accent);margin:1.4rem 0;overflow:visible;position:relative}

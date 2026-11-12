@@ -185,7 +185,7 @@ Un contrôle (date, remarque) n'a pas d'existence propre : il appartient à un a
   <div class="box"><span class="lab">Structure</span><p>N'a pas d'identité, vit à l'intérieur d'un objet, disparaît avec lui. <em>Ex. : Controle.</em></p></div>
 </div>
 
-## Associations et cardinalités
+## Associations et cardinalités {continu}
 
 Une association relie deux classes. Chaque extrémité porte un **nom de rôle** et une **cardinalité** : le nombre d'objets qu'on peut trouver *de ce côté*.
 
@@ -242,7 +242,7 @@ Choisissez les cardinalités, puis modifiez les liens. **Cliquez sur un arbre pu
 
 Il existe aussi des associations plus fortes. `-<>` est une **agrégation** : le tout est formé de parties qui peuvent exister seules. `-<#>` est une **composition** : les parties disparaissent avec le tout, par exemple les bâtiments d'un bien-fonds dans certains modèles. La simple association `--` suffit dans la plupart des cas.
 
-## Le fichier XTF
+## Le fichier XTF {continu}
 
 Le fichier de transfert d'INTERLIS 2 est un fichier XML. Chaque objet est un élément dont le nom est `Modèle.Thème.Classe`, avec un identifiant `TID`. Chaque attribut est une balise qui porte son nom. Survolez un nom pour le retrouver des deux côtés.
 </script>
@@ -313,6 +313,8 @@ Le fichier de transfert d'INTERLIS 2 est un fichier XML. Chaque objet est un él
 </div>
 
 <script type="text/markdown">
+---
+
 :::retenir
 - Le **HEADERSECTION** dit quel modèle (et quelle version) décrit les données.
 - Le **DATASECTION** contient des **paniers** (*baskets*, identifiés par `BID`), un par thème livré.
@@ -325,7 +327,7 @@ Le fichier de transfert d'INTERLIS 2 est un fichier XML. Chaque objet est un él
 Un vrai modèle n'écrit pas lui-même le domaine `Coord2` : il l'importe d'un modèle de base de la Confédération. C'est l'objet du chapitre suivant, [Importer et étendre](importer.html).
 :::
 
-## Le même arbre en XTF 2.4
+## Le même arbre en XTF 2.4 {continu}
 
 La version **INTERLIS 2.4** (norme eCH-0031) garde la même façon de modéliser : classes, héritage, associations s'écrivent comme en 2.3. C'est surtout le **fichier XTF** qui change. Le nouveau modèle de la mensuration officielle, le **DMAV**, est écrit en 2.4 : c'est ce format que vous recevrez et livrerez pour la MO. Survolez les noms pour comparer.
 </script>
@@ -380,6 +382,8 @@ La version **INTERLIS 2.4** (norme eCH-0031) garde la même façon de modéliser
 </div>
 
 <script type="text/markdown">
+---
+
 | | XTF 2.3 | XTF 2.4 |
 |---|---|---|
 | Balises d'INTERLIS | majuscules : `TRANSFER`, `DATASECTION` | minuscules, préfixe `ili:` : `ili:transfer`, `ili:datasection` |

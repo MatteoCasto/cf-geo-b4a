@@ -23,7 +23,7 @@
 <main class="doc">
 
 <script type="text/markdown">
-## Ne pas réinventer la roue
+## Ne pas réinventer la roue {continu}
 
 Au chapitre [INTERLIS 2](interlis2.html), Montavaux a écrit elle-même son domaine de coordonnées : trois lignes avec les bornes MN95, l'unité et la rotation. Toutes les communes, tous les cantons et tous les services fédéraux ont besoin du même domaine. Si chacun l'écrit à sa façon (autres bornes, autres décimales), les modèles ne se ressemblent plus.
 
@@ -71,6 +71,8 @@ La Confédération publie donc des **modèles de base** : de petits modèles qui
 </div>
 
 <script type="text/markdown">
+---
+
 Quelques modèles de base que vous croiserez partout :
 
 | Modèle de base | Ce qu'il apporte | Exemples d'utilisation |
@@ -90,7 +92,7 @@ Quelques modèles de base que vous croiserez partout :
 Un modèle importé est cherché **par son nom**. Une faute de frappe (`GeometryCHLV95_v1`) ou un ordinateur sans accès à internet, et ili2c s'arrête : il ne trouve pas le modèle. Hors ligne, copiez les fichiers `.ili` des modèles de base dans le dossier de travail et indiquez `--modeldir "."`.
 :::
 
-## Étendre un modèle existant
+## Étendre un modèle existant {continu}
 
 Nouvelle situation : le canton publie un modèle `Arbres_Cantonaux_V1`. Toutes les communes doivent lui livrer leurs arbres selon ce modèle. Montavaux, elle, veut garder deux informations de plus : la **hauteur** de l'arbre, et sa **propriété** (communale ou privée), car le règlement communal ne protège pas de la même façon les arbres des deux catégories.
 
@@ -147,6 +149,8 @@ Montavaux pourrait écrire son propre modèle à côté. Mais elle aurait alors 
 </div>
 
 <script type="text/markdown">
+---
+
 Le modèle de la commune tient en quelques lignes :
 
 - `IMPORTS Arbres_Cantonaux_V1;` rend le modèle cantonal disponible.
@@ -157,7 +161,7 @@ Le modèle de la commune tient en quelques lignes :
 Une extension peut **ajouter** (attributs, classes) ou **resserrer** (rendre obligatoire un attribut facultatif, raccourcir un texte, réduire une plage). Elle ne peut **jamais retirer ni élargir** ce que dit le modèle de base. C'est ce qui garantit qu'un arbre de Montavaux reste un arbre cantonal valide.
 :::
 
-## Un fichier, deux lectures
+## Un fichier, deux lectures {continu}
 
 Voici un arbre du fichier livré par Montavaux. Le canton reçoit des fichiers de toutes ses communes, certains étendus, d'autres non. Son logiciel est réglé sur le seul modèle cantonal. Basculez entre les deux points de vue.
 </script>

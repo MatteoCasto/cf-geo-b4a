@@ -25,6 +25,7 @@ for (const ch of C.chapters) {
   if (!files.has(ch.file)) fail('config.js', `page manquante ${ch.file}`);
   if (ch.num) { if (nums.has(ch.num)) fail('config.js', `numéro en double ${ch.num}`); nums.add(ch.num); }
   for (const k of ['title']) if (!ch[k]) fail('config.js', `${ch.file} : champ ${k} manquant`);
+  if (ch.diapo !== undefined && !['bloc', 'continu'].includes(ch.diapo)) fail('config.js', `${ch.file} : diapo doit valoir 'bloc' ou 'continu'`);
   if (ch.duration) fail('config.js', `${ch.file} : champ duration (durée de chapitre = donnée interne, à ne pas publier)`);
   if (/chapitres? \d/.test(ch.prereq || '')) fail('config.js', `${ch.file} : prérequis numéroté, citer le titre`);
 }
@@ -62,7 +63,9 @@ for (const f of [...files].sort()) {
       if (t === ':::') { open--; if (open < 0) { fail(f, `::: fermant en trop (« ${lines[i - 1]?.trim()} »)`); open = 0; } return; }
       const b = t.match(/^:::(\w+)/);
       if (b) { if (!BOXES.has(b[1])) fail(f, `encadré inconnu :::${b[1]}`); open++; return; }
-      if (/^-{3,}$/.test(t) && open) fail(f, `coupure de diapo --- dans un encadré (sans effet) : la placer entre deux blocs`);
+      const mode = t.match(/^(?:#{2,4}\s.*|-{3,})\s*\{(\w+)\}$/);
+      if (mode && !['bloc', 'continu'].includes(mode[1])) fail(f, `mode de diapo inconnu {${mode[1]}} (bloc ou continu)`);
+      if (/^-{3,}\s*(\{\w+\})?$/.test(t) && open) fail(f, `coupure de diapo --- dans un encadré (sans effet) : la placer entre deux blocs`);
       if (t.startsWith('???')) sol = t === '???' ? sol - 1 : sol + 1;
       if (/^>\s/.test(t)) fail(f, `citation « > » non gérée par le moteur Markdown`);
     });
@@ -86,6 +89,28 @@ for (const f of [...files].sort()) {
 
   // données internes à ne pas publier
   if (f !== 'guide.html' && META.test(html)) fail(f, 'mention d\'un nombre de périodes (donnée interne)');
+}
+
+// mode édition (edition.js) : empreinte du mot de passe, et réécriture fidèle de chaque page
+if (C.admin !== undefined && !/^[0-9a-f]{64}$/.test(C.admin)) fail('config.js', 'admin doit être une empreinte SHA-256 (node tests/empreinte.mjs "mot de passe")');
+{
+  const ectx = { window: {}, document: { addEventListener() {} }, TextEncoder };
+  vm.runInNewContext(fs.readFileSync(path.join(DIR, 'edition.js'), 'utf8'), ectx, { filename: 'edition.js' });
+  const E = ectx.window.GEO_EDITION;
+  const MD = /<script type="text\/markdown"[^>]*>([\s\S]*?)<\/script>/g;
+  for (const f of [...files].sort()) {
+    const raw = fs.readFileSync(path.join(DIR, f), 'utf8');
+    const src = [...raw.matchAll(MD)].map(m => m[1].replace(/\r\n?/g, '\n'));   // ce que lit le navigateur
+    if (!src.length) continue;
+    try {
+      if (E.patchPage(raw, src, {}) !== raw) fail(f, 'mode édition : la page ne se réécrit pas à l\'identique');
+      const last = src.length - 1, mod = E.patchPage(raw, src, { [last]: src[last] + '\nTEST\n' });
+      const after = [...mod.matchAll(MD)].map(m => m[1].replace(/\r\n?/g, '\n'));
+      if (after.length !== src.length || after[last] !== src[last] + '\nTEST\n' || after.slice(0, last).some((s, i) => s !== src[i]))
+        fail(f, 'mode édition : la réécriture d\'un bloc touche les autres blocs');
+      if (raw.includes('\r\n') && /[^\r]\n/.test(mod)) fail(f, 'mode édition : fins de ligne Windows non conservées');
+    } catch (e) { fail(f, `mode édition : ${e.message}`); }
+  }
 }
 
 // liens « ch » des questions du quiz

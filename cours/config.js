@@ -16,6 +16,13 @@ var COURSE = {
   author:   'CF-geo',
   colophon: 'Cours INTERLIS 1 & 2 · techniciennes et techniciens en géomatique',
 
+  // Mode édition (console en bas du menu) : seule l'EMPREINTE du mot de passe est écrite ici.
+  // Pour changer le mot de passe :  node tests/empreinte.mjs "nouveau mot de passe"
+  // Ce n'est pas une protection : le site est public, le mode édition ne publie rien tout seul.
+  admin:    '820faa8b75019b198978ec316d5ba34782cf7661910e6c7d82978f25cfb5c5c6',
+  repo:     'https://github.com/MatteoCasto/cf-geo-b4a',   // dépôt (lien « Modifier sur GitHub »)
+  branch:   'main',
+
   // Libellés des encadrés Markdown  :::retenir  :::attention  :::terrain  :::exo
   labels: {
     retenir:   'À retenir',
@@ -31,6 +38,8 @@ var COURSE = {
      num  : '1', '2'… (chapitre numéroté) · 'A', 'B'… (annexe) · '' (accueil)
      info : cases supplémentaires de l'en-tête, ex. {'Fichiers': '.ili, .itf'}
      hidden : true → page hors menu, accessible seulement par son adresse (guide.html)
+     diapo : 'continu' → en diaporama, les sections de la page défilent au lieu de tenir
+             dans l'écran (défaut 'bloc') ; pour une seule section : ## Titre {continu}
      Les champs absents ne s'affichent simplement pas. */
   chapters: [
     { file: 'index.html', num: '', title: 'Accueil' },
@@ -186,14 +195,14 @@ var COURSE = {
         'Situer DM.01-AV-CH, DMAV et les modèles de géodonnées minimaux.',
       ] },
 
-    { file: 'quiz.html', num: '12', title: 'Quiz final',
+    { file: 'quiz.html', num: '12', title: 'Quiz final', diapo: 'continu',
       activity: 'auto-évaluation',
       question: 'Seize questions, correction immédiate.',
       lead: "Seize questions sur l'essentiel du cours. Chaque réponse est corrigée tout de suite, avec une explication et un lien vers le chapitre à revoir.",
       summary: "Seize questions pour vérifier l'essentiel, avec correction immédiate.",
       tags: ['auto-évaluation'] },
 
-    { file: 'aide-memoire.html', num: 'A', title: 'Aide-mémoire',
+    { file: 'aide-memoire.html', num: 'A', title: 'Aide-mémoire', diapo: 'continu',
       activity: 'fiche à imprimer',
       lead: "L'essentiel du cours sur deux pages : syntaxe, fichiers de transfert, cardinalités, commandes et vocabulaire français-allemand. Imprimez avec Ctrl+P : le menu et les boutons disparaissent." },
 

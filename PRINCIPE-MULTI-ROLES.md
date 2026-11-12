@@ -18,10 +18,14 @@ On n'administre donc **qu'un seul format** : ce qu'on corrige dans la page est c
 
 ## Règles de rédaction
 
-1. **Une section = une diapo, le plus souvent possible.** Chaque titre `##` commence une diapositive. Si la section est trop longue, on la coupe par une ligne `---` (nouvelle diapo, même section) ou on déplace le détail dans un bloc « Théorie + ».
-2. **Sur la diapo, l'essentiel** : une idée, une figure, un encadré « À retenir ». Les explications longues, les exemples supplémentaires, les références vont dans `:::plus`.
-3. **Chaque composant interactif a une version figée** (`:::fige`), placée juste après lui, et il est marqué « écran seulement » (`ecran`). Sans version figée, le composant est imprimé tel quel, dans son état initial.
-4. Le contenu « Théorie + » reste du cours à part entière : à jour (état 2025-2026), relu, et sans renvoi numéroté (on cite le titre du chapitre).
+1. **Une section = une diapo, quand c'est possible et adapté.** Chaque titre `##` commence une diapositive. Si la section est trop longue, on la coupe par une ligne `---` (nouvelle diapo, même section) ou on déplace le détail dans un bloc « Théorie + ».
+2. **Chaque diapo a un mode, choisi selon ce que fait la section** :
+   - **par bloc** (`{bloc}`, par défaut) : la diapo tient dans l'écran, comme dans PowerPoint ; elle est réduite si besoin. Pour exposer une idée.
+   - **continu** (`{continu}`) : la diapo défile comme une page web. Pour un atelier, un composant interactif haut, un exercice guidé, une longue liste (quiz, aide-mémoire).
+   - Réglage : `## Titre {continu}` pour une section, `--- {continu}` pour une coupure, `diapo: 'continu'` dans `config.js` pour toute une page.
+3. **Sur la diapo, l'essentiel** : une idée, une figure, un encadré « À retenir ». Les explications longues, les exemples supplémentaires, les références vont dans `:::plus`.
+4. **Chaque composant interactif a une version figée** (`:::fige`), placée juste après lui, et il est marqué « écran seulement » (`ecran`). Sans version figée, le composant est imprimé tel quel, dans son état initial.
+5. Le contenu « Théorie + » reste du cours à part entière : à jour (état 2025-2026), relu, et sans renvoi numéroté (on cite le titre du chapitre).
 
 ## Briques (nouveaux blocs, aucune syntaxe existante ne change)
 
@@ -39,9 +43,14 @@ Visible à la lecture et à l'impression, caché en diaporama.
 :::fige
 La version figée d'une animation : visible seulement à l'impression.
 :::
+
+## L'atelier {continu}    ← diapo qui défile (défaut : {bloc})
+
+--- {continu}            ← coupure, la diapo suivante défile
 ```
 
-En HTML (composants) : `class="ecran"` (pas imprimé), `class="plus"` (caché en diaporama), `class="fige"` (imprimé seulement).
+En HTML (composants) : `class="ecran"` (pas imprimé), `class="plus"` (caché en diaporama), `class="fige"` (imprimé seulement),
+`data-diapo="continu"` sur un `<h2>` écrit en HTML. Dans `config.js` : `diapo: 'continu'` pour toute une page.
 
 ## Fonctions
 
@@ -60,6 +69,7 @@ En HTML (composants) : `class="ecran"` (pas imprimé), `class="plus"` (caché en
 - **Moteur** (`app.js`, `style.css`) : diaporama, blocs `---`, `:::plus`, `:::fige`, classes `ecran` / `plus` / `fige`, boutons « Diaporama » et « Version étendue (PDF) » dans l'en-tête de chaque chapitre, impression des diapos.
 - **Chapitre modèle** : [Pourquoi INTERLIS ?](cours/pourquoi.html) applique le principe en entier (coupures `---`, un bloc Théorie +, version figée de ses trois composants).
 - **Tests** : `node tests/check.mjs` connaît les nouveaux blocs ; `node tests/render.mjs` ouvre chaque page aussi en diaporama et liste les diapos encore trop longues.
+- **Mode édition** (`edition.js`) : depuis la console du menu, la page montre tout ce qui est caché selon l'usage (Théorie +, versions figées, coupures, modes de diapo, composants `ecran`) et chaque bloc s'édite avec un aperçu en direct ; l'enregistrement réécrit seulement les blocs Markdown du fichier. Mode d'emploi dans le guide de rédaction.
 - **À faire, chapitre par chapitre** : découper les sections trop longues, déplacer le détail dans `:::plus`, écrire les versions figées des composants interactifs (voir `TODO.txt`).
 
 ## Rétrocompatibilité

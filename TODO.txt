@@ -4,8 +4,9 @@
 - progression de sauvegarde des notes (p.ex. temps depuis la dernière sauvegarde) + bouton simple pour télécharger les notes
 
 EN COURS
-- un document, trois usages (lecture, diaporama, version étendue) : moteur en place, chapitre « Pourquoi INTERLIS ? » terminé. Reste, chapitre par chapitre : couper les sections trop longues (---), déplacer le détail dans :::plus, marquer les composants interactifs « ecran » et écrire leur version :::fige. node tests/render.mjs liste les diapos encore trop longues.
+- un document, trois usages (lecture, diaporama, version étendue) : moteur en place (modes de diapo {bloc} / {continu}), diaporama réglé partout. Chapitres complets : « Pourquoi INTERLIS ? », « Modéliser le territoire ». Reste, à partir de « INTERLIS 1 » : marquer les composants interactifs « ecran » et écrire leur version :::fige, ajouter des :::plus là où c'est utile.
 - rendre facile l'édition du contenu de texte pour les développeurs : Markdown dans les pages, config.js, guide de rédaction (guide.html), modele.html ; à compléter au besoin
+- vers un « programme » de maintenance du cours sans Claude : mode édition dans le navigateur en place (console du menu, édition des blocs, enregistrement du fichier). Suite possible : créer un chapitre depuis le navigateur (copie de modele.html + entrée config.js), éditer config.js (titres, chapeaux, ordre), lancer les vérifications de check.mjs dans le navigateur avant d'enregistrer.
 
 FAIT
 - système de notes export-import pour persistance (menu « Annotations », fichier JSON)
