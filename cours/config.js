@@ -11,8 +11,8 @@ var COURSE = {
   title:    'INTERLIS',                           // nom court (menu, onglet)
   subtitle: '1 & 2 · CF-geo B4a',                 // sous le nom, dans le menu
   appName:  'Cours INTERLIS · CF-geo',            // nom de l'appli installée
-  version:  '0.1.2',                          // SemVer, = tag git v0.1.2 (voir CHANGELOG.md)
-  date:     '10.11.2026',
+  version:  '0.2.0',                          // SemVer, = tag git v0.2.0 (voir CHANGELOG.md)
+  date:     '12.11.2026',
   author:   'CF-geo',
   colophon: 'Cours INTERLIS 1 & 2 · techniciennes et techniciens en géomatique',
 

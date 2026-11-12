@@ -5,7 +5,7 @@ Une suite de chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres
 
 - **En ligne** : <https://matteocasto.github.io/cf-geo-b4a/>
 - **En local** : ouvrir [`cours/index.html`](cours/index.html) dans le navigateur
-- **Version** : 0.1.0 · historique dans [`CHANGELOG.md`](CHANGELOG.md)
+- **Version** : 0.2.0 · historique dans [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Modifier le cours
 

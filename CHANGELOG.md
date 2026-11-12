@@ -4,6 +4,8 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+## [0.2.0] – 2026-11-12
+
 ### Ajouté
 - Menu de gauche redimensionnable : poignée au bord droit (glisser, double-clic pour la largeur par défaut, flèches au clavier). La largeur est mémorisée dans le navigateur. Écrans larges seulement.
 - Numéro de version du cours affiché à côté du titre, en haut du menu (tiré de `config.js`).
@@ -71,7 +73,8 @@ Le cours porte désormais sur **INTERLIS** (et plus sur la géomatique en géné
 
 - Gabarit de démonstration (géomatique), non numéroté : moteur Markdown, menu généré, annotations exportables, application hors ligne.
 
-[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.2...HEAD
+[Non publié]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/MatteoCasto/cf-geo-b4a/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MatteoCasto/cf-geo-b4a/releases/tag/v0.1.0
