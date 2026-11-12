@@ -36,7 +36,7 @@ La solution.
 :::
 ```
 
-Encadrés : `retenir`, `attention`, `terrain`, `exo`, `info`, `carte`, `prof` (notes formateur).
+Encadrés : `retenir`, `attention`, `terrain`, `exo`, `info`, `carte`.
 Code coloré : `ili`, `ili1`, `itf`, `xtf`, `sh`, `sql`, `json`…
 
 ## Publier
@@ -57,7 +57,6 @@ puis `git tag -a v0.1.1 -m "…"` et `git push origin v0.1.1`.
 ## Fonctions du support
 
 - **Annotations** : touche `N`, puis `+` sur un bloc. Stockées dans le navigateur, exportables / importables en JSON (menu *Annotations*).
-- **Notes formateur** : encadrés `:::prof`, affichés via le bouton du menu, jamais imprimés.
 - **Hors ligne** : le site s'installe comme une application et fonctionne ensuite sans connexion.
 - **Projection** : touche `P` agrandit le texte pour le beamer.
 

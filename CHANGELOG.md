@@ -11,6 +11,10 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 ### Modifié
 - Titres (accueil, chapitres, sections, menu) dans la même police que le texte, IBM Plex Sans ; la police Archivo n'est plus chargée.
 
+### Supprimé
+- Mention « vu » à côté des chapitres déjà ouverts dans le menu.
+- Mode « Notes formateur » : bouton du menu, encadrés `:::prof` de toutes les pages, libellé dans `config.js`, style, documentation. Les tests refusent désormais `:::prof`.
+
 ## [0.1.2] – 2026-11-10
 
 ### Supprimé

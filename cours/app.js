@@ -148,7 +148,6 @@ document.addEventListener('mouseout',  e => { const t = e.target.closest && e.ta
    ```sql fichier.sql … ```               bloc de code coloré avec bouton Copier
    :::retenir / :::attention / :::terrain / :::exo [précision]  …  :::
    :::info Titre libre … :::               encadré avec titre au choix
-   :::prof … :::                           note formateur (visible avec « Notes formateur »)
    :::carte Titre … :::                    carte (aide-mémoire), regroupées en grille
    ??? Solution … ???                      bloc dépliable (dans un exercice)
    Une ligne qui commence par < est du HTML, recopié tel quel. */
@@ -231,7 +230,6 @@ let theme = store.get('theme', 'système');
 function applyTheme(t){ if(t === 'clair') root.dataset.theme = 'light'; else if(t === 'sombre') root.dataset.theme = 'dark'; else delete root.dataset.theme; }
 applyTheme(theme);
 root.classList.toggle('proj', !!store.get('proj', false));
-root.classList.toggle('prof-on', !!store.get('prof', false));
 // largeur du menu choisie par l'utilisateur (poignée, voir buildTocResize)
 const TOC_MIN = 200, TOC_MAX = 480;
 function setTocW(w){ if(w) root.style.setProperty('--toc-w', Math.round(Math.min(TOC_MAX, Math.max(TOC_MIN, w))) + 'px'); else root.style.removeProperty('--toc-w'); }
@@ -320,18 +318,16 @@ function buildQuiz(doc){
 
 const LOGO = `<svg class="brand-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3L31 17L17 31L3 17Z" class="fillsheet strokeink" stroke-width="2"/><path d="M17 9V25M9 17H25" class="strokeink" stroke-width="1.3"/><circle cx="17" cy="17" r="3.8" class="fillaccent"/></svg>`;
 function buildToc(){
-  const visited = new Set(store.get('visited', [])); visited.add(FILE); store.set('visited', [...visited]);
   const toc = document.createElement('aside');
   toc.className = 'toc'; toc.id = 'toc';
   toc.innerHTML = `
     <a class="brand" href="index.html">${LOGO}<span><b>${esc(C.title)} <span class="ver" title="Version du cours (${esc(C.date)})">v${esc(C.version)}</span></b><small>${esc(C.subtitle)}</small></span></a>
     <button class="btn sm toc-toggle" type="button" aria-expanded="false">Menu</button>
     <nav aria-label="Chapitres"><ol>${NAV.map(c => `<li><a href="${c.file}"${c === CH ? ' aria-current="page"' : ''}>
-      <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span><span class="v">${visited.has(c.file) && c !== CH ? 'vu' : ''}</span></a></li>`).join('')}</ol></nav>
+      <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span></a></li>`).join('')}</ol></nav>
     <div class="toc-tools">
       <button class="tool" type="button" id="tTheme">Thème <span class="st"></span></button>
       <button class="tool" type="button" id="tProj">Mode projection <span class="st"></span></button>
-      <button class="tool" type="button" id="tProf">Notes formateur <span class="st"></span></button>
       <button class="tool" type="button" id="tApp" hidden>Installer l'appli <span class="st">hors ligne</span></button>
       <div class="toc-keys">← → chapitre · P projection</div>
       <div class="toc-keys" id="tOff"></div>
@@ -341,10 +337,7 @@ function buildToc(){
     q('#tTheme .st').textContent = theme;
     q('#tProj').setAttribute('aria-pressed', root.classList.contains('proj'));
     q('#tProj .st').textContent = root.classList.contains('proj') ? 'oui' : 'non';
-    q('#tProf').setAttribute('aria-pressed', root.classList.contains('prof-on'));
-    q('#tProf .st').textContent = root.classList.contains('prof-on') ? 'oui' : 'non';
   };
-  q('#tProf').onclick = () => { store.set('prof', root.classList.toggle('prof-on')); paint(); };
   q('#tTheme').onclick = () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; applyTheme(theme); store.set('theme', theme); paint(); };
   q('#tProj').onclick = () => { store.set('proj', root.classList.toggle('proj')); paint(); };
   q('.toc-toggle').onclick = e => { const o = toc.classList.toggle('open'); e.currentTarget.setAttribute('aria-expanded', o); };

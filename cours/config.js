@@ -16,13 +16,12 @@ var COURSE = {
   author:   'CF-geo',
   colophon: 'Cours INTERLIS 1 & 2 · techniciennes et techniciens en géomatique',
 
-  // Libellés des encadrés Markdown  :::retenir  :::attention  :::terrain  :::exo  :::prof
+  // Libellés des encadrés Markdown  :::retenir  :::attention  :::terrain  :::exo
   labels: {
     retenir:   'À retenir',
     attention: 'Attention',
     terrain:   'Sur le terrain',
     exo:       'Exercice',
-    prof:      'Formateur',
     solution:  'Solution',
   },
 

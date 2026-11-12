@@ -33,7 +33,7 @@ const numbered = C.chapters.filter(c => /^\d+$/.test(c.num || '')).map(c => +c.n
 numbered.forEach((n, i) => { if (n !== i + 1) fail('config.js', `numérotation non continue : ${n} en position ${i + 1}`); });
 
 // ---- pages
-const BOXES = new Set(['retenir', 'attention', 'terrain', 'exo', 'info', 'carte', 'prof']);
+const BOXES = new Set(['retenir', 'attention', 'terrain', 'exo', 'info', 'carte']);
 const META = /\b\d+\s*(p[ée]riodes?)\b|\b\d+\s*x\s*45\s*min|Durée proposée/i;
 
 for (const f of [...files].sort()) {
