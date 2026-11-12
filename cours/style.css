@@ -31,7 +31,7 @@
   --c-sel:#c01d30;
   --shadow:0 1px 0 rgba(20,32,42,.04),0 10px 28px -16px rgba(20,32,42,.28);
 
-  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-display:var(--f-body);  /* titres : même police que le texte */
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
   --f-hand:"Caveat","Segoe Print","Bradley Hand",cursive;
@@ -75,7 +75,8 @@ a:hover{color:var(--accent)}
 .toc{position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid var(--rule);padding:22px 16px 18px;display:flex;flex-direction:column;gap:18px;background:var(--paper)}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
 .brand-mark{width:34px;height:34px;flex:none}
-.brand b{font:800 1.05rem/1 var(--f-display);font-stretch:118%;letter-spacing:.02em;display:block}
+.brand b{font:800 1.05rem/1 var(--f-display);letter-spacing:.02em;display:block}
+.brand b .ver{font:500 .62rem/1 var(--f-mono);letter-spacing:.04em;color:var(--accent);vertical-align:.35em;margin-left:2px}
 .brand small{font:500 .7rem/1.2 var(--f-mono);color:var(--muted);letter-spacing:.04em}
 .toc-toggle{display:none}
 .toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
@@ -91,6 +92,12 @@ a:hover{color:var(--accent)}
 .tool .st{font:600 .7rem var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .tool[aria-pressed="true"] .st{color:var(--accent)}
 .toc-keys{font:400 .7rem/1.5 var(--f-mono);color:var(--muted);padding:0 8px}
+/* poignée de largeur du menu (glisser ; double-clic = largeur par défaut ; flèches au clavier) */
+.toc-resize{position:fixed;top:0;bottom:0;left:calc(var(--toc-w) - 5px);width:10px;z-index:25;cursor:col-resize;touch-action:none}
+.toc-resize::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:2px;background:transparent;transition:background .15s}
+.toc-resize:hover::after,.toc-resize:focus-visible::after,.toc-resize.drag::after{background:var(--accent)}
+.toc-resize:focus-visible{outline:0}
+html.toc-dragging,html.toc-dragging *{cursor:col-resize!important;user-select:none!important}
 
 .doc{padding-block:44px 90px;padding-inline:clamp(16px,5vw,64px);min-width:0}
 .doc > *{width:100%;max-width:var(--measure);margin-inline:auto}
@@ -102,14 +109,14 @@ a:hover{color:var(--accent)}
   .toc-toggle{display:inline-flex;margin-left:auto}
   .toc nav,.toc-tools{display:none;width:100%}
   .toc.open nav,.toc.open .toc-tools{display:flex}
-  .toc-keys{display:none}
+  .toc-keys,.toc-resize{display:none}
   .doc{padding-block:28px 70px}
 }
 
 /* ---------- typographie ---------- */
 h1,h2,h3,h4{text-wrap:balance;margin:0}
-h1{font:800 clamp(2.2rem,4.6vw,3.4rem)/1.02 var(--f-display);font-stretch:112%;letter-spacing:-.01em}
-h2{font:750 1.7rem/1.15 var(--f-display);font-stretch:104%;margin-top:3.2rem;margin-bottom:.9rem;display:flex;gap:.6em;align-items:baseline}
+h1{font:800 clamp(2.2rem,4.6vw,3.4rem)/1.02 var(--f-display);letter-spacing:-.01em}
+h2{font:750 1.7rem/1.15 var(--f-display);margin-top:3.2rem;margin-bottom:.9rem;display:flex;gap:.6em;align-items:baseline}
 h2 .sn{font:600 .95rem var(--f-mono);color:var(--accent);flex:none}
 h3{font:650 1.12rem/1.3 var(--f-body);margin-top:2rem;margin-bottom:.5rem}
 p{margin:.8rem 0}
@@ -260,7 +267,7 @@ details > :not(summary){margin-top:.6rem}
   html{font-size:11pt}
   body{background:#fff}
   .site{display:block}
-  .toc,.pager,.cb-copy,.btn,.seg,.prof{display:none!important}
+  .toc,.toc-resize,.pager,.cb-copy,.btn,.seg,.prof{display:none!important}
   .doc{padding:0}
   .fig,.box,.codeblock{box-shadow:none;break-inside:avoid}
   h2{break-after:avoid}
@@ -280,7 +287,7 @@ details > :not(summary){margin-top:.6rem}
 .plan li{margin:0}
 .plan a{display:grid;grid-template-columns:2.4rem minmax(0,1fr);gap:4px 12px;padding:14px 16px;border:1px solid var(--rule);background:var(--sheet);border-radius:6px;text-decoration:none;height:100%}
 .plan a:hover{border-color:var(--accent)}
-.plan .n{grid-row:span 3;font:800 1.9rem/1 var(--f-display);font-stretch:120%;color:var(--accent)}
+.plan .n{grid-row:span 3;font:800 1.9rem/1 var(--f-display);color:var(--accent)}
 .plan b{font:700 1.05rem/1.25 var(--f-display)}
 .plan p{margin:0;font-size:.88rem;color:var(--ink-2);line-height:1.45}
 .plan .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font:500 .7rem var(--f-mono);color:var(--muted)}
@@ -300,7 +307,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .check{display:flex;gap:8px;align-items:center;font-size:.9rem;cursor:pointer}
 .check input{accent-color:var(--accent)}
 .swatch{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
-.big{font:800 2.4rem/1 var(--f-display);font-stretch:115%;font-variant-numeric:tabular-nums}
+.big{font:800 2.4rem/1 var(--f-display);font-variant-numeric:tabular-nums}
 
 /* quiz */
 .quiz{list-style:none;padding:0;margin:0;counter-reset:q}

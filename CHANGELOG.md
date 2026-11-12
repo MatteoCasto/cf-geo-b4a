@@ -4,6 +4,13 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+### Ajouté
+- Menu de gauche redimensionnable : poignée au bord droit (glisser, double-clic pour la largeur par défaut, flèches au clavier). La largeur est mémorisée dans le navigateur. Écrans larges seulement.
+- Numéro de version du cours affiché à côté du titre, en haut du menu (tiré de `config.js`).
+
+### Modifié
+- Titres (accueil, chapitres, sections, menu) dans la même police que le texte, IBM Plex Sans ; la police Archivo n'est plus chargée.
+
 ## [0.1.2] – 2026-11-10
 
 ### Supprimé

@@ -17,7 +17,7 @@ const C = window.COURSE;
 const root = document.documentElement;
 
 // ---------------------------------------------------------------- 1. <head>
-const FONTS = 'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap';
+const FONTS = 'https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap';
 document.write(`
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="${FONTS}">
@@ -232,6 +232,10 @@ function applyTheme(t){ if(t === 'clair') root.dataset.theme = 'light'; else if(
 applyTheme(theme);
 root.classList.toggle('proj', !!store.get('proj', false));
 root.classList.toggle('prof-on', !!store.get('prof', false));
+// largeur du menu choisie par l'utilisateur (poignée, voir buildTocResize)
+const TOC_MIN = 200, TOC_MAX = 480;
+function setTocW(w){ if(w) root.style.setProperty('--toc-w', Math.round(Math.min(TOC_MAX, Math.max(TOC_MIN, w))) + 'px'); else root.style.removeProperty('--toc-w'); }
+setTocW(store.get('tocw', null));
 
 // ---------------------------------------------------------------- 4. mise en page
 const label = c => (c.num ? c.num + '. ' : '') + c.title;
@@ -320,7 +324,7 @@ function buildToc(){
   const toc = document.createElement('aside');
   toc.className = 'toc'; toc.id = 'toc';
   toc.innerHTML = `
-    <a class="brand" href="index.html">${LOGO}<span><b>${esc(C.title)}</b><small>${esc(C.subtitle)}</small></span></a>
+    <a class="brand" href="index.html">${LOGO}<span><b>${esc(C.title)} <span class="ver" title="Version du cours (${esc(C.date)})">v${esc(C.version)}</span></b><small>${esc(C.subtitle)}</small></span></a>
     <button class="btn sm toc-toggle" type="button" aria-expanded="false">Menu</button>
     <nav aria-label="Chapitres"><ol>${NAV.map(c => `<li><a href="${c.file}"${c === CH ? ' aria-current="page"' : ''}>
       <span class="n">${c.num || '·'}</span><span>${esc(c.title)}</span><span class="v">${visited.has(c.file) && c !== CH ? 'vu' : ''}</span></a></li>`).join('')}</ol></nav>
@@ -349,6 +353,39 @@ function buildToc(){
   return toc;
 }
 
+// poignée verticale au bord droit du menu : glisser pour élargir / rétrécir, double-clic pour revenir
+// à la largeur par défaut ; au clavier, flèches gauche/droite (Origine = défaut). Écrans larges seulement.
+function buildTocResize(){
+  const h = document.createElement('div');
+  h.className = 'toc-resize';
+  Object.assign(h, {tabIndex: 0, title: 'Glisser pour régler la largeur du menu (double-clic : largeur par défaut)'});
+  h.setAttribute('role', 'separator'); h.setAttribute('aria-orientation', 'vertical');
+  h.setAttribute('aria-label', 'Largeur du menu'); h.setAttribute('aria-valuemin', TOC_MIN); h.setAttribute('aria-valuemax', TOC_MAX);
+  const cur = () => document.getElementById('toc').getBoundingClientRect().width;
+  const sync = () => h.setAttribute('aria-valuenow', Math.round(cur()));
+  const save = () => { store.set('tocw', root.style.getPropertyValue('--toc-w') ? parseInt(root.style.getPropertyValue('--toc-w')) : null); sync(); };
+  h.addEventListener('pointerdown', e => {
+    if(e.button !== 0) return;
+    e.preventDefault(); h.setPointerCapture(e.pointerId);
+    h.classList.add('drag'); root.classList.add('toc-dragging');
+    const move = ev => setTocW(ev.clientX);
+    const up = () => { h.classList.remove('drag'); root.classList.remove('toc-dragging'); h.removeEventListener('pointermove', move); save(); };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up, {once: true}); h.addEventListener('pointercancel', up, {once: true});
+  });
+  h.addEventListener('dblclick', () => { setTocW(null); save(); });
+  h.addEventListener('keydown', e => {
+    const step = e.shiftKey ? 48 : 16;
+    if(e.key === 'ArrowLeft') setTocW(cur() - step);
+    else if(e.key === 'ArrowRight') setTocW(cur() + step);
+    else if(e.key === 'Home') setTocW(null);
+    else return;
+    e.preventDefault(); e.stopPropagation(); save();
+  });
+  requestAnimationFrame(sync);
+  return h;
+}
+
 function buildPager(doc){
   const p = NIDX > 0 && NAV[NIDX - 1], n = NIDX >= 0 && NAV[NIDX + 1];
   const nav = document.createElement('nav');
@@ -367,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const site = document.createElement('div');
   site.className = 'site';
   doc.before(site);
-  site.append(buildToc(), doc);
+  site.append(buildToc(), buildTocResize(), doc);
   // définitions SVG partagées (effet crayon, flèches)
   document.body.insertAdjacentHTML('afterbegin', `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
     <filter id="crayon" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>

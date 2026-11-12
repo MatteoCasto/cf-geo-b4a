@@ -8,4 +8,5 @@
 - tenir un changelog à jour (racine)
 - toujours lancer les tests (que l'on va mettre au point) après des modifs.
 - ne jamais mentionner le nombre de périodes ni le nombre d'étudiants (dans le cours comme dans les propositions/plans) : ce sont des données internes, sans valeur publique.
+- ne commit pas par toi meme sauf avis explicite contraire
 - contenu toujours à jour (état 2025-2026) : versions INTERLIS, DMAV, outils ; l'ancien cours (ANCIEN_COURS/) n'est pas une référence, seulement une source d'idées.
