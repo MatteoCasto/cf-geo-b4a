@@ -1,7 +1,15 @@
-- système de notes export-import pour persistance
-- mettre en place des tests, et runné à chaque push avant le déploiement ça doit passer
-- mot de passe d'accès à la page io
-- rendre facile l'édition du contenu de texte pour les développeurs
-- progession de sauvarde des notes (p.ex. temps depuis dernière sauvegarde) + bouton simple dans downloads
-- texte caché (mode admin) -> on gère un seul document et on gère la partie théorie
-- versionnage pour publication
+À FAIRE
+- lancer les tests (node tests/check.mjs, node tests/render.mjs) dans GitHub Actions à chaque push, avant le déploiement : le site n'est publié que s'ils passent (les tests existent, pages.yml ne les lance pas encore)
+- mot de passe d'accès à la page GitHub Pages (site statique : protection seulement symbolique, à discuter)
+- progression de sauvegarde des notes (p.ex. temps depuis la dernière sauvegarde) + bouton simple pour télécharger les notes
+
+EN COURS
+- rendre facile l'édition du contenu de texte pour les développeurs : Markdown dans les pages, config.js, guide de rédaction (guide.html), modele.html ; à compléter au besoin
+
+FAIT
+- système de notes export-import pour persistance (menu « Annotations », fichier JSON)
+- tests statiques et de rendu (tests/check.mjs, tests/render.mjs)
+- versionnage pour publication (SemVer, tags git vX.Y.Z, CHANGELOG.md, version dans config.js)
+
+ABANDONNÉ
+- texte caché (mode admin / notes formateur) : retiré au profit des notes générales locales (annotations)

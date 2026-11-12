@@ -5,7 +5,7 @@ Une suite de chapitres, un aide-mémoire, un fil rouge : l'inventaire des arbres
 
 - **En ligne** : <https://matteocasto.github.io/cf-geo-b4a/>
 - **En local** : ouvrir [`cours/index.html`](cours/index.html) dans le navigateur
-- **Version** : 0.2.0 · historique dans [`CHANGELOG.md`](CHANGELOG.md)
+- **Version** : 0.2.0 (celle de `config.js`) · historique dans [`CHANGELOG.md`](CHANGELOG.md)
 
 ## Modifier le cours
 
@@ -36,7 +36,7 @@ La solution.
 :::
 ```
 
-Encadrés : `retenir`, `attention`, `terrain`, `exo`, `info`, `carte`.
+Encadrés : `retenir`, `attention`, `terrain` (libellé « Au bureau »), `exo`, `info`, `carte`.
 Code coloré : `ili`, `ili1`, `itf`, `xtf`, `sh`, `sql`, `json`…
 
 ## Publier
@@ -59,6 +59,7 @@ puis `git tag -a v0.1.1 -m "…"` et `git push origin v0.1.1`.
 - **Annotations** : touche `N`, puis `+` sur un bloc. Stockées dans le navigateur, exportables / importables en JSON (menu *Annotations*).
 - **Hors ligne** : le site s'installe comme une application et fonctionne ensuite sans connexion.
 - **Projection** : touche `P` agrandit le texte pour le beamer.
+- **Navigation** : flèches `←` `→` pour le chapitre précédent / suivant ; menu de gauche redimensionnable (poignée au bord droit, largeur mémorisée).
 
 ## Fichiers techniques
 

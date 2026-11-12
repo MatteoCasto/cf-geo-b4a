@@ -4,6 +4,9 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+### Modifié
+- README : version à jour, libellé « Au bureau », navigation au clavier et menu redimensionnable. TODO : points classés (à faire, en cours, fait, abandonné).
+
 ## [0.2.0] – 2026-11-12
 
 ### Ajouté
