@@ -54,6 +54,11 @@ puis `git tag -a v0.1.1 -m "…"` et `git push origin v0.1.1`.
 | mineure (0.**2**.0) | nouveau contenu, nouveau chapitre, nouveau bloc de syntaxe |
 | majeure (**1**.0.0) | premier jour de cours ; ensuite la syntaxe reste rétrocompatible |
 
+## Un document, trois usages
+
+Chaque page sert à la **lecture**, au **diaporama** (beamer) et à la **version étendue** imprimée :
+voir [`PRINCIPE-MULTI-ROLES.md`](PRINCIPE-MULTI-ROLES.md).
+
 ## Fonctions du support
 
 - **Annotations** : touche `N`, puis `+` sur un bloc. Stockées dans le navigateur, exportables / importables en JSON (menu *Annotations*).

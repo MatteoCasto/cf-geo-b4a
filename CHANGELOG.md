@@ -4,6 +4,9 @@ Toutes les modifications notables du support de cours. Format : [Keep a Changelo
 
 ## [Non publié]
 
+### Ajouté
+- Principe « un document, trois usages » (lecture, diaporama, version étendue imprimée) : `PRINCIPE-MULTI-ROLES.md`.
+
 ### Modifié
 - README : version à jour, libellé « Au bureau », navigation au clavier et menu redimensionnable. TODO : points classés (à faire, en cours, fait, abandonné).
 
